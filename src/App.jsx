@@ -66,7 +66,7 @@ const T = {
       editarPerfil:"Editar Perfil", guardar:"Guardar", cancelar:"Cancelar", perfilActualizado:"✅ Perfil actualizado",
       registrarFactura:"Registrar Factura", numFactura:"NUMERO DE FACTURA", monto:"MONTO (CAD $)",
       facturaVale:"Esta factura vale", puntos:"puntos", siAprobada:"si es aprobada",
-      productoCheck:"Esta factura incluye uno de los productos participantes* del concurso",
+      productoCheck:"Esta factura incluye uno de los productos participantes* del polla",
       sinProductoTitle:"Sin producto participante, esta factura", sinProductoMsg:"no valida tu participación aunque sea de $50+. Igual genera puntos.",
       conProductoMsg:"Esta factura valida tu participación si es aprobada por el administrador.",
       facturaSent:"Factura enviada! Pendiente de aprobacion por el administrador.",
@@ -683,62 +683,54 @@ function ReglamentoView() {
       toggle: "Voir en Français",
       title: "REGLAMENTO OFICIAL — CONCURSO MUNDIAL 2026",
       subtitle: "Sabor Latino · mundial26.vercel.app",
-      s1: "1. Objetivo del concurso",
-      s1b: "El Concurso Mundial 2026 de Sabor Latino es una competencia de pronósticos deportivos en la que los participantes predicen los resultados de los partidos de la Copa Mundial de Fútbol 2026. El participante con mayor puntaje al finalizar el torneo será declarado ganador.",
+      s1: "1. Objetivo del polla",
+      s1b: "El Polla Mundial 2026 de Sabor Latino es una competencia de pronósticos deportivos en la que los participantes predicen los resultados de los partidos de la Copa Mundial de Fútbol 2026. El participante con mayor puntaje al finalizar el torneo será declarado ganador.",
       s2: "2. Requisitos de participación",
-      s2intro: "Para participar de forma válida en el concurso, se deben cumplir TODOS los siguientes requisitos:",
+      s2intro: "Para participar de forma válida en el polla, se deben cumplir TODOS los siguientes requisitos:",
       s2items: [
         "Registrarse en la plataforma oficial (mundial26.vercel.app) antes del 10 de junio de 2026.",
         "Haber realizado al menos UNA compra de $50.00 CAD o más en Sabor Latino.",
-        "La factura de $50.00 CAD o más debe incluir al menos uno de los productos participantes del concurso*. La lista será publicada próximamente.",
+        "La factura de $50.00 CAD o más debe incluir al menos uno de los productos participantes del polla*. La lista será publicada próximamente.",
         "Si el participante resulta ganador de algún premio, debe permitir que una fotografía recibiendo el premio sea publicada en las redes sociales oficiales de Sabor Latino.",
       ],
       s2note1: "⚠️ IMPORTANTE: Las compras menores de $50.00 CAD generan puntos adicionales, pero NO validan la participación. Si un ganador no cuenta con una factura de $50.00+ que incluya un producto participante, su premio no será entregado y pasará al siguiente clasificado.",
       s2note2: "* Los productos participantes serán publicados próximamente en las redes sociales de Sabor Latino.",
       s3: "3. Premios",
-      s3b: "Los premios serán anunciados próximamente en las redes sociales y en la plataforma del concurso.",
+      s3b: "Los premios serán anunciados próximamente en las redes sociales y en la plataforma del polla.",
       s3items: ["1er lugar: Premio por anunciar *", "2do lugar: Premio por anunciar *", "3er lugar: Premio por anunciar *"],
-      s4: "4. Sistema de puntos",
-      s4a: "4.1  Pronósticos de partidos",
+      s4: "1. Sistema de puntos",
+      s4a: "1.1  Pronósticos de partidos",
       s4aRows: [["Resultado exacto (marcador correcto)","5 pts"],["Ganador correcto (empate, local o visitante)","3 pts"],["Pronóstico incorrecto","0 pts"]],
-      s4b: "4.2  Clasificados de grupos",
+      s4b: "1.2  Clasificados de grupos",
       s4bRows: [["Equipo correcto + posición exacta (1° o 2° del grupo)","10 pts"],["Equipo correcto, posición equivocada","5 pts"],["Mejor tercero: posición exacta","10 pts"],["Mejor tercero: equipo correcto, posición equivocada","5 pts"]],
-      s4c: "4.3  Puntos por facturas (CAD $)",
-      s4cRows: [["$10 – $50","1 pt"],["$51 – $100","3 pts"],["$101 – $150","6 pts"],["$151 – $200","9 pts"],["$201 o más","12 pts"]],
-      s4note: "Las facturas deben registrarse en la plataforma. Solo las facturas aprobadas por el administrador generan puntos.",
-      s5: "5. Registro de facturas",
-      s5items: [
-        "Registrar las facturas en la sección \"Mi Perfil\" dentro de la plataforma.",
-        "Ingresar el número de factura y el monto total en dólares canadienses (CAD).",
-        "El administrador aprobará o rechazará cada factura registrada.",
-        "Una misma factura no puede ser registrada dos veces.",
-        "Monto mínimo para obtener puntos: $10.00 CAD.",
-      ],
-      s6: "6. Cierre de pronósticos",
+      s4c: null,
+      s4cRows: [],
+      s4note: null,
+      s5: null,
+      s5items: [],
+      s6: "2. Cierre de pronósticos",
       s6items: [
         "Fase de grupos: todos los pronósticos deben ingresarse antes del 10 de junio de 2026 a las 00:00. Sin cambios después de esa hora.",
         "Fases eliminatorias: cada partido se bloqueará 24 horas antes de su horario oficial de juego.",
       ],
-      s7: "7. Condiciones generales",
-      s7items: [
-        "Sabor Latino se reserva el derecho de modificar, suspender o cancelar el concurso en caso de fuerza mayor.",
-        "La decisión del administrador sobre la validez de facturas y pronósticos es definitiva.",
-        "En caso de empate: (1) mayor número de resultados exactos, (2) mayor número de ganadores correctos, (3) mayor puntaje en facturas.",
-        "Al participar, el concursante acepta todas las condiciones de este reglamento.",
-      ],
+      s7: null,
+      s7items: [],
     }
   };
 
   const t = T[lang];
 
-  const Section = ({title, children}) => (
-    <div style={{marginBottom:22}}>
-      <div style={{fontWeight:800,fontSize:"0.95rem",color:BRAND.red,borderBottom:"2px solid "+BRAND.red,paddingBottom:5,marginBottom:10,letterSpacing:0.5}}>
-        {title}
+  const Section = ({title, children}) => {
+    if (!title) return null;
+    return (
+      <div style={{marginBottom:22}}>
+        <div style={{fontWeight:800,fontSize:"0.95rem",color:BRAND.red,borderBottom:"2px solid "+BRAND.red,paddingBottom:5,marginBottom:10,letterSpacing:0.5}}>
+          {title}
+        </div>
+        {children}
       </div>
-      {children}
-    </div>
-  );
+    );
+  };
 
   const BulletItem = ({text}) => (
     <div style={{display:"flex",gap:8,marginBottom:6,alignItems:"flex-start"}}>
@@ -776,42 +768,15 @@ function ReglamentoView() {
       {/* Sections */}
       <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e7eb",padding:"20px 18px"}}>
 
-        <Section title={t.s1}>
-          <p style={{fontSize:"0.85rem",color:"#374151",lineHeight:1.7,margin:0}}>{t.s1b}</p>
-        </Section>
-
-        <Section title={t.s2}>
-          <p style={{fontSize:"0.85rem",color:"#374151",marginBottom:8,fontWeight:600}}>{t.s2intro}</p>
-          {t.s2items.map((item,i)=><BulletItem key={i} text={item}/>)}
-          <Note text={t.s2note1}/>
-          <Note text={t.s2note2}/>
-        </Section>
-
-        <Section title={t.s3}>
-          <p style={{fontSize:"0.85rem",color:"#374151",marginBottom:8}}>{t.s3b}</p>
-          {t.s3items.map((item,i)=><BulletItem key={i} text={item}/>)}
-        </Section>
-
         <Section title={t.s4}>
           <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:4}}>{t.s4a}</div>
           <PointsTable rows={t.s4aRows}/>
           <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:12}}>{t.s4b}</div>
           <PointsTable rows={t.s4bRows}/>
-          <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:12}}>{t.s4c}</div>
-          <PointsTable rows={t.s4cRows}/>
-          <Note text={t.s4note}/>
-        </Section>
-
-        <Section title={t.s5}>
-          {t.s5items.map((item,i)=><BulletItem key={i} text={item}/>)}
         </Section>
 
         <Section title={t.s6}>
           {t.s6items.map((item,i)=><BulletItem key={i} text={item}/>)}
-        </Section>
-
-        <Section title={t.s7}>
-          {t.s7items.map((item,i)=><BulletItem key={i} text={item}/>)}
         </Section>
 
       </div>
@@ -2595,7 +2560,7 @@ export default function App() {
               onError={e=>{e.target.style.display="none";}}
             />
             <div>
-              <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Concurso</div>
+              <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Polla</div>
               <div style={{fontSize:"1rem",fontWeight:800,color:BRAND.gray900,letterSpacing:1}}>Mundial 2026</div>
             </div>
           </div>
