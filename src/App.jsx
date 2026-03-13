@@ -4,12 +4,12 @@ import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/fires
 
 // FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyC9rb0ETv5sq4LKs9zJrb1OoebveOjJe8Y",
-  authDomain: "polla2026-88080.firebaseapp.com",
-  projectId: "polla2026-88080",
-  storageBucket: "polla2026-88080.firebasestorage.app",
-  messagingSenderId: "500836837009",
-  appId: "1:500836837009:web:360bfca31f374444da8130"
+  apiKey: "AIzaSyDL2FV0gfT5b58f5mXmAPJMqSbwKde0IV0",
+  authDomain: "mundial2026-2026.firebaseapp.com",
+  projectId: "mundial2026-2026",
+  storageBucket: "mundial2026-2026.firebasestorage.app",
+  messagingSenderId: "76029862427",
+  appId: "1:76029862427:web:23f21566a32e1c40610ebe"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component {
 }
 
 // LANG CONTEXT
-const LangContext = createContext("fr");
+const LangContext = createContext("es");
 const useLang = () => useContext(LangContext);
 const T = {
   es: {
@@ -1539,7 +1539,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         <div style={{color:"#6b7280",marginBottom:16}}>Hola <strong style={{color:"#111827"}}>{currentUser?.name}</strong></div>
         <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
           <button style={S.btn()} onClick={()=>setStep("form")}>Editar Pronosticos</button>
-          <button style={S.btn("#6b7280",true)} onClick={()=>{if(window.confirm(lang==="fr"?"Voulez-vous vraiment vous déconnecter ?":"¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>Cambiar Usuario</button>
+          <button style={S.btn("#6b7280",true)} onClick={()=>{if(window.confirm("¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>Cambiar Usuario</button>
         </div>
       </div>
     </div>
@@ -1550,25 +1550,25 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
       {/* Welcome banner */}
       <div style={{background:"linear-gradient(135deg,#d3172e 0%,#a0122a 100%)",borderRadius:12,padding:"14px 18px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
         <div>
-          <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.72rem",letterSpacing:1,fontWeight:600,textTransform:"uppercase"}}>{lang==="fr"?"Bienvenue":"Bienvenido"}</div>
+          <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.72rem",letterSpacing:1,fontWeight:600,textTransform:"uppercase"}}>{"Bienvenido"}</div>
           <div style={{color:"#fff",fontWeight:800,fontSize:"1.1rem"}}>{currentUser?.nombre ? currentUser.nombre+" "+currentUser.apellido : currentUser?.name}</div>
         </div>
         <div style={{display:"flex",gap:10}}>
           <div style={{background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 14px",textAlign:"center"}}>
             <div style={{color:"#fff",fontWeight:800,fontSize:"1.2rem"}}>{Object.keys(preds).length}</div>
-            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{lang==="fr"?"pronostics":"pronósticos"}</div>
+            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{"pronósticos"}</div>
           </div>
           <div style={{background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 14px",textAlign:"center"}}>
             <div style={{color:"#fff",fontWeight:800,fontSize:"1.2rem"}}>{matches.length}</div>
-            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{lang==="fr"?"matchs total":"partidos total"}</div>
+            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{"partidos total"}</div>
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button style={{...S.btn("#27ae60"),fontSize:"0.8rem",padding:"6px 14px"}} onClick={handleSave} disabled={saving}>
             {saving?"Guardando...":"Guardar Todo"}
           </button>
-          <button style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"6px 12px",fontSize:"0.8rem",cursor:"pointer",fontWeight:600}} onClick={()=>{if(window.confirm(lang==="fr"?"Voulez-vous vraiment vous déconnecter ?":"¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>
-            {lang==="fr"?"Déconnexion":"Salir"}
+          <button style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"6px 12px",fontSize:"0.8rem",cursor:"pointer",fontWeight:600}} onClick={()=>{if(window.confirm("¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>
+            {"Salir"}
           </button>
         </div>
       </div>
@@ -1620,9 +1620,9 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
             const status = getParticipationStatus(currentUser?.id, invoices);
             if (status === "valid") return null;
             const cfg = {
-              invalid:  { bg:"#fff5f5", border:"#fca5a5", icon:"🧾", color:"#991b1b", msg: lang==="fr" ? "Tu n'as pas encore de facture valide. Enregistre un achat de 50 $+ avec produit éligible pour participer." : "No tienes una factura válida aún. Registra una compra de $50+ con producto elegible para participar.", btn: lang==="fr"?"Enregistrer ma facture":"Registrar mi factura" },
-              no_product:{ bg:"#fffbeb", border:"#f59e0b", icon:"⚠️", color:"#92400e", msg: lang==="fr" ? "Ta facture de 50 $+ n'a pas de produit éligible confirmé. Modifie-la dans Mon Profil." : "Tu factura de $50+ no tiene producto elegible confirmado. Edítala en Mi Perfil.", btn: lang==="fr"?"Voir Mon Profil":"Ver Mi Perfil" },
-              pending:  { bg:"#eff6ff", border:"#93c5fd", icon:"🕐", color:"#1e40af", msg: lang==="fr" ? "Ta facture est en attente d'approbation par l'administrateur." : "Tu factura está pendiente de aprobación por el administrador.", btn: null },
+              invalid:  { bg:"#fff5f5", border:"#fca5a5", icon:"🧾", color:"#991b1b", msg: "No tienes una factura válida aún. Registra una compra de $50+ con producto elegible para participar.", btn: "Registrar mi factura" },
+              no_product:{ bg:"#fffbeb", border:"#f59e0b", icon:"⚠️", color:"#92400e", msg: "Tu factura de $50+ no tiene producto elegible confirmado. Edítala en Mi Perfil.", btn: "Ver Mi Perfil" },
+              pending:  { bg:"#eff6ff", border:"#93c5fd", icon:"🕐", color:"#1e40af", msg: "Tu factura está pendiente de aprobación por el administrador.", btn: null },
             };
             const c = cfg[status];
             if (!c) return null;
@@ -2070,7 +2070,7 @@ function AdminInvoicesTab({ invoices, handleInvoice, pendingInvoices }) {
                 <button
                   style={{...S.btn(editingId===inv.id?"#6b7280":"#d97706",true),fontSize:"0.78rem",padding:"5px 12px"}}
                   onClick={()=>setEditingId(editingId===inv.id?null:inv.id)}>
-                  {editingId===inv.id?lang==="fr"?"Annuler":"Cancelar":"✏️ Corregir"}
+                  {editingId===inv.id?"Cancelar":"✏️ Corregir"}
                 </button>
               )}
             </div>
@@ -2505,7 +2505,7 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 export default function App() {
   const isAdmin = typeof window !== "undefined" && window.location.search.includes("admin");
   const [view, setView] = useState("leaderboard");
-  const [lang, setLang] = useState("fr");
+  const [lang, setLang] = useState("es");
   const [matches, setMatches] = useState(INITIAL_MATCHES);
   const [participants, setParticipants] = useState([]);
   const [adminUnlocked, setAdminUnlocked] = useState({});
@@ -2628,22 +2628,15 @@ export default function App() {
                 {(currentUser.nombre||currentUser.name||"?")[0].toUpperCase()}
               </button>
             )}
-            {/* Lang toggle */}
-            <button
-              onClick={()=>setLang(l=>l==="fr"?"es":"fr")}
-              title={lang==="fr"?"Ver en Español":"Voir en Français"}
-              style={{marginLeft:6,background:"none",border:"1px solid #e5e7eb",borderRadius:6,cursor:"pointer",padding:"4px 8px",fontSize:"0.72rem",fontWeight:700,color:BRAND.gray600,letterSpacing:0.5,lineHeight:1.2,transition:"all 0.15s"}}
-            >
-              {lang==="fr"?"ES":"FR"}
-            </button>
+            {/* Lang toggle removido - solo español */}
           </nav>
         </div>
         <div style={{background:BRAND.red,padding:"4px 16px",textAlign:"center",fontSize:"0.7rem",color:"rgba(255,255,255,0.85)",letterSpacing:1}}>
           {participants.length} {t.status.participants} &nbsp;|&nbsp; {totalMatches} {t.status.matches} &nbsp;|&nbsp; 11 JUN - 19 JUL 2026
           {(() => {
             const diff = Math.ceil((new Date("2026-06-11") - new Date()) / (1000*60*60*24));
-            if (diff > 0) return <> &nbsp;|&nbsp; 🏆 {diff} {lang==="fr"?`jour${diff!==1?"s":""} avant le Mondial`:`día${diff!==1?"s":""} para el Mundial`}</>;
-            if (diff === 0) return <> &nbsp;|&nbsp; 🏆 {lang==="fr"?"Le Mondial commence aujourd'hui !":"¡El Mundial empieza hoy!"}</>;
+            if (diff > 0) return <> &nbsp;|&nbsp; 🏆 {diff} {`día${diff!==1?"s":""} para el Mundial`}</>;
+            if (diff === 0) return <> &nbsp;|&nbsp; 🏆 {"¡El Mundial empieza hoy!"}</>;
             return null;
           })()}
         </div>
