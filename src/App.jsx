@@ -1164,25 +1164,7 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
           ))}
         </div>
       </div>
-      {/* INDICADOR DE PARTICIPACIÓN VÁLIDA */}
-      {(()=>{
-        const ps = getParticipationStatus(currentUser.id, invoices);
-        const cfg = {
-          valid:      { icon:"✅", color:"#166534", bg:"#f0fdf4", border:"#86efac", title:tp.validTitle,            msg:tp.validOk },
-          pending:    { icon:"🕐", color:"#1e40af", bg:"#eff6ff", border:"#93c5fd", title:tp.pendingTitle,    msg:tp.pendingMsg },
-          no_product: { icon:"⚠️", color:"#92400e", bg:"#fffbeb", border:"#f59e0b", title:tp.noProductTitle, msg:tp.noProductMsg },
-          invalid:    { icon:"🔴", color:"#991b1b", bg:"#fff5f5", border:"#fca5a5", title:tp.invalidTitle,   msg:tp.invalidMsg },
-        }[ps];
-        return (
-          <div style={{background:cfg.bg,border:"1px solid "+cfg.border,borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
-            <span style={{fontSize:"1.2rem",flexShrink:0}}>{cfg.icon}</span>
-            <div>
-              <div style={{fontWeight:700,fontSize:"0.85rem",color:cfg.color,marginBottom:3}}>{cfg.title}</div>
-              <div style={{fontSize:"0.78rem",color:cfg.color,lineHeight:1.5}}>{cfg.msg}</div>
-            </div>
-          </div>
-        );
-      })()}
+
       {editOk && <div style={{background:"#f0fdf4",border:"1px solid #16a34a",borderRadius:10,padding:"10px 14px",marginBottom:12,color:"#16a34a",fontWeight:600,fontSize:"0.85rem"}}>{tp.perfilActualizado}</div>}
       {!editMode ? (
         <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:12,padding:16}}>
@@ -1223,9 +1205,6 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
           </div>
         </div>
       )}
-      <div style={{marginTop:20}}>
-        <InvoiceForm currentUser={currentUser} invoices={invoices} setInvoices={setInvoices} />
-      </div>
     </div>
   );
 }
@@ -1580,27 +1559,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
       {activeTab==="pronosticos" && (
         <>
-          {/* Invoice status banner */}
-          {(()=>{
-            const status = getParticipationStatus(currentUser?.id, invoices);
-            if (status === "valid") return null;
-            const cfg = {
-              invalid:  { bg:"#fff5f5", border:"#fca5a5", icon:"🧾", color:"#991b1b", msg: "No tienes una factura válida aún. Registra una compra de $50+ con producto elegible para participar.", btn: "Registrar mi factura" },
-              no_product:{ bg:"#fffbeb", border:"#f59e0b", icon:"⚠️", color:"#92400e", msg: "Tu factura de $50+ no tiene producto elegible confirmado. Edítala en Mi Perfil.", btn: "Ver Mi Perfil" },
-              pending:  { bg:"#eff6ff", border:"#93c5fd", icon:"🕐", color:"#1e40af", msg: "Tu factura está pendiente de aprobación por el administrador.", btn: null },
-            };
-            const c = cfg[status];
-            if (!c) return null;
-            return (
-              <div style={{background:c.bg,border:`1px solid ${c.border}`,borderRadius:10,padding:"12px 16px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
-                <div style={{display:"flex",gap:10,alignItems:"center"}}>
-                  <span style={{fontSize:"1.3rem"}}>{c.icon}</span>
-                  <span style={{fontSize:"0.82rem",color:c.color,fontWeight:600,lineHeight:1.4}}>{c.msg}</span>
-                </div>
-                {c.btn && <button style={{...S.btn(BRAND.red),fontSize:"0.78rem",padding:"6px 14px",whiteSpace:"nowrap"}} onClick={()=>setActiveTab("perfil")}>{c.btn}</button>}
-              </div>
-            );
-          })()}
+
           <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
             {["groups","elim"].map(ph=>(
               <button key={ph} style={S.navBtn(activePhase===ph)} onClick={()=>setActivePhase(ph)}>
@@ -2593,7 +2552,6 @@ export default function App() {
                 {(currentUser.nombre||currentUser.name||"?")[0].toUpperCase()}
               </button>
             )}
-            {/* Lang toggle removido - solo español */}
           </nav>
         </div>
         <div style={{background:BRAND.red,padding:"4px 16px",textAlign:"center",fontSize:"0.7rem",color:"rgba(255,255,255,0.85)",letterSpacing:1}}>
