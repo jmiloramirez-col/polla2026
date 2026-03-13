@@ -4,12 +4,12 @@ import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/fires
 
 // FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyDL2FV0gfT5b58f5mXmAPJMqSbwKde0IV0",
-  authDomain: "mundial2026-2026.firebaseapp.com",
-  projectId: "mundial2026-2026",
-  storageBucket: "mundial2026-2026.firebasestorage.app",
-  messagingSenderId: "76029862427",
-  appId: "1:76029862427:web:23f21566a32e1c40610ebe"
+  apiKey: "AIzaSyC9rb0ETv5sq4LKs9zJrb1OoebveOjJe8Y",
+  authDomain: "polla2026-88080.firebaseapp.com",
+  projectId: "polla2026-88080",
+  storageBucket: "polla2026-88080.firebasestorage.app",
+  messagingSenderId: "500836837009",
+  appId: "1:500836837009:web:360bfca31f374444da8130"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
