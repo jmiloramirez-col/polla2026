@@ -823,36 +823,7 @@ function ClasificacionView({ participants, matches, invoices, currentUser }) {
 
   return (
     <div className="fi">
-      {currentUser && (()=>{
-        const ps = getParticipationStatus(currentUser.id, invoices);
-        if (ps==="valid") return (
-          <div style={{background:"#f0fdf4",border:"1px solid #86efac",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"center"}}>
-            <span style={{fontSize:"1.2rem"}}>✅</span>
-            <div style={{fontWeight:700,fontSize:"0.85rem",color:"#166534"}}>{tc.validOk}</div>
-          </div>
-        );
-        if (ps==="pending") return (
-          <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
-            <span style={{fontSize:"1.2rem",flexShrink:0}}>🕐</span>
-            <div>
-              <div style={{fontWeight:700,fontSize:"0.85rem",color:"#1e40af",marginBottom:2}}>Factura pendiente de aprobación</div>
-              <div style={{fontSize:"0.8rem",color:"#1e40af",lineHeight:1.5}}>{tc.pendingMsg}</div>
-            </div>
-          </div>
-        );
-        const msg = ps==="no_product"
-          ? tc.noProductMsg
-          : tc.invalidMsg;
-        return (
-          <div style={{background:"#fffbeb",border:"1px solid #f59e0b",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
-            <span style={{fontSize:"1.2rem",flexShrink:0}}>⚠️</span>
-            <div>
-              <div style={{fontWeight:700,fontSize:"0.85rem",color:"#92400e",marginBottom:2}}>{tc.invalidTitle}</div>
-              <div style={{fontSize:"0.8rem",color:"#92400e",lineHeight:1.5}}>{msg}</div>
-            </div>
-          </div>
-        );
-      })()}
+
       <div style={{...S.card, padding:0, overflow:"hidden"}}>
         <div style={{background:BRAND.red, padding:"12px 18px"}}>
           <div style={{color:"#fff", fontWeight:800, fontSize:"1rem", letterSpacing:1}}>{tc.title} — {ranked.length} {tc.participants}</div>
