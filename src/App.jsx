@@ -760,9 +760,7 @@ function ReglamentoView() {
     <div className="fi" style={{maxWidth:600,margin:"0 auto"}}>
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,#d3172e,#a01020)",borderRadius:14,padding:"18px 20px",marginBottom:18,textAlign:"center",color:"#fff"}}>
-        <div style={{fontSize:"0.7rem",letterSpacing:3,opacity:0.8,marginBottom:6}}>SABOR LATINO</div>
         <div style={{fontSize:"1rem",fontWeight:800,letterSpacing:1,lineHeight:1.3}}>{t.title}</div>
-        <div style={{fontSize:"0.72rem",opacity:0.75,marginTop:6}}>{t.subtitle}</div>
       </div>
 
       {/* Sections */}
@@ -1250,8 +1248,6 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
     if (!regNombre.trim()) { setError("Ingresa tu nombre"); return; }
     if (!regApellido.trim()) { setError("Ingresa tu apellido"); return; }
     if (!regEmail.trim()||!regEmail.includes("@")) { setError("Ingresa un correo valido"); return; }
-    if (!regTel.trim()) { setError("Ingresa tu telefono"); return; }
-    if (!regSucursal) { setError("Selecciona una sucursal"); return; }
     if (!regPin.trim()||regPin.length<6) { setError("PIN minimo 6 digitos"); return; }
     if (regPin!==regPin2) { setError("Los PINs no coinciden"); return; }
     const exists = participants.find(p=>p.email&&p.email.toLowerCase()===regEmail.trim().toLowerCase());
@@ -1264,8 +1260,6 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         apellido: regApellido.trim(),
         name: regNombre.trim()+" "+regApellido.trim(),
         email: regEmail.trim().toLowerCase(),
-        telefono: regTel.trim(),
-        sucursal: regSucursal,
         pin: regPin,
         predictions: {},
         createdAt: new Date().toISOString(),
@@ -1412,19 +1406,6 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
             <div style={{marginBottom:10}}>
               <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CORREO ELECTRONICO</label>
               <input style={S.input} type="email" placeholder="tu@correo.com" value={regEmail} onChange={e=>setRegEmail(e.target.value)} />
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-              <div>
-                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>TELEFONO</label>
-                <input style={S.input} placeholder="514-000-0000" value={regTel} onChange={e=>setRegTel(e.target.value)} />
-              </div>
-              <div>
-                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>SUCURSAL</label>
-                <select style={selectStyle} value={regSucursal} onChange={e=>setRegSucursal(e.target.value)}>
-                  <option value="">Seleccionar...</option>
-                  {SUCURSALES.map(s=><option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
               <div>
