@@ -2413,7 +2413,7 @@ export default function App() {
       <FontStyle />
       <div style={{textAlign:"center"}}>
         <img src="data:image/jpeg;base64"
-          alt="Sabor Latino" style={{height:60,marginBottom:16,opacity:.8}} />
+          alt="Sabor Latino" style={{display:"none"}} />
         <div style={{fontSize:"2rem",marginBottom:8,color:BRAND.red}} className="pulse">...</div>
         <div style={{color:BRAND.gray400,fontSize:"0.85rem",letterSpacing:3}}>{t.status.loading}</div>
       </div>
@@ -2428,12 +2428,6 @@ export default function App() {
       <header style={S.header}>
         <div style={S.headerInner}>
           <div style={S.logo}>
-            <img
-              src="data:image/jpeg;base64"
-              alt="Sabor Latino"
-              style={{height:44, width:"auto", objectFit:"contain", borderRadius:4}}
-              onError={e=>{e.target.style.display="none";}}
-            />
             <div>
               <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Polla</div>
               <div style={{fontSize:"1rem",fontWeight:800,color:BRAND.gray900,letterSpacing:1}}>Mundial 2026</div>
