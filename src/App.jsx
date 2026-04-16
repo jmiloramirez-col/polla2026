@@ -134,18 +134,18 @@ const T = {
 
 // GROUPS
 const GROUPS = {
-  A: ["México","Corea del Sur","Sudáfrica","Dinamarca*"],
-  B: ["Canadá","Suiza","Catar","Italia*"],
-  C: ["Brasil","Haití","Marruecos","Escocia"],
-  D: ["Estados Unidos","Australia","Paraguay","Turquía*"],
-  E: ["Alemania","Costa de Marfil","Ecuador","Curazao"],
-  F: ["Países Bajos","Japón","Túnez","Ucrania*"],
+  A: ["México","Corea del Sur","Sudáfrica","Chequia"],
+  B: ["Canadá","Suiza","Catar","Bosnia y Herzegovina"],
+  C: ["Brasil","Marruecos","Escocia","Haití"],
+  D: ["Estados Unidos","Australia","Paraguay","Turquía"],
+  E: ["Alemania","Ecuador","Costa de Marfil","Curazao"],
+  F: ["Países Bajos","Japón","Túnez","Suecia"],
   G: ["Bélgica","Irán","Egipto","Nueva Zelanda"],
-  H: ["España","Arabia Saudí","Uruguay","Cabo Verde"],
-  I: ["Francia","Noruega","Senegal","Irak*"],
+  H: ["España","Uruguay","Arabia Saudí","Cabo Verde"],
+  I: ["Francia","Senegal","Noruega","Irak"],
   J: ["Argentina","Austria","Argelia","Jordania"],
-  K: ["Portugal","Uzbekistán","Colombia","Jamaica*"],
-  L: ["Inglaterra","Croacia","Ghana","Panamá"],
+  K: ["Portugal","Colombia","Uzbekistán","R.D. Congo"],
+  L: ["Inglaterra","Croacia","Panamá","Ghana"],
 }
 
 const GROUP_COLORS = {
@@ -200,18 +200,18 @@ function generateGroupMatches() {
   const matches = [
     // GRUPO A
     {id:1,  phase:"groups",group:"A",date:"11 Jun",home:"México",            away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-11T15:00:00"},
-    {id:2,  phase:"groups",group:"A",date:"11 Jun",home:"Corea del Sur",     away:"Dinamarca*",        realHome:null,realAway:null,lockTime:"2026-06-11T18:00:00"},
-    {id:3,  phase:"groups",group:"A",date:"18 Jun",home:"Dinamarca*",        away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
+    {id:2,  phase:"groups",group:"A",date:"11 Jun",home:"Corea del Sur",     away:"Chequia",           realHome:null,realAway:null,lockTime:"2026-06-11T18:00:00"},
+    {id:3,  phase:"groups",group:"A",date:"18 Jun",home:"Chequia",           away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
     {id:4,  phase:"groups",group:"A",date:"18 Jun",home:"México",            away:"Corea del Sur",     realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
-    {id:5,  phase:"groups",group:"A",date:"24 Jun",home:"Dinamarca*",        away:"México",            realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
+    {id:5,  phase:"groups",group:"A",date:"24 Jun",home:"Chequia",           away:"México",            realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
     {id:6,  phase:"groups",group:"A",date:"24 Jun",home:"Sudáfrica",         away:"Corea del Sur",     realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
     // GRUPO B
-    {id:7,  phase:"groups",group:"B",date:"12 Jun",home:"Canadá",            away:"Italia*",           realHome:null,realAway:null,lockTime:"2026-06-12T15:00:00"},
+    {id:7,  phase:"groups",group:"B",date:"12 Jun",home:"Canadá",            away:"Bosnia y Herzegovina", realHome:null,realAway:null,lockTime:"2026-06-12T15:00:00"},
     {id:8,  phase:"groups",group:"B",date:"13 Jun",home:"Catar",             away:"Suiza",             realHome:null,realAway:null,lockTime:"2026-06-13T15:00:00"},
-    {id:9,  phase:"groups",group:"B",date:"18 Jun",home:"Suiza",             away:"Italia*",           realHome:null,realAway:null,lockTime:"2026-06-18T12:00:00"},
+    {id:9,  phase:"groups",group:"B",date:"18 Jun",home:"Suiza",             away:"Bosnia y Herzegovina", realHome:null,realAway:null,lockTime:"2026-06-18T12:00:00"},
     {id:10, phase:"groups",group:"B",date:"18 Jun",home:"Canadá",            away:"Catar",             realHome:null,realAway:null,lockTime:"2026-06-18T21:00:00"},
     {id:11, phase:"groups",group:"B",date:"24 Jun",home:"Suiza",             away:"Canadá",            realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
-    {id:12, phase:"groups",group:"B",date:"24 Jun",home:"Italia*",           away:"Catar",             realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
+    {id:12, phase:"groups",group:"B",date:"24 Jun",home:"Bosnia y Herzegovina", away:"Catar",          realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
     // GRUPO C
     {id:13, phase:"groups",group:"C",date:"13 Jun",home:"Brasil",            away:"Marruecos",         realHome:null,realAway:null,lockTime:"2026-06-13T18:00:00"},
     {id:14, phase:"groups",group:"C",date:"13 Jun",home:"Haití",             away:"Escocia",           realHome:null,realAway:null,lockTime:"2026-06-13T21:00:00"},
@@ -221,10 +221,10 @@ function generateGroupMatches() {
     {id:18, phase:"groups",group:"C",date:"24 Jun",home:"Marruecos",         away:"Haití",             realHome:null,realAway:null,lockTime:"2026-06-25T15:00:00"},
     // GRUPO D
     {id:19, phase:"groups",group:"D",date:"12 Jun",home:"Estados Unidos",    away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-12T18:00:00"},
-    {id:20, phase:"groups",group:"D",date:"12 Jun",home:"Australia",         away:"Turquía*",          realHome:null,realAway:null,lockTime:"2026-06-12T21:00:00"},
-    {id:21, phase:"groups",group:"D",date:"18 Jun",home:"Turquía*",          away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
+    {id:20, phase:"groups",group:"D",date:"12 Jun",home:"Australia",         away:"Turquía",           realHome:null,realAway:null,lockTime:"2026-06-12T21:00:00"},
+    {id:21, phase:"groups",group:"D",date:"18 Jun",home:"Turquía",           away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
     {id:22, phase:"groups",group:"D",date:"19 Jun",home:"Estados Unidos",    away:"Australia",         realHome:null,realAway:null,lockTime:"2026-06-19T21:00:00"},
-    {id:23, phase:"groups",group:"D",date:"25 Jun",home:"Turquía*",          away:"Estados Unidos",    realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
+    {id:23, phase:"groups",group:"D",date:"25 Jun",home:"Turquía",           away:"Estados Unidos",    realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
     {id:24, phase:"groups",group:"D",date:"25 Jun",home:"Paraguay",          away:"Australia",         realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
     // GRUPO E
     {id:25, phase:"groups",group:"E",date:"14 Jun",home:"Alemania",          away:"Curazao",           realHome:null,realAway:null,lockTime:"2026-06-14T15:00:00"},
@@ -235,10 +235,10 @@ function generateGroupMatches() {
     {id:30, phase:"groups",group:"E",date:"25 Jun",home:"Ecuador",           away:"Alemania",          realHome:null,realAway:null,lockTime:"2026-06-26T15:00:00"},
     // GRUPO F
     {id:31, phase:"groups",group:"F",date:"14 Jun",home:"Países Bajos",      away:"Japón",             realHome:null,realAway:null,lockTime:"2026-06-15T15:00:00"},
-    {id:32, phase:"groups",group:"F",date:"14 Jun",home:"Ucrania*",          away:"Túnez",             realHome:null,realAway:null,lockTime:"2026-06-15T18:00:00"},
+    {id:32, phase:"groups",group:"F",date:"14 Jun",home:"Suecia",            away:"Túnez",             realHome:null,realAway:null,lockTime:"2026-06-15T18:00:00"},
     {id:33, phase:"groups",group:"F",date:"19 Jun",home:"Túnez",             away:"Japón",             realHome:null,realAway:null,lockTime:"2026-06-20T21:00:00"},
-    {id:34, phase:"groups",group:"F",date:"20 Jun",home:"Países Bajos",      away:"Ucrania*",          realHome:null,realAway:null,lockTime:"2026-06-21T15:00:00"},
-    {id:35, phase:"groups",group:"F",date:"25 Jun",home:"Japón",             away:"Ucrania*",          realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
+    {id:34, phase:"groups",group:"F",date:"20 Jun",home:"Países Bajos",      away:"Suecia",            realHome:null,realAway:null,lockTime:"2026-06-21T15:00:00"},
+    {id:35, phase:"groups",group:"F",date:"25 Jun",home:"Japón",             away:"Suecia",            realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
     {id:36, phase:"groups",group:"F",date:"25 Jun",home:"Túnez",             away:"Países Bajos",      realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
     // GRUPO G
     {id:37, phase:"groups",group:"G",date:"15 Jun",home:"Bélgica",           away:"Egipto",            realHome:null,realAway:null,lockTime:"2026-06-15T21:00:00"},
@@ -256,11 +256,11 @@ function generateGroupMatches() {
     {id:48, phase:"groups",group:"H",date:"26 Jun",home:"Uruguay",           away:"España",            realHome:null,realAway:null,lockTime:"2026-06-27T15:00:00"},
     // GRUPO I
     {id:49, phase:"groups",group:"I",date:"16 Jun",home:"Francia",           away:"Senegal",           realHome:null,realAway:null,lockTime:"2026-06-17T15:00:00"},
-    {id:50, phase:"groups",group:"I",date:"16 Jun",home:"Irak*",             away:"Noruega",           realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
-    {id:51, phase:"groups",group:"I",date:"22 Jun",home:"Francia",           away:"Irak*",             realHome:null,realAway:null,lockTime:"2026-06-22T21:00:00"},
+    {id:50, phase:"groups",group:"I",date:"16 Jun",home:"Irak",              away:"Noruega",           realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
+    {id:51, phase:"groups",group:"I",date:"22 Jun",home:"Francia",           away:"Irak",              realHome:null,realAway:null,lockTime:"2026-06-22T21:00:00"},
     {id:52, phase:"groups",group:"I",date:"22 Jun",home:"Noruega",           away:"Senegal",           realHome:null,realAway:null,lockTime:"2026-06-23T15:00:00"},
     {id:53, phase:"groups",group:"I",date:"26 Jun",home:"Noruega",           away:"Francia",           realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
-    {id:54, phase:"groups",group:"I",date:"26 Jun",home:"Senegal",           away:"Irak*",             realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
+    {id:54, phase:"groups",group:"I",date:"26 Jun",home:"Senegal",           away:"Irak",              realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
     // GRUPO J
     {id:55, phase:"groups",group:"J",date:"15 Jun",home:"Austria",           away:"Jordania",          realHome:null,realAway:null,lockTime:"2026-06-17T21:00:00"},
     {id:56, phase:"groups",group:"J",date:"16 Jun",home:"Argentina",         away:"Argelia",           realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
@@ -269,12 +269,12 @@ function generateGroupMatches() {
     {id:59, phase:"groups",group:"J",date:"27 Jun",home:"Argelia",           away:"Austria",           realHome:null,realAway:null,lockTime:"2026-06-27T21:00:00"},
     {id:60, phase:"groups",group:"J",date:"27 Jun",home:"Jordania",          away:"Argentina",         realHome:null,realAway:null,lockTime:"2026-06-27T21:00:00"},
     // GRUPO K
-    {id:61, phase:"groups",group:"K",date:"17 Jun",home:"Portugal",          away:"Jamaica*",          realHome:null,realAway:null,lockTime:"2026-06-17T12:00:00"},
+    {id:61, phase:"groups",group:"K",date:"17 Jun",home:"Portugal",          away:"R.D. Congo",        realHome:null,realAway:null,lockTime:"2026-06-17T12:00:00"},
     {id:62, phase:"groups",group:"K",date:"17 Jun",home:"Uzbekistán",        away:"Colombia",          realHome:null,realAway:null,lockTime:"2026-06-17T21:00:00"},
     {id:63, phase:"groups",group:"K",date:"23 Jun",home:"Portugal",          away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-23T12:00:00"},
-    {id:64, phase:"groups",group:"K",date:"23 Jun",home:"Colombia",          away:"Jamaica*",          realHome:null,realAway:null,lockTime:"2026-06-23T18:00:00"},
+    {id:64, phase:"groups",group:"K",date:"23 Jun",home:"Colombia",          away:"R.D. Congo",        realHome:null,realAway:null,lockTime:"2026-06-23T18:00:00"},
     {id:65, phase:"groups",group:"K",date:"27 Jun",home:"Colombia",          away:"Portugal",          realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
-    {id:66, phase:"groups",group:"K",date:"27 Jun",home:"Jamaica*",          away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
+    {id:66, phase:"groups",group:"K",date:"27 Jun",home:"R.D. Congo",        away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
     // GRUPO L
     {id:67, phase:"groups",group:"L",date:"17 Jun",home:"Inglaterra",        away:"Croacia",           realHome:null,realAway:null,lockTime:"2026-06-17T15:00:00"},
     {id:68, phase:"groups",group:"L",date:"17 Jun",home:"Ghana",             away:"Panamá",            realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
