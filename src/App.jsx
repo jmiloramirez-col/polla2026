@@ -185,17 +185,12 @@ function isPhaseLocked(phase, adminUnlocked = {}) {
 
 function isMatchLocked(match, adminUnlocked = {}) {
   if (!match) return false;
-  // Groups: locked globally on June 10
-  if (match.phase === "groups") {
-    if (adminUnlocked["groups"]) return false;
-    if (adminUnlocked["groups_forced"]) return true;
-    return new Date() >= LOCK_DATES["groups"];
-  }
-  // Elimination: check per-match manual lock first, then auto 24h before lockTime
-  if (adminUnlocked["match_"+match.id]) return false;       // manually unlocked
-  if (adminUnlocked["match_"+match.id+"_forced"]) return true; // manually locked
+  // Manual overrides from admin
+  if (adminUnlocked["match_"+match.id]) return false;
+  if (adminUnlocked["match_"+match.id+"_forced"]) return true;
   if (adminUnlocked[match.phase]) return false;
   if (adminUnlocked[match.phase+"_forced"]) return true;
+  // Todos los partidos: bloquear 24h antes del lockTime
   if (match.lockTime) return new Date() >= new Date(new Date(match.lockTime).getTime() - 24*60*60*1000);
   return isPhaseLocked(match.phase, adminUnlocked);
 }
@@ -703,18 +698,13 @@ function ReglamentoView() {
       s4aRows: [["Resultado exacto (marcador correcto)","5 pts"],["Ganador correcto (empate, local o visitante)","3 pts"],["Pronóstico incorrecto","0 pts"]],
       s4b: "1.2  Clasificados de grupos",
       s4bRows: [["Equipo correcto + posición exacta (1° o 2° del grupo)","10 pts"],["Equipo correcto, posición equivocada","5 pts"],["Mejor tercero: posición exacta","10 pts"],["Mejor tercero: equipo correcto, posición equivocada","5 pts"]],
-      s4c: null,
-      s4cRows: [],
-      s4note: null,
-      s5: null,
-      s5items: [],
+      s4c: null, s4cRows: [], s4note: null,
+      s5: null, s5items: [],
       s6: "2. Cierre de pronósticos",
       s6items: [
-        "Fase de grupos: todos los pronósticos deben ingresarse antes del 10 de junio de 2026 a las 00:00. Sin cambios después de esa hora.",
-        "Fases eliminatorias: cada partido se bloqueará 24 horas antes de su horario oficial de juego.",
+        "Cada partido se bloquea automáticamente 24 horas antes de su horario oficial de juego. No se pueden cambiar pronósticos después de ese momento.",
       ],
-      s7: null,
-      s7items: [],
+      s7: null, s7items: [],
     }
   };
 
@@ -1187,12 +1177,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
   const [loginPin, setLoginPin] = useState("");
   // Register
   const [regNombre, setRegNombre] = useState("");
-  const [regApellido, setRegApellido] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regTel, setRegTel] = useState("");
-  const [regSucursal, setRegSucursal] = useState("");
   const [regPin, setRegPin] = useState("");
-  const [regPin2, setRegPin2] = useState("");
   const [preds, setPreds] = useState(currentUser?.predictions||{});
   const [activeGroup, setActiveGroup] = useState("A");
   const [activePhase, setActivePhase] = useState("groups");
@@ -1232,11 +1217,11 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function handleLogin() {
     setError("");
-    if (!loginEmail.trim()) { setError("Ingresa tu correo"); return; }
-    if (!loginPin.trim()||loginPin.length<4) { setError("PIN minimo 4 digitos"); return; }
-    const existing = participants.find(p=>p.email&&p.email.toLowerCase()===loginEmail.trim().toLowerCase());
-    if (!existing) { setError("Correo no registrado. Crea una cuenta nueva."); return; }
-    if (existing.pin!==loginPin) { setError("PIN incorrecto"); return; }
+    if (!loginEmail.trim()) { setError("Ingresa tu nombre"); return; }
+    if (!loginPin.trim()||loginPin.length<4) { setError("Código de 4 dígitos requerido"); return; }
+    const existing = participants.find(p=>p.nombre&&p.nombre.toLowerCase()===loginEmail.trim().toLowerCase());
+    if (!existing) { setError("Nombre no registrado. Crea una cuenta nueva."); return; }
+    if (existing.pin!==loginPin) { setError("Código incorrecto"); return; }
     setCurrentUser(existing);
     setPreds(existing.predictions||{});
     setStep("form");
@@ -1246,20 +1231,15 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
   async function handleRegister() {
     setError("");
     if (!regNombre.trim()) { setError("Ingresa tu nombre"); return; }
-    if (!regApellido.trim()) { setError("Ingresa tu apellido"); return; }
-    if (!regEmail.trim()||!regEmail.includes("@")) { setError("Ingresa un correo valido"); return; }
-    if (!regPin.trim()||regPin.length<6) { setError("PIN minimo 6 digitos"); return; }
-    if (regPin!==regPin2) { setError("Los PINs no coinciden"); return; }
-    const exists = participants.find(p=>p.email&&p.email.toLowerCase()===regEmail.trim().toLowerCase());
-    if (exists) { setError("Este correo ya esta registrado. Inicia sesion."); return; }
+    if (!regPin.trim()||regPin.length!==4) { setError("El código debe ser de exactamente 4 dígitos"); return; }
+    const exists = participants.find(p=>p.nombre&&p.nombre.toLowerCase()===regNombre.trim().toLowerCase());
+    if (exists) { setError("Este nombre ya está registrado. Inicia sesión."); return; }
     setSaving(true);
     try {
       const newUser = {
         id: Date.now(),
         nombre: regNombre.trim(),
-        apellido: regApellido.trim(),
-        name: regNombre.trim()+" "+regApellido.trim(),
-        email: regEmail.trim().toLowerCase(),
+        name: regNombre.trim(),
         pin: regPin,
         predictions: {},
         createdAt: new Date().toISOString(),
@@ -1350,15 +1330,15 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
           <>
             <div style={S.sectionTitle}>Iniciar Sesion</div>
             <div style={{marginBottom:12}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>CORREO ELECTRONICO</label>
-              <input style={S.input} type="email" placeholder="tu@correo.com"
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>TU NOMBRE</label>
+              <input style={S.input} type="text" placeholder="Juan"
                 value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
                 onKeyDown={e=>e.key==="Enter"&&handleLogin()} />
             </div>
             <div style={{marginBottom:16}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>PIN</label>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>CÓDIGO (4 dígitos)</label>
               <input style={S.input} type="password" placeholder="****"
-                value={loginPin} onChange={e=>setLoginPin(e.target.value.replace(/\D/g,""))}
+                value={loginPin} onChange={e=>setLoginPin(e.target.value.replace(/\D/g,"").slice(0,4))}
                 onKeyDown={e=>e.key==="Enter"&&handleLogin()} />
             </div>
             {error && <div style={{color:"#dc2626",marginBottom:12,fontSize:"0.85rem",background:"#fef2f2",padding:"8px 12px",borderRadius:6}}>{error}</div>}
@@ -1393,29 +1373,13 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         {isNew && (
           <>
             <div style={S.sectionTitle}>Crear Cuenta</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-              <div>
-                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>NOMBRE</label>
-                <input style={S.input} placeholder="Juan" value={regNombre} onChange={e=>setRegNombre(e.target.value)} />
-              </div>
-              <div>
-                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>APELLIDO</label>
-                <input style={S.input} placeholder="Perez" value={regApellido} onChange={e=>setRegApellido(e.target.value)} />
-              </div>
+            <div style={{marginBottom:12}}>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>TU NOMBRE</label>
+              <input style={S.input} placeholder="Juan" value={regNombre} onChange={e=>setRegNombre(e.target.value)} />
             </div>
-            <div style={{marginBottom:10}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CORREO ELECTRONICO</label>
-              <input style={S.input} type="email" placeholder="tu@correo.com" value={regEmail} onChange={e=>setRegEmail(e.target.value)} />
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-              <div>
-                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>PIN (min. 4 dig.)</label>
-                <input style={S.input} type="password" placeholder="****" value={regPin} onChange={e=>setRegPin(e.target.value.replace(/\D/g,""))} />
-              </div>
-              <div>
-                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CONFIRMAR PIN</label>
-                <input style={S.input} type="password" placeholder="****" value={regPin2} onChange={e=>setRegPin2(e.target.value.replace(/\D/g,""))} />
-              </div>
+            <div style={{marginBottom:14}}>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CÓDIGO (4 dígitos)</label>
+              <input style={S.input} type="password" placeholder="****" maxLength={4} value={regPin} onChange={e=>setRegPin(e.target.value.replace(/\D/g,"").slice(0,4))} />
             </div>
             {error && <div style={{color:"#dc2626",marginBottom:12,fontSize:"0.85rem",background:"#fef2f2",padding:"8px 12px",borderRadius:6}}>{error}</div>}
             <button style={{...S.btn(),width:"100%"}} onClick={handleRegister} disabled={saving}>
