@@ -2112,43 +2112,67 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 
       {activeTab==="locks" && (
         <div>
-          <p style={{color:"#6b7280",marginBottom:14,fontSize:"0.85rem"}}>Bloquea o desbloquea manualmente cada fase para pruebas o correcciones.</p>
+          <p style={{color:"#6b7280",marginBottom:14,fontSize:"0.85rem"}}>Bloquea o desbloquea manualmente cada partido.</p>
 
-
-          {/* GRUPOS - bloqueo general */}
-          {(()=>{
-            const phase="groups";
-            const color="#1F618D";
-            const manLocked=!!adminUnlocked[phase+"_forced"];
-            const autoLocked=isPhaseLocked(phase,adminUnlocked);
-            const manUnlocked=!!adminUnlocked[phase];
-            const isLocked = manLocked || (autoLocked && !manUnlocked);
+          {/* GRUPOS - bloqueo por partido */}
+          {["A","B","C","D","E","F","G","H","I","J","K","L"].map(grp => {
+            const grpMatches = matches.filter(m=>m.phase==="groups"&&m.group===grp);
+            const allLocked = grpMatches.length>0 && grpMatches.every(m=>isMatchLocked(m,adminUnlocked));
+            const color = GROUP_COLORS[grp] || "#6b7280";
             return (
-              <div style={{marginBottom:20}}>
-                <div style={{fontWeight:800,fontSize:"0.8rem",color:"#6b7280",letterSpacing:2,marginBottom:8}}>FASE DE GRUPOS</div>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#f9fafb",border:"1px solid "+color+"44",borderRadius:10,padding:"12px 16px",flexWrap:"wrap",gap:8}}>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:"0.95rem",color:"#111827"}}>Todos los grupos</div>
-                    <div style={{fontSize:"0.75rem",color:"#9ca3af",marginTop:2}}>Bloqueo automático: 10 Jun 2026 00:00</div>
-                    <div style={{fontSize:"0.8rem",marginTop:3,fontWeight:600,color:isLocked?"#e74c3c":"#16a34a"}}>
-                      {isLocked ? "🔒 BLOQUEADO" : "🔓 ABIERTO"}
-                    </div>
-                  </div>
+              <div key={grp} style={{marginBottom:16}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                  <div style={{fontWeight:800,fontSize:"0.8rem",color:"#6b7280",letterSpacing:2}}>GRUPO {grp}</div>
                   <button
-                    style={{...S.btn(isLocked?"#16a34a":"#e74c3c",true),fontSize:"0.78rem",padding:"6px 14px"}}
+                    style={{...S.btn(allLocked?"#16a34a":"#e74c3c",true),fontSize:"0.72rem",padding:"3px 10px"}}
                     onClick={async ()=>{
-                      const updated = isLocked
-                        ? {...adminUnlocked, [phase]:true, [phase+"_forced"]:false}
-                        : {...adminUnlocked, [phase]:false, [phase+"_forced"]:true};
+                      let updated = {...adminUnlocked};
+                      grpMatches.forEach(m=>{
+                        if (allLocked) {
+                          updated["match_"+m.id] = true;
+                          updated["match_"+m.id+"_forced"] = false;
+                        } else {
+                          updated["match_"+m.id] = false;
+                          updated["match_"+m.id+"_forced"] = true;
+                        }
+                      });
                       setAdminUnlocked(updated);
                       await setDoc(SETTINGS_DOC, {adminUnlocked: updated});
                     }}>
-                    {isLocked ? "Desbloquear" : "Bloquear"}
+                    {allLocked ? "Desbloquear grupo" : "Bloquear grupo"}
                   </button>
                 </div>
+                {grpMatches.map(m=>{
+                  const locked = isMatchLocked(m, adminUnlocked);
+                  const manLocked = !!adminUnlocked["match_"+m.id+"_forced"];
+                  const manUnlocked = !!adminUnlocked["match_"+m.id];
+                  return (
+                    <div key={m.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#f9fafb",border:"1px solid "+color+"33",borderRadius:8,padding:"8px 12px",marginBottom:5,flexWrap:"wrap",gap:6}}>
+                      <div>
+                        <div style={{fontWeight:600,fontSize:"0.82rem",color:"#111827"}}>{m.date} · {m.home} vs {m.away}</div>
+                        <div style={{fontSize:"0.72rem",marginTop:2,fontWeight:600,color:locked?"#e74c3c":"#16a34a"}}>
+                          {locked?"🔒 Bloqueado":"🔓 Abierto"}
+                          {manLocked&&<span style={{color:"#9ca3af"}}> (manual)</span>}
+                          {manUnlocked&&<span style={{color:"#9ca3af"}}> (desbloqueado)</span>}
+                        </div>
+                      </div>
+                      <button
+                        style={{...S.btn(locked?"#16a34a":"#e74c3c",true),fontSize:"0.72rem",padding:"4px 10px"}}
+                        onClick={async ()=>{
+                          const updated = locked
+                            ? {...adminUnlocked, ["match_"+m.id]:true, ["match_"+m.id+"_forced"]:false}
+                            : {...adminUnlocked, ["match_"+m.id]:false, ["match_"+m.id+"_forced"]:true};
+                          setAdminUnlocked(updated);
+                          await setDoc(SETTINGS_DOC, {adminUnlocked: updated});
+                        }}>
+                        {locked?"Desbloquear":"Bloquear"}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             );
-          })()}
+          })}
 
           {/* ELIMINATORIAS - bloqueo por partido */}
           {[
