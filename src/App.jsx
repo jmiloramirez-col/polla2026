@@ -4,12 +4,12 @@ import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/fires
 
 // FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyC9rb0ETv5sq4LKs9zJrb1OoebveOjJe8Y",
-  authDomain: "polla2026-88080.firebaseapp.com",
-  projectId: "polla2026-88080",
-  storageBucket: "polla2026-88080.firebasestorage.app",
-  messagingSenderId: "500836837009",
-  appId: "1:500836837009:web:360bfca31f374444da8130"
+  apiKey: "AIzaSyDL2FV0gfT5b58f5mXmAPJMqSbwKde0IV0",
+  authDomain: "mundial2026-2026.firebaseapp.com",
+  projectId: "mundial2026-2026",
+  storageBucket: "mundial2026-2026.firebasestorage.app",
+  messagingSenderId: "76029862427",
+  appId: "1:76029862427:web:23f21566a32e1c40610ebe"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component {
 }
 
 // LANG CONTEXT
-const LangContext = createContext("es");
+const LangContext = createContext("fr");
 const useLang = () => useContext(LangContext);
 const T = {
   es: {
@@ -66,7 +66,7 @@ const T = {
       editarPerfil:"Editar Perfil", guardar:"Guardar", cancelar:"Cancelar", perfilActualizado:"✅ Perfil actualizado",
       registrarFactura:"Registrar Factura", numFactura:"NUMERO DE FACTURA", monto:"MONTO (CAD $)",
       facturaVale:"Esta factura vale", puntos:"puntos", siAprobada:"si es aprobada",
-      productoCheck:"Esta factura incluye uno de los productos participantes* del polla",
+      productoCheck:"Esta factura incluye uno de los productos participantes* del concurso",
       sinProductoTitle:"Sin producto participante, esta factura", sinProductoMsg:"no valida tu participación aunque sea de $50+. Igual genera puntos.",
       conProductoMsg:"Esta factura valida tu participación si es aprobada por el administrador.",
       facturaSent:"Factura enviada! Pendiente de aprobacion por el administrador.",
@@ -134,18 +134,18 @@ const T = {
 
 // GROUPS
 const GROUPS = {
-  A: ["México","Corea del Sur","Sudáfrica","Chequia"],
-  B: ["Canadá","Suiza","Catar","Bosnia y Herzegovina"],
-  C: ["Brasil","Marruecos","Escocia","Haití"],
-  D: ["Estados Unidos","Australia","Paraguay","Turquía"],
-  E: ["Alemania","Ecuador","Costa de Marfil","Curazao"],
-  F: ["Países Bajos","Japón","Túnez","Suecia"],
+  A: ["México","Corea del Sur","Sudáfrica","Dinamarca*"],
+  B: ["Canadá","Suiza","Catar","Italia*"],
+  C: ["Brasil","Haití","Marruecos","Escocia"],
+  D: ["Estados Unidos","Australia","Paraguay","Turquía*"],
+  E: ["Alemania","Costa de Marfil","Ecuador","Curazao"],
+  F: ["Países Bajos","Japón","Túnez","Ucrania*"],
   G: ["Bélgica","Irán","Egipto","Nueva Zelanda"],
-  H: ["España","Uruguay","Arabia Saudí","Cabo Verde"],
-  I: ["Francia","Senegal","Noruega","Irak"],
+  H: ["España","Arabia Saudí","Uruguay","Cabo Verde"],
+  I: ["Francia","Noruega","Senegal","Irak*"],
   J: ["Argentina","Austria","Argelia","Jordania"],
-  K: ["Portugal","Colombia","Uzbekistán","R.D. Congo"],
-  L: ["Inglaterra","Croacia","Panamá","Ghana"],
+  K: ["Portugal","Uzbekistán","Colombia","Jamaica*"],
+  L: ["Inglaterra","Croacia","Ghana","Panamá"],
 }
 
 const GROUP_COLORS = {
@@ -178,21 +178,17 @@ function calcInvoicePoints(amount) {
 function isPhaseLocked(phase, adminUnlocked = {}) {
   if (adminUnlocked[phase+"_forced"]) return true;
   if (adminUnlocked[phase]) return false;
-  const lockDate = LOCK_DATES[phase];
-  if (!lockDate) return false;
-  return new Date() >= lockDate;
+  return false; // Sin bloqueo automático — solo manual
 }
 
 function isMatchLocked(match, adminUnlocked = {}) {
   if (!match) return false;
-  // Manual overrides from admin
+  // Solo bloqueo manual por partido o por fase
   if (adminUnlocked["match_"+match.id]) return false;
   if (adminUnlocked["match_"+match.id+"_forced"]) return true;
   if (adminUnlocked[match.phase]) return false;
   if (adminUnlocked[match.phase+"_forced"]) return true;
-  // Todos los partidos: bloquear 24h antes del lockTime
-  if (match.lockTime) return new Date() >= new Date(new Date(match.lockTime).getTime() - 24*60*60*1000);
-  return isPhaseLocked(match.phase, adminUnlocked);
+  return false; // Por defecto abierto
 }
 
 function generateGroupMatches() {
@@ -200,18 +196,18 @@ function generateGroupMatches() {
   const matches = [
     // GRUPO A
     {id:1,  phase:"groups",group:"A",date:"11 Jun",home:"México",            away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-11T15:00:00"},
-    {id:2,  phase:"groups",group:"A",date:"11 Jun",home:"Corea del Sur",     away:"Chequia",           realHome:null,realAway:null,lockTime:"2026-06-11T18:00:00"},
-    {id:3,  phase:"groups",group:"A",date:"18 Jun",home:"Chequia",           away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
+    {id:2,  phase:"groups",group:"A",date:"11 Jun",home:"Corea del Sur",     away:"Dinamarca*",        realHome:null,realAway:null,lockTime:"2026-06-11T18:00:00"},
+    {id:3,  phase:"groups",group:"A",date:"18 Jun",home:"Dinamarca*",        away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
     {id:4,  phase:"groups",group:"A",date:"18 Jun",home:"México",            away:"Corea del Sur",     realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
-    {id:5,  phase:"groups",group:"A",date:"24 Jun",home:"Chequia",           away:"México",            realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
+    {id:5,  phase:"groups",group:"A",date:"24 Jun",home:"Dinamarca*",        away:"México",            realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
     {id:6,  phase:"groups",group:"A",date:"24 Jun",home:"Sudáfrica",         away:"Corea del Sur",     realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
     // GRUPO B
-    {id:7,  phase:"groups",group:"B",date:"12 Jun",home:"Canadá",            away:"Bosnia y Herzegovina", realHome:null,realAway:null,lockTime:"2026-06-12T15:00:00"},
+    {id:7,  phase:"groups",group:"B",date:"12 Jun",home:"Canadá",            away:"Italia*",           realHome:null,realAway:null,lockTime:"2026-06-12T15:00:00"},
     {id:8,  phase:"groups",group:"B",date:"13 Jun",home:"Catar",             away:"Suiza",             realHome:null,realAway:null,lockTime:"2026-06-13T15:00:00"},
-    {id:9,  phase:"groups",group:"B",date:"18 Jun",home:"Suiza",             away:"Bosnia y Herzegovina", realHome:null,realAway:null,lockTime:"2026-06-18T12:00:00"},
+    {id:9,  phase:"groups",group:"B",date:"18 Jun",home:"Suiza",             away:"Italia*",           realHome:null,realAway:null,lockTime:"2026-06-18T12:00:00"},
     {id:10, phase:"groups",group:"B",date:"18 Jun",home:"Canadá",            away:"Catar",             realHome:null,realAway:null,lockTime:"2026-06-18T21:00:00"},
     {id:11, phase:"groups",group:"B",date:"24 Jun",home:"Suiza",             away:"Canadá",            realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
-    {id:12, phase:"groups",group:"B",date:"24 Jun",home:"Bosnia y Herzegovina", away:"Catar",          realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
+    {id:12, phase:"groups",group:"B",date:"24 Jun",home:"Italia*",           away:"Catar",             realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
     // GRUPO C
     {id:13, phase:"groups",group:"C",date:"13 Jun",home:"Brasil",            away:"Marruecos",         realHome:null,realAway:null,lockTime:"2026-06-13T18:00:00"},
     {id:14, phase:"groups",group:"C",date:"13 Jun",home:"Haití",             away:"Escocia",           realHome:null,realAway:null,lockTime:"2026-06-13T21:00:00"},
@@ -221,10 +217,10 @@ function generateGroupMatches() {
     {id:18, phase:"groups",group:"C",date:"24 Jun",home:"Marruecos",         away:"Haití",             realHome:null,realAway:null,lockTime:"2026-06-25T15:00:00"},
     // GRUPO D
     {id:19, phase:"groups",group:"D",date:"12 Jun",home:"Estados Unidos",    away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-12T18:00:00"},
-    {id:20, phase:"groups",group:"D",date:"12 Jun",home:"Australia",         away:"Turquía",           realHome:null,realAway:null,lockTime:"2026-06-12T21:00:00"},
-    {id:21, phase:"groups",group:"D",date:"18 Jun",home:"Turquía",           away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
+    {id:20, phase:"groups",group:"D",date:"12 Jun",home:"Australia",         away:"Turquía*",          realHome:null,realAway:null,lockTime:"2026-06-12T21:00:00"},
+    {id:21, phase:"groups",group:"D",date:"18 Jun",home:"Turquía*",          away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
     {id:22, phase:"groups",group:"D",date:"19 Jun",home:"Estados Unidos",    away:"Australia",         realHome:null,realAway:null,lockTime:"2026-06-19T21:00:00"},
-    {id:23, phase:"groups",group:"D",date:"25 Jun",home:"Turquía",           away:"Estados Unidos",    realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
+    {id:23, phase:"groups",group:"D",date:"25 Jun",home:"Turquía*",          away:"Estados Unidos",    realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
     {id:24, phase:"groups",group:"D",date:"25 Jun",home:"Paraguay",          away:"Australia",         realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
     // GRUPO E
     {id:25, phase:"groups",group:"E",date:"14 Jun",home:"Alemania",          away:"Curazao",           realHome:null,realAway:null,lockTime:"2026-06-14T15:00:00"},
@@ -235,10 +231,10 @@ function generateGroupMatches() {
     {id:30, phase:"groups",group:"E",date:"25 Jun",home:"Ecuador",           away:"Alemania",          realHome:null,realAway:null,lockTime:"2026-06-26T15:00:00"},
     // GRUPO F
     {id:31, phase:"groups",group:"F",date:"14 Jun",home:"Países Bajos",      away:"Japón",             realHome:null,realAway:null,lockTime:"2026-06-15T15:00:00"},
-    {id:32, phase:"groups",group:"F",date:"14 Jun",home:"Suecia",            away:"Túnez",             realHome:null,realAway:null,lockTime:"2026-06-15T18:00:00"},
+    {id:32, phase:"groups",group:"F",date:"14 Jun",home:"Ucrania*",          away:"Túnez",             realHome:null,realAway:null,lockTime:"2026-06-15T18:00:00"},
     {id:33, phase:"groups",group:"F",date:"19 Jun",home:"Túnez",             away:"Japón",             realHome:null,realAway:null,lockTime:"2026-06-20T21:00:00"},
-    {id:34, phase:"groups",group:"F",date:"20 Jun",home:"Países Bajos",      away:"Suecia",            realHome:null,realAway:null,lockTime:"2026-06-21T15:00:00"},
-    {id:35, phase:"groups",group:"F",date:"25 Jun",home:"Japón",             away:"Suecia",            realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
+    {id:34, phase:"groups",group:"F",date:"20 Jun",home:"Países Bajos",      away:"Ucrania*",          realHome:null,realAway:null,lockTime:"2026-06-21T15:00:00"},
+    {id:35, phase:"groups",group:"F",date:"25 Jun",home:"Japón",             away:"Ucrania*",          realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
     {id:36, phase:"groups",group:"F",date:"25 Jun",home:"Túnez",             away:"Países Bajos",      realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
     // GRUPO G
     {id:37, phase:"groups",group:"G",date:"15 Jun",home:"Bélgica",           away:"Egipto",            realHome:null,realAway:null,lockTime:"2026-06-15T21:00:00"},
@@ -256,11 +252,11 @@ function generateGroupMatches() {
     {id:48, phase:"groups",group:"H",date:"26 Jun",home:"Uruguay",           away:"España",            realHome:null,realAway:null,lockTime:"2026-06-27T15:00:00"},
     // GRUPO I
     {id:49, phase:"groups",group:"I",date:"16 Jun",home:"Francia",           away:"Senegal",           realHome:null,realAway:null,lockTime:"2026-06-17T15:00:00"},
-    {id:50, phase:"groups",group:"I",date:"16 Jun",home:"Irak",              away:"Noruega",           realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
-    {id:51, phase:"groups",group:"I",date:"22 Jun",home:"Francia",           away:"Irak",              realHome:null,realAway:null,lockTime:"2026-06-22T21:00:00"},
+    {id:50, phase:"groups",group:"I",date:"16 Jun",home:"Irak*",             away:"Noruega",           realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
+    {id:51, phase:"groups",group:"I",date:"22 Jun",home:"Francia",           away:"Irak*",             realHome:null,realAway:null,lockTime:"2026-06-22T21:00:00"},
     {id:52, phase:"groups",group:"I",date:"22 Jun",home:"Noruega",           away:"Senegal",           realHome:null,realAway:null,lockTime:"2026-06-23T15:00:00"},
     {id:53, phase:"groups",group:"I",date:"26 Jun",home:"Noruega",           away:"Francia",           realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
-    {id:54, phase:"groups",group:"I",date:"26 Jun",home:"Senegal",           away:"Irak",              realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
+    {id:54, phase:"groups",group:"I",date:"26 Jun",home:"Senegal",           away:"Irak*",             realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
     // GRUPO J
     {id:55, phase:"groups",group:"J",date:"15 Jun",home:"Austria",           away:"Jordania",          realHome:null,realAway:null,lockTime:"2026-06-17T21:00:00"},
     {id:56, phase:"groups",group:"J",date:"16 Jun",home:"Argentina",         away:"Argelia",           realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
@@ -269,12 +265,12 @@ function generateGroupMatches() {
     {id:59, phase:"groups",group:"J",date:"27 Jun",home:"Argelia",           away:"Austria",           realHome:null,realAway:null,lockTime:"2026-06-27T21:00:00"},
     {id:60, phase:"groups",group:"J",date:"27 Jun",home:"Jordania",          away:"Argentina",         realHome:null,realAway:null,lockTime:"2026-06-27T21:00:00"},
     // GRUPO K
-    {id:61, phase:"groups",group:"K",date:"17 Jun",home:"Portugal",          away:"R.D. Congo",        realHome:null,realAway:null,lockTime:"2026-06-17T12:00:00"},
+    {id:61, phase:"groups",group:"K",date:"17 Jun",home:"Portugal",          away:"Jamaica*",          realHome:null,realAway:null,lockTime:"2026-06-17T12:00:00"},
     {id:62, phase:"groups",group:"K",date:"17 Jun",home:"Uzbekistán",        away:"Colombia",          realHome:null,realAway:null,lockTime:"2026-06-17T21:00:00"},
     {id:63, phase:"groups",group:"K",date:"23 Jun",home:"Portugal",          away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-23T12:00:00"},
-    {id:64, phase:"groups",group:"K",date:"23 Jun",home:"Colombia",          away:"R.D. Congo",        realHome:null,realAway:null,lockTime:"2026-06-23T18:00:00"},
+    {id:64, phase:"groups",group:"K",date:"23 Jun",home:"Colombia",          away:"Jamaica*",          realHome:null,realAway:null,lockTime:"2026-06-23T18:00:00"},
     {id:65, phase:"groups",group:"K",date:"27 Jun",home:"Colombia",          away:"Portugal",          realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
-    {id:66, phase:"groups",group:"K",date:"27 Jun",home:"R.D. Congo",        away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
+    {id:66, phase:"groups",group:"K",date:"27 Jun",home:"Jamaica*",          away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
     // GRUPO L
     {id:67, phase:"groups",group:"L",date:"17 Jun",home:"Inglaterra",        away:"Croacia",           realHome:null,realAway:null,lockTime:"2026-06-17T15:00:00"},
     {id:68, phase:"groups",group:"L",date:"17 Jun",home:"Ghana",             away:"Panamá",            realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
@@ -393,14 +389,16 @@ function calcAllClassified(allMatches, getScore) {
 
 // Calculate bonus points for classification predictions
 function calcClassificationBonus(predictions, allMatches) {
-  // Check if real results have enough data
   const realGroupMatches = allMatches.filter(m=>m.phase==="groups"&&m.realHome!==null);
   if (realGroupMatches.length === 0) return {bonus:0, details:[]};
 
-  // Real classified
-  const realClassified = calcAllClassified(allMatches, m=>({h:m.realHome, a:m.realAway}));
+  // Solo calcular si TODOS los partidos de grupos tienen resultado real
+  const allGroupMatches = allMatches.filter(m=>m.phase==="groups");
+  const allGroupsComplete = allGroupMatches.length > 0 &&
+    allGroupMatches.every(m=>m.realHome!==null&&m.realAway!==null);
+  if (!allGroupsComplete) return {bonus:0, details:[]};
 
-  // Predicted classified (from participant's predictions)
+  const realClassified = calcAllClassified(allMatches, m=>({h:m.realHome, a:m.realAway}));
   const predClassified = calcAllClassified(allMatches, m=>{
     const pred = predictions?.[m.id];
     if (!pred||pred.home===null||pred.away===null) return null;
@@ -410,7 +408,6 @@ function calcClassificationBonus(predictions, allMatches) {
   let bonus = 0;
   const details = [];
 
-  // Check 1st and 2nd place for each group
   Object.keys(GROUPS).forEach(grp => {
     ["1st","2nd"].forEach(pos => {
       const key = grp+"_"+pos;
@@ -421,7 +418,6 @@ function calcClassificationBonus(predictions, allMatches) {
         bonus+=10;
         details.push({type:"group_pos", grp, pos, team:real, pts:10, msg:"Acerto "+pos+" del Grupo "+grp+": "+real+" (10pts)"});
       } else {
-        // Check if predicted team classified but wrong position
         const realGrp = realClassified.byGroup[grp];
         if (realGrp && realGrp.slice(0,2).some(s=>s.team===pred)) {
           bonus+=5;
@@ -431,7 +427,6 @@ function calcClassificationBonus(predictions, allMatches) {
     });
   });
 
-  // Check best 8 thirds
   const realTop8 = realClassified.top8thirds;
   const predTop8 = predClassified.top8thirds;
   if (realTop8.length>0 && predTop8.length>0) {
@@ -678,49 +673,62 @@ function ReglamentoView() {
       toggle: "Voir en Français",
       title: "REGLAMENTO OFICIAL — CONCURSO MUNDIAL 2026",
       subtitle: "Sabor Latino · mundial26.vercel.app",
-      s1: "1. Objetivo del polla",
-      s1b: "El Polla Mundial 2026 de Sabor Latino es una competencia de pronósticos deportivos en la que los participantes predicen los resultados de los partidos de la Copa Mundial de Fútbol 2026. El participante con mayor puntaje al finalizar el torneo será declarado ganador.",
+      s1: "1. Objetivo del concurso",
+      s1b: "El Concurso Mundial 2026 de Sabor Latino es una competencia de pronósticos deportivos en la que los participantes predicen los resultados de los partidos de la Copa Mundial de Fútbol 2026. El participante con mayor puntaje al finalizar el torneo será declarado ganador.",
       s2: "2. Requisitos de participación",
-      s2intro: "Para participar de forma válida en el polla, se deben cumplir TODOS los siguientes requisitos:",
+      s2intro: "Para participar de forma válida en el concurso, se deben cumplir TODOS los siguientes requisitos:",
       s2items: [
         "Registrarse en la plataforma oficial (mundial26.vercel.app) antes del 10 de junio de 2026.",
         "Haber realizado al menos UNA compra de $50.00 CAD o más en Sabor Latino.",
-        "La factura de $50.00 CAD o más debe incluir al menos uno de los productos participantes del polla*. La lista será publicada próximamente.",
+        "La factura de $50.00 CAD o más debe incluir al menos uno de los productos participantes del concurso*. La lista será publicada próximamente.",
         "Si el participante resulta ganador de algún premio, debe permitir que una fotografía recibiendo el premio sea publicada en las redes sociales oficiales de Sabor Latino.",
       ],
       s2note1: "⚠️ IMPORTANTE: Las compras menores de $50.00 CAD generan puntos adicionales, pero NO validan la participación. Si un ganador no cuenta con una factura de $50.00+ que incluya un producto participante, su premio no será entregado y pasará al siguiente clasificado.",
       s2note2: "* Los productos participantes serán publicados próximamente en las redes sociales de Sabor Latino.",
       s3: "3. Premios",
-      s3b: "Los premios serán anunciados próximamente en las redes sociales y en la plataforma del polla.",
+      s3b: "Los premios serán anunciados próximamente en las redes sociales y en la plataforma del concurso.",
       s3items: ["1er lugar: Premio por anunciar *", "2do lugar: Premio por anunciar *", "3er lugar: Premio por anunciar *"],
-      s4: "1. Sistema de puntos",
-      s4a: "1.1  Pronósticos de partidos",
+      s4: "4. Sistema de puntos",
+      s4a: "4.1  Pronósticos de partidos",
       s4aRows: [["Resultado exacto (marcador correcto)","5 pts"],["Ganador correcto (empate, local o visitante)","3 pts"],["Pronóstico incorrecto","0 pts"]],
-      s4b: "1.2  Clasificados de grupos",
+      s4b: "4.2  Clasificados de grupos",
       s4bRows: [["Equipo correcto + posición exacta (1° o 2° del grupo)","10 pts"],["Equipo correcto, posición equivocada","5 pts"],["Mejor tercero: posición exacta","10 pts"],["Mejor tercero: equipo correcto, posición equivocada","5 pts"]],
-      s4c: null, s4cRows: [], s4note: null,
-      s5: null, s5items: [],
-      s6: "2. Cierre de pronósticos",
-      s6items: [
-        "Cada partido se bloquea automáticamente 24 horas antes de su horario oficial de juego. No se pueden cambiar pronósticos después de ese momento.",
+      s4c: "4.3  Puntos por facturas (CAD $)",
+      s4cRows: [["$10 – $50","1 pt"],["$51 – $100","3 pts"],["$101 – $150","6 pts"],["$151 – $200","9 pts"],["$201 o más","12 pts"]],
+      s4note: "Las facturas deben registrarse en la plataforma. Solo las facturas aprobadas por el administrador generan puntos.",
+      s5: "5. Registro de facturas",
+      s5items: [
+        "Registrar las facturas en la sección \"Mi Perfil\" dentro de la plataforma.",
+        "Ingresar el número de factura y el monto total en dólares canadienses (CAD).",
+        "El administrador aprobará o rechazará cada factura registrada.",
+        "Una misma factura no puede ser registrada dos veces.",
+        "Monto mínimo para obtener puntos: $10.00 CAD.",
       ],
-      s7: null, s7items: [],
+      s6: "6. Cierre de pronósticos",
+      s6items: [
+        "Fase de grupos: todos los pronósticos deben ingresarse antes del 10 de junio de 2026 a las 00:00. Sin cambios después de esa hora.",
+        "Fases eliminatorias: cada partido se bloqueará 24 horas antes de su horario oficial de juego.",
+      ],
+      s7: "7. Condiciones generales",
+      s7items: [
+        "Sabor Latino se reserva el derecho de modificar, suspender o cancelar el concurso en caso de fuerza mayor.",
+        "La decisión del administrador sobre la validez de facturas y pronósticos es definitiva.",
+        "En caso de empate: (1) mayor número de resultados exactos, (2) mayor número de ganadores correctos, (3) mayor puntaje en facturas.",
+        "Al participar, el concursante acepta todas las condiciones de este reglamento.",
+      ],
     }
   };
 
   const t = T[lang];
 
-  const Section = ({title, children}) => {
-    if (!title) return null;
-    return (
-      <div style={{marginBottom:22}}>
-        <div style={{fontWeight:800,fontSize:"0.95rem",color:BRAND.red,borderBottom:"2px solid "+BRAND.red,paddingBottom:5,marginBottom:10,letterSpacing:0.5}}>
-          {title}
-        </div>
-        {children}
+  const Section = ({title, children}) => (
+    <div style={{marginBottom:22}}>
+      <div style={{fontWeight:800,fontSize:"0.95rem",color:BRAND.red,borderBottom:"2px solid "+BRAND.red,paddingBottom:5,marginBottom:10,letterSpacing:0.5}}>
+        {title}
       </div>
-    );
-  };
+      {children}
+    </div>
+  );
 
   const BulletItem = ({text}) => (
     <div style={{display:"flex",gap:8,marginBottom:6,alignItems:"flex-start"}}>
@@ -750,21 +758,50 @@ function ReglamentoView() {
     <div className="fi" style={{maxWidth:600,margin:"0 auto"}}>
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,#d3172e,#a01020)",borderRadius:14,padding:"18px 20px",marginBottom:18,textAlign:"center",color:"#fff"}}>
+        <div style={{fontSize:"0.7rem",letterSpacing:3,opacity:0.8,marginBottom:6}}>SABOR LATINO</div>
         <div style={{fontSize:"1rem",fontWeight:800,letterSpacing:1,lineHeight:1.3}}>{t.title}</div>
+        <div style={{fontSize:"0.72rem",opacity:0.75,marginTop:6}}>{t.subtitle}</div>
       </div>
 
       {/* Sections */}
       <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e7eb",padding:"20px 18px"}}>
+
+        <Section title={t.s1}>
+          <p style={{fontSize:"0.85rem",color:"#374151",lineHeight:1.7,margin:0}}>{t.s1b}</p>
+        </Section>
+
+        <Section title={t.s2}>
+          <p style={{fontSize:"0.85rem",color:"#374151",marginBottom:8,fontWeight:600}}>{t.s2intro}</p>
+          {t.s2items.map((item,i)=><BulletItem key={i} text={item}/>)}
+          <Note text={t.s2note1}/>
+          <Note text={t.s2note2}/>
+        </Section>
+
+        <Section title={t.s3}>
+          <p style={{fontSize:"0.85rem",color:"#374151",marginBottom:8}}>{t.s3b}</p>
+          {t.s3items.map((item,i)=><BulletItem key={i} text={item}/>)}
+        </Section>
 
         <Section title={t.s4}>
           <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:4}}>{t.s4a}</div>
           <PointsTable rows={t.s4aRows}/>
           <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:12}}>{t.s4b}</div>
           <PointsTable rows={t.s4bRows}/>
+          <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:12}}>{t.s4c}</div>
+          <PointsTable rows={t.s4cRows}/>
+          <Note text={t.s4note}/>
+        </Section>
+
+        <Section title={t.s5}>
+          {t.s5items.map((item,i)=><BulletItem key={i} text={item}/>)}
         </Section>
 
         <Section title={t.s6}>
           {t.s6items.map((item,i)=><BulletItem key={i} text={item}/>)}
+        </Section>
+
+        <Section title={t.s7}>
+          {t.s7items.map((item,i)=><BulletItem key={i} text={item}/>)}
         </Section>
 
       </div>
@@ -811,7 +848,36 @@ function ClasificacionView({ participants, matches, invoices, currentUser }) {
 
   return (
     <div className="fi">
-
+      {currentUser && (()=>{
+        const ps = getParticipationStatus(currentUser.id, invoices);
+        if (ps==="valid") return (
+          <div style={{background:"#f0fdf4",border:"1px solid #86efac",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:"1.2rem"}}>✅</span>
+            <div style={{fontWeight:700,fontSize:"0.85rem",color:"#166534"}}>{tc.validOk}</div>
+          </div>
+        );
+        if (ps==="pending") return (
+          <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:"1.2rem",flexShrink:0}}>🕐</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:"#1e40af",marginBottom:2}}>Factura pendiente de aprobación</div>
+              <div style={{fontSize:"0.8rem",color:"#1e40af",lineHeight:1.5}}>{tc.pendingMsg}</div>
+            </div>
+          </div>
+        );
+        const msg = ps==="no_product"
+          ? tc.noProductMsg
+          : tc.invalidMsg;
+        return (
+          <div style={{background:"#fffbeb",border:"1px solid #f59e0b",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:"1.2rem",flexShrink:0}}>⚠️</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:"#92400e",marginBottom:2}}>{tc.invalidTitle}</div>
+              <div style={{fontSize:"0.8rem",color:"#92400e",lineHeight:1.5}}>{msg}</div>
+            </div>
+          </div>
+        );
+      })()}
       <div style={{...S.card, padding:0, overflow:"hidden"}}>
         <div style={{background:BRAND.red, padding:"12px 18px"}}>
           <div style={{color:"#fff", fontWeight:800, fontSize:"1rem", letterSpacing:1}}>{tc.title} — {ranked.length} {tc.participants}</div>
@@ -1123,7 +1189,25 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
           ))}
         </div>
       </div>
-
+      {/* INDICADOR DE PARTICIPACIÓN VÁLIDA */}
+      {(()=>{
+        const ps = getParticipationStatus(currentUser.id, invoices);
+        const cfg = {
+          valid:      { icon:"✅", color:"#166534", bg:"#f0fdf4", border:"#86efac", title:tp.validTitle,            msg:tp.validOk },
+          pending:    { icon:"🕐", color:"#1e40af", bg:"#eff6ff", border:"#93c5fd", title:tp.pendingTitle,    msg:tp.pendingMsg },
+          no_product: { icon:"⚠️", color:"#92400e", bg:"#fffbeb", border:"#f59e0b", title:tp.noProductTitle, msg:tp.noProductMsg },
+          invalid:    { icon:"🔴", color:"#991b1b", bg:"#fff5f5", border:"#fca5a5", title:tp.invalidTitle,   msg:tp.invalidMsg },
+        }[ps];
+        return (
+          <div style={{background:cfg.bg,border:"1px solid "+cfg.border,borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:"1.2rem",flexShrink:0}}>{cfg.icon}</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:cfg.color,marginBottom:3}}>{cfg.title}</div>
+              <div style={{fontSize:"0.78rem",color:cfg.color,lineHeight:1.5}}>{cfg.msg}</div>
+            </div>
+          </div>
+        );
+      })()}
       {editOk && <div style={{background:"#f0fdf4",border:"1px solid #16a34a",borderRadius:10,padding:"10px 14px",marginBottom:12,color:"#16a34a",fontWeight:600,fontSize:"0.85rem"}}>{tp.perfilActualizado}</div>}
       {!editMode ? (
         <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:12,padding:16}}>
@@ -1164,6 +1248,9 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
           </div>
         </div>
       )}
+      <div style={{marginTop:20}}>
+        <InvoiceForm currentUser={currentUser} invoices={invoices} setInvoices={setInvoices} />
+      </div>
     </div>
   );
 }
@@ -1177,7 +1264,12 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
   const [loginPin, setLoginPin] = useState("");
   // Register
   const [regNombre, setRegNombre] = useState("");
+  const [regApellido, setRegApellido] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regTel, setRegTel] = useState("");
+  const [regSucursal, setRegSucursal] = useState("");
   const [regPin, setRegPin] = useState("");
+  const [regPin2, setRegPin2] = useState("");
   const [preds, setPreds] = useState(currentUser?.predictions||{});
   const [activeGroup, setActiveGroup] = useState("A");
   const [activePhase, setActivePhase] = useState("groups");
@@ -1204,24 +1296,16 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function getLockMsg(phase) {
     const locked = isPhaseLocked(phase, adminUnlocked);
-    if (!locked) {
-      const d = LOCK_DATES[phase];
-      if (d) {
-        const diff = Math.ceil((d-new Date())/(1000*60*60*24));
-        if (diff>0) return {locked:false, msg:"Abierto - se bloquea en "+diff+" dia"+(diff!==1?"s":"")};
-      }
-      return {locked:false, msg:"Abierto"};
-    }
-    return {locked:true, msg:"Bloqueado"};
+    return locked ? {locked:true, msg:"Bloqueado"} : {locked:false, msg:"Abierto"};
   }
 
   function handleLogin() {
     setError("");
-    if (!loginEmail.trim()) { setError("Ingresa tu nombre"); return; }
-    if (!loginPin.trim()||loginPin.length<4) { setError("Código de 4 dígitos requerido"); return; }
-    const existing = participants.find(p=>p.nombre&&p.nombre.toLowerCase()===loginEmail.trim().toLowerCase());
-    if (!existing) { setError("Nombre no registrado. Crea una cuenta nueva."); return; }
-    if (existing.pin!==loginPin) { setError("Código incorrecto"); return; }
+    if (!loginEmail.trim()) { setError("Ingresa tu correo"); return; }
+    if (!loginPin.trim()||loginPin.length<4) { setError("PIN minimo 4 digitos"); return; }
+    const existing = participants.find(p=>p.email&&p.email.toLowerCase()===loginEmail.trim().toLowerCase());
+    if (!existing) { setError("Correo no registrado. Crea una cuenta nueva."); return; }
+    if (existing.pin!==loginPin) { setError("PIN incorrecto"); return; }
     setCurrentUser(existing);
     setPreds(existing.predictions||{});
     setStep("form");
@@ -1231,15 +1315,24 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
   async function handleRegister() {
     setError("");
     if (!regNombre.trim()) { setError("Ingresa tu nombre"); return; }
-    if (!regPin.trim()||regPin.length!==4) { setError("El código debe ser de exactamente 4 dígitos"); return; }
-    const exists = participants.find(p=>p.nombre&&p.nombre.toLowerCase()===regNombre.trim().toLowerCase());
-    if (exists) { setError("Este nombre ya está registrado. Inicia sesión."); return; }
+    if (!regApellido.trim()) { setError("Ingresa tu apellido"); return; }
+    if (!regEmail.trim()||!regEmail.includes("@")) { setError("Ingresa un correo valido"); return; }
+    if (!regTel.trim()) { setError("Ingresa tu telefono"); return; }
+    if (!regSucursal) { setError("Selecciona una sucursal"); return; }
+    if (!regPin.trim()||regPin.length<6) { setError("PIN minimo 6 digitos"); return; }
+    if (regPin!==regPin2) { setError("Los PINs no coinciden"); return; }
+    const exists = participants.find(p=>p.email&&p.email.toLowerCase()===regEmail.trim().toLowerCase());
+    if (exists) { setError("Este correo ya esta registrado. Inicia sesion."); return; }
     setSaving(true);
     try {
       const newUser = {
         id: Date.now(),
         nombre: regNombre.trim(),
-        name: regNombre.trim(),
+        apellido: regApellido.trim(),
+        name: regNombre.trim()+" "+regApellido.trim(),
+        email: regEmail.trim().toLowerCase(),
+        telefono: regTel.trim(),
+        sucursal: regSucursal,
         pin: regPin,
         predictions: {},
         createdAt: new Date().toISOString(),
@@ -1330,15 +1423,15 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
           <>
             <div style={S.sectionTitle}>Iniciar Sesion</div>
             <div style={{marginBottom:12}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>TU NOMBRE</label>
-              <input style={S.input} type="text" placeholder="Juan"
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>CORREO ELECTRONICO</label>
+              <input style={S.input} type="email" placeholder="tu@correo.com"
                 value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
                 onKeyDown={e=>e.key==="Enter"&&handleLogin()} />
             </div>
             <div style={{marginBottom:16}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>CÓDIGO (4 dígitos)</label>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>PIN</label>
               <input style={S.input} type="password" placeholder="****"
-                value={loginPin} onChange={e=>setLoginPin(e.target.value.replace(/\D/g,"").slice(0,4))}
+                value={loginPin} onChange={e=>setLoginPin(e.target.value.replace(/\D/g,""))}
                 onKeyDown={e=>e.key==="Enter"&&handleLogin()} />
             </div>
             {error && <div style={{color:"#dc2626",marginBottom:12,fontSize:"0.85rem",background:"#fef2f2",padding:"8px 12px",borderRadius:6}}>{error}</div>}
@@ -1373,13 +1466,42 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         {isNew && (
           <>
             <div style={S.sectionTitle}>Crear Cuenta</div>
-            <div style={{marginBottom:12}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>TU NOMBRE</label>
-              <input style={S.input} placeholder="Juan" value={regNombre} onChange={e=>setRegNombre(e.target.value)} />
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>NOMBRE</label>
+                <input style={S.input} placeholder="Juan" value={regNombre} onChange={e=>setRegNombre(e.target.value)} />
+              </div>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>APELLIDO</label>
+                <input style={S.input} placeholder="Perez" value={regApellido} onChange={e=>setRegApellido(e.target.value)} />
+              </div>
             </div>
-            <div style={{marginBottom:14}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CÓDIGO (4 dígitos)</label>
-              <input style={S.input} type="password" placeholder="****" maxLength={4} value={regPin} onChange={e=>setRegPin(e.target.value.replace(/\D/g,"").slice(0,4))} />
+            <div style={{marginBottom:10}}>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CORREO ELECTRONICO</label>
+              <input style={S.input} type="email" placeholder="tu@correo.com" value={regEmail} onChange={e=>setRegEmail(e.target.value)} />
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>TELEFONO</label>
+                <input style={S.input} placeholder="514-000-0000" value={regTel} onChange={e=>setRegTel(e.target.value)} />
+              </div>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>SUCURSAL</label>
+                <select style={selectStyle} value={regSucursal} onChange={e=>setRegSucursal(e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {SUCURSALES.map(s=><option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>PIN (min. 4 dig.)</label>
+                <input style={S.input} type="password" placeholder="****" value={regPin} onChange={e=>setRegPin(e.target.value.replace(/\D/g,""))} />
+              </div>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CONFIRMAR PIN</label>
+                <input style={S.input} type="password" placeholder="****" value={regPin2} onChange={e=>setRegPin2(e.target.value.replace(/\D/g,""))} />
+              </div>
             </div>
             {error && <div style={{color:"#dc2626",marginBottom:12,fontSize:"0.85rem",background:"#fef2f2",padding:"8px 12px",borderRadius:6}}>{error}</div>}
             <button style={{...S.btn(),width:"100%"}} onClick={handleRegister} disabled={saving}>
@@ -1399,7 +1521,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         <div style={{color:"#6b7280",marginBottom:16}}>Hola <strong style={{color:"#111827"}}>{currentUser?.name}</strong></div>
         <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
           <button style={S.btn()} onClick={()=>setStep("form")}>Editar Pronosticos</button>
-          <button style={S.btn("#6b7280",true)} onClick={()=>{if(window.confirm("¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>Cambiar Usuario</button>
+          <button style={S.btn("#6b7280",true)} onClick={()=>{if(window.confirm(lang==="fr"?"Voulez-vous vraiment vous déconnecter ?":"¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>Cambiar Usuario</button>
         </div>
       </div>
     </div>
@@ -1410,25 +1532,25 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
       {/* Welcome banner */}
       <div style={{background:"linear-gradient(135deg,#d3172e 0%,#a0122a 100%)",borderRadius:12,padding:"14px 18px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
         <div>
-          <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.72rem",letterSpacing:1,fontWeight:600,textTransform:"uppercase"}}>{"Bienvenido"}</div>
+          <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.72rem",letterSpacing:1,fontWeight:600,textTransform:"uppercase"}}>{lang==="fr"?"Bienvenue":"Bienvenido"}</div>
           <div style={{color:"#fff",fontWeight:800,fontSize:"1.1rem"}}>{currentUser?.nombre ? currentUser.nombre+" "+currentUser.apellido : currentUser?.name}</div>
         </div>
         <div style={{display:"flex",gap:10}}>
           <div style={{background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 14px",textAlign:"center"}}>
             <div style={{color:"#fff",fontWeight:800,fontSize:"1.2rem"}}>{Object.keys(preds).length}</div>
-            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{"pronósticos"}</div>
+            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{lang==="fr"?"pronostics":"pronósticos"}</div>
           </div>
           <div style={{background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 14px",textAlign:"center"}}>
             <div style={{color:"#fff",fontWeight:800,fontSize:"1.2rem"}}>{matches.length}</div>
-            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{"partidos total"}</div>
+            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{lang==="fr"?"matchs total":"partidos total"}</div>
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button style={{...S.btn("#27ae60"),fontSize:"0.8rem",padding:"6px 14px"}} onClick={handleSave} disabled={saving}>
             {saving?"Guardando...":"Guardar Todo"}
           </button>
-          <button style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"6px 12px",fontSize:"0.8rem",cursor:"pointer",fontWeight:600}} onClick={()=>{if(window.confirm("¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>
-            {"Salir"}
+          <button style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"6px 12px",fontSize:"0.8rem",cursor:"pointer",fontWeight:600}} onClick={()=>{if(window.confirm(lang==="fr"?"Voulez-vous vraiment vous déconnecter ?":"¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>
+            {lang==="fr"?"Déconnexion":"Salir"}
           </button>
         </div>
       </div>
@@ -1475,7 +1597,27 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
       {activeTab==="pronosticos" && (
         <>
-
+          {/* Invoice status banner */}
+          {(()=>{
+            const status = getParticipationStatus(currentUser?.id, invoices);
+            if (status === "valid") return null;
+            const cfg = {
+              invalid:  { bg:"#fff5f5", border:"#fca5a5", icon:"🧾", color:"#991b1b", msg: lang==="fr" ? "Tu n'as pas encore de facture valide. Enregistre un achat de 50 $+ avec produit éligible pour participer." : "No tienes una factura válida aún. Registra una compra de $50+ con producto elegible para participar.", btn: lang==="fr"?"Enregistrer ma facture":"Registrar mi factura" },
+              no_product:{ bg:"#fffbeb", border:"#f59e0b", icon:"⚠️", color:"#92400e", msg: lang==="fr" ? "Ta facture de 50 $+ n'a pas de produit éligible confirmé. Modifie-la dans Mon Profil." : "Tu factura de $50+ no tiene producto elegible confirmado. Edítala en Mi Perfil.", btn: lang==="fr"?"Voir Mon Profil":"Ver Mi Perfil" },
+              pending:  { bg:"#eff6ff", border:"#93c5fd", icon:"🕐", color:"#1e40af", msg: lang==="fr" ? "Ta facture est en attente d'approbation par l'administrateur." : "Tu factura está pendiente de aprobación por el administrador.", btn: null },
+            };
+            const c = cfg[status];
+            if (!c) return null;
+            return (
+              <div style={{background:c.bg,border:`1px solid ${c.border}`,borderRadius:10,padding:"12px 16px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+                <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                  <span style={{fontSize:"1.3rem"}}>{c.icon}</span>
+                  <span style={{fontSize:"0.82rem",color:c.color,fontWeight:600,lineHeight:1.4}}>{c.msg}</span>
+                </div>
+                {c.btn && <button style={{...S.btn(BRAND.red),fontSize:"0.78rem",padding:"6px 14px",whiteSpace:"nowrap"}} onClick={()=>setActiveTab("perfil")}>{c.btn}</button>}
+              </div>
+            );
+          })()}
           <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
             {["groups","elim"].map(ph=>(
               <button key={ph} style={S.navBtn(activePhase===ph)} onClick={()=>setActivePhase(ph)}>
@@ -1910,7 +2052,7 @@ function AdminInvoicesTab({ invoices, handleInvoice, pendingInvoices }) {
                 <button
                   style={{...S.btn(editingId===inv.id?"#6b7280":"#d97706",true),fontSize:"0.78rem",padding:"5px 12px"}}
                   onClick={()=>setEditingId(editingId===inv.id?null:inv.id)}>
-                  {editingId===inv.id?"Cancelar":"✏️ Corregir"}
+                  {editingId===inv.id?lang==="fr"?"Annuler":"Cancelar":"✏️ Corregir"}
                 </button>
               )}
             </div>
@@ -2345,7 +2487,7 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 export default function App() {
   const isAdmin = typeof window !== "undefined" && window.location.search.includes("admin");
   const [view, setView] = useState("leaderboard");
-  const [lang, setLang] = useState("es");
+  const [lang, setLang] = useState("fr");
   const [matches, setMatches] = useState(INITIAL_MATCHES);
   const [participants, setParticipants] = useState([]);
   const [adminUnlocked, setAdminUnlocked] = useState({});
@@ -2413,7 +2555,7 @@ export default function App() {
       <FontStyle />
       <div style={{textAlign:"center"}}>
         <img src="data:image/jpeg;base64"
-          alt="Sabor Latino" style={{display:"none"}} />
+          alt="Sabor Latino" style={{height:60,marginBottom:16,opacity:.8}} />
         <div style={{fontSize:"2rem",marginBottom:8,color:BRAND.red}} className="pulse">...</div>
         <div style={{color:BRAND.gray400,fontSize:"0.85rem",letterSpacing:3}}>{t.status.loading}</div>
       </div>
@@ -2428,8 +2570,14 @@ export default function App() {
       <header style={S.header}>
         <div style={S.headerInner}>
           <div style={S.logo}>
+            <img
+              src="data:image/jpeg;base64"
+              alt="Sabor Latino"
+              style={{height:44, width:"auto", objectFit:"contain", borderRadius:4}}
+              onError={e=>{e.target.style.display="none";}}
+            />
             <div>
-              <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Polla</div>
+              <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Concurso</div>
               <div style={{fontSize:"1rem",fontWeight:800,color:BRAND.gray900,letterSpacing:1}}>Mundial 2026</div>
             </div>
           </div>
@@ -2462,14 +2610,22 @@ export default function App() {
                 {(currentUser.nombre||currentUser.name||"?")[0].toUpperCase()}
               </button>
             )}
+            {/* Lang toggle */}
+            <button
+              onClick={()=>setLang(l=>l==="fr"?"es":"fr")}
+              title={lang==="fr"?"Ver en Español":"Voir en Français"}
+              style={{marginLeft:6,background:"none",border:"1px solid #e5e7eb",borderRadius:6,cursor:"pointer",padding:"4px 8px",fontSize:"0.72rem",fontWeight:700,color:BRAND.gray600,letterSpacing:0.5,lineHeight:1.2,transition:"all 0.15s"}}
+            >
+              {lang==="fr"?"ES":"FR"}
+            </button>
           </nav>
         </div>
         <div style={{background:BRAND.red,padding:"4px 16px",textAlign:"center",fontSize:"0.7rem",color:"rgba(255,255,255,0.85)",letterSpacing:1}}>
           {participants.length} {t.status.participants} &nbsp;|&nbsp; {totalMatches} {t.status.matches} &nbsp;|&nbsp; 11 JUN - 19 JUL 2026
           {(() => {
             const diff = Math.ceil((new Date("2026-06-11") - new Date()) / (1000*60*60*24));
-            if (diff > 0) return <> &nbsp;|&nbsp; 🏆 {diff} {`día${diff!==1?"s":""} para el Mundial`}</>;
-            if (diff === 0) return <> &nbsp;|&nbsp; 🏆 {"¡El Mundial empieza hoy!"}</>;
+            if (diff > 0) return <> &nbsp;|&nbsp; 🏆 {diff} {lang==="fr"?`jour${diff!==1?"s":""} avant le Mondial`:`día${diff!==1?"s":""} para el Mundial`}</>;
+            if (diff === 0) return <> &nbsp;|&nbsp; 🏆 {lang==="fr"?"Le Mondial commence aujourd'hui !":"¡El Mundial empieza hoy!"}</>;
             return null;
           })()}
         </div>
