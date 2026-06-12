@@ -178,21 +178,16 @@ function calcInvoicePoints(amount) {
 function isPhaseLocked(phase, adminUnlocked = {}) {
   if (adminUnlocked[phase+"_forced"]) return true;
   if (adminUnlocked[phase]) return false;
-  const lockDate = LOCK_DATES[phase];
-  if (!lockDate) return false;
-  return new Date() >= lockDate;
+  return false; // Sin bloqueo automático — solo manual
 }
 
 function isMatchLocked(match, adminUnlocked = {}) {
   if (!match) return false;
-  // Manual overrides from admin
   if (adminUnlocked["match_"+match.id]) return false;
   if (adminUnlocked["match_"+match.id+"_forced"]) return true;
   if (adminUnlocked[match.phase]) return false;
   if (adminUnlocked[match.phase+"_forced"]) return true;
-  // Todos los partidos: bloquear 24h antes del lockTime
-  if (match.lockTime) return new Date() >= new Date(new Date(match.lockTime).getTime() - 24*60*60*1000);
-  return isPhaseLocked(match.phase, adminUnlocked);
+  return false; // Por defecto abierto
 }
 
 function generateGroupMatches() {
@@ -393,11 +388,15 @@ function calcAllClassified(allMatches, getScore) {
 
 // Calculate bonus points for classification predictions
 function calcClassificationBonus(predictions, allMatches) {
-  // Check if real results have enough data
   const realGroupMatches = allMatches.filter(m=>m.phase==="groups"&&m.realHome!==null);
   if (realGroupMatches.length === 0) return {bonus:0, details:[]};
 
-  // Real classified
+  // Solo calcular cuando TODOS los partidos de grupos tengan resultado
+  const allGroupMatches = allMatches.filter(m=>m.phase==="groups");
+  const allGroupsComplete = allGroupMatches.length > 0 &&
+    allGroupMatches.every(m=>m.realHome!==null&&m.realAway!==null);
+  if (!allGroupsComplete) return {bonus:0, details:[]};
+
   const realClassified = calcAllClassified(allMatches, m=>({h:m.realHome, a:m.realAway}));
 
   // Predicted classified (from participant's predictions)
@@ -1204,15 +1203,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function getLockMsg(phase) {
     const locked = isPhaseLocked(phase, adminUnlocked);
-    if (!locked) {
-      const d = LOCK_DATES[phase];
-      if (d) {
-        const diff = Math.ceil((d-new Date())/(1000*60*60*24));
-        if (diff>0) return {locked:false, msg:"Abierto - se bloquea en "+diff+" dia"+(diff!==1?"s":"")};
-      }
-      return {locked:false, msg:"Abierto"};
-    }
-    return {locked:true, msg:"Bloqueado"};
+    return locked ? {locked:true, msg:"Bloqueado"} : {locked:false, msg:"Abierto"};
   }
 
   function handleLogin() {
