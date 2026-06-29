@@ -334,13 +334,14 @@ function generateElimMatches() {
 const INITIAL_MATCHES = [...generateGroupMatches(), ...generateElimMatches()];
 
 // SCORING
-function calcPoints(predH, predA, realH, realA) {
+function calcPoints(predH, predA, realH, realA, pkWinner) {
   if (realH===null||realA===null||predH===null||predA===null) return null;
   const ph=Number(predH),pa=Number(predA),rh=Number(realH),ra=Number(realA);
   if (isNaN(ph)||isNaN(pa)||isNaN(rh)||isNaN(ra)) return null;
   if (ph===rh&&pa===ra) return 5;
   const pw=ph>pa?"H":ph<pa?"A":"D";
-  const rw=rh>ra?"H":rh<ra?"A":"D";
+  // Si hubo empate en tiempo regular (con penaltis), el resultado real es empate
+  const rw = pkWinner ? "D" : (rh>ra?"H":rh<ra?"A":"D");
   if (pw===rw) return 3;
   return 0;
 }
@@ -401,7 +402,7 @@ function calcParticipantPoints(predictions, matches, invoices) {
   matches.forEach(m => {
     const pred=predictions?.[m.id];
     if (!pred) return;
-    const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);
+    const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);
     if (pts===null) return;
     total+=pts;
     if (pts===5) exact++;
@@ -745,7 +746,7 @@ function ClasificacionView({ participants, matches, invoices, currentUser }) {
       matches.forEach(m => {
         const pred = p.predictions?.[m.id];
         if (!pred) return;
-        const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway);
+        const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway, m.pkWinner);
         if (pts === null) return;
         gamePts += pts;
         if (pts === 5) exact++;
@@ -1013,14 +1014,14 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
   const userInv = (invoices||[]).filter(inv=>inv.participantId===currentUser.id&&inv.status==="approved");
   const invPts = userInv.reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount), 0);
   let gamePts = 0;
-  matches.forEach(m=>{const pred=preds[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);if(pts!==null)gamePts+=pts;});
+  matches.forEach(m=>{const pred=preds[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);if(pts!==null)gamePts+=pts;});
   const {bonus:classPts} = calcClassificationBonus(preds, matches);
   const total = gamePts + invPts + classPts;
 
   const ranked = [...participants].map(p=>{
     const ui=(invoices||[]).filter(i=>i.participantId===p.id&&i.status==="approved");
     const ip=ui.reduce((s,i)=>s+calcInvoicePoints(i.amount),0);
-    let gp=0; matches.forEach(m=>{const pr=p.predictions?.[m.id];if(!pr)return;const pts=calcPoints(pr.home,pr.away,m.realHome,m.realAway);if(pts!==null)gp+=pts;});
+    let gp=0; matches.forEach(m=>{const pr=p.predictions?.[m.id];if(!pr)return;const pts=calcPoints(pr.home,pr.away,m.realHome,m.realAway,m.pkWinner);if(pts!==null)gp+=pts;});
     const {bonus:cp}=calcClassificationBonus(p.predictions||{},matches);
     return {...p,_total:gp+ip+cp};
   }).sort((a,b)=>b._total-a._total);
@@ -1229,7 +1230,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function renderMatchRow(m, locked=false) {
     const pred = preds[m.id]||{};
-    const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway);
+    const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway, m.pkWinner);
     const lockTime = m.lockTime ? new Date(m.lockTime) : null;
     const now = new Date();
     const minutesLeft = lockTime ? Math.round((lockTime - now) / 60000) : null;
@@ -1916,6 +1917,10 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
     setMatches(prev=>prev.map(m=>m.id===matchId?{...m,[side==="home"?"realHome":"realAway"]:v}:m));
   }
 
+  function setPkWinner(matchId, val) {
+    setMatches(prev=>prev.map(m=>m.id===matchId?{...m, pkWinner: val||null}:m));
+  }
+
   function setTeamName(matchId, side, val) {
     setMatches(prev=>prev.map(m=>m.id===matchId?{...m,[side==="home"?"home":"away"]:val}:m));
   }
@@ -2025,21 +2030,38 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
                 ))}
               </div>
               <div style={S.phaseHeader(phaseColors[activePh])}>{phaseLabels[activePh]}</div>
-              {elimMatches.filter(m=>m.phase===activePh).map(m=>(
-                <div key={m.id} style={{display:"grid",gridTemplateColumns:"38px 1fr 46px 12px 46px 1fr 24px",gap:5,alignItems:"center",background:"#f9fafb",border:"1px solid #1e2d4a",borderRadius:8,padding:"6px 10px",marginBottom:5}}>
-                  <span style={{color:"#9ca3af",fontSize:"0.7rem"}}>{m.date}</span>
-                  <div style={{textAlign:"right",fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.home}</div>
-                  <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
-                    value={m.realHome??""} onChange={e=>setResult(m.id,"home",e.target.value)} />
-                  <span style={{color:"#9ca3af",fontSize:"0.68rem",textAlign:"center"}}>VS</span>
-                  <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
-                    value={m.realAway??""} onChange={e=>setResult(m.id,"away",e.target.value)} />
-                  <div style={{fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.away}</div>
-                  <span style={{fontSize:"0.8rem",color:m.realHome!==null?"#27ae60":"#9ca3af"}}>
-                    {m.realHome!==null?"OK":"..."}
-                  </span>
+              {elimMatches.filter(m=>m.phase===activePh).map(m=>{
+                const isDraw = m.realHome!==null && m.realAway!==null && Number(m.realHome)===Number(m.realAway);
+                return (
+                <div key={m.id} style={{background:"#f9fafb",border:"1px solid #1e2d4a",borderRadius:8,padding:"6px 10px",marginBottom:5}}>
+                  <div style={{display:"grid",gridTemplateColumns:"38px 1fr 46px 12px 46px 1fr 24px",gap:5,alignItems:"center"}}>
+                    <span style={{color:"#9ca3af",fontSize:"0.7rem"}}>{m.date}</span>
+                    <div style={{textAlign:"right",fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.home}</div>
+                    <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
+                      value={m.realHome??""} onChange={e=>setResult(m.id,"home",e.target.value)} />
+                    <span style={{color:"#9ca3af",fontSize:"0.68rem",textAlign:"center"}}>VS</span>
+                    <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
+                      value={m.realAway??""} onChange={e=>setResult(m.id,"away",e.target.value)} />
+                    <div style={{fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.away}</div>
+                    <span style={{fontSize:"0.8rem",color:m.realHome!==null?"#27ae60":"#9ca3af"}}>
+                      {m.realHome!==null?"OK":"..."}
+                    </span>
+                  </div>
+                  {isDraw && (
+                    <div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,background:"#fffbeb",borderRadius:6,padding:"6px 10px"}}>
+                      <span style={{fontSize:"0.75rem",fontWeight:700,color:"#92400e"}}>🥅 Penaltis — Ganador:</span>
+                      <select
+                        style={{fontSize:"0.78rem",padding:"3px 8px",borderRadius:6,border:"1px solid #f59e0b",background:"#fff",fontWeight:600}}
+                        value={m.pkWinner||""}
+                        onChange={e=>setPkWinner(m.id, e.target.value)}>
+                        <option value="">Sin definir</option>
+                        <option value="home">{m.home}</option>
+                        <option value="away">{m.away}</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
-              ))}
+              )})}
             </>
           )}
         </>
@@ -2262,7 +2284,7 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
                 const userInv=(invoices||[]).filter(inv=>inv.participantId===p.id&&inv.status==="approved");
                 const invPts=userInv.reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount),0);
                 let gamePts=0;
-                matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);if(pts!==null)gamePts+=pts;});
+                matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);if(pts!==null)gamePts+=pts;});
                 const {bonus:classPts}=calcClassificationBonus(p.predictions,matches);
                 return {...p,_total:gamePts+invPts+classPts,_invPts:invPts,_classPts:classPts};
               }).sort((a,b)=>b._total-a._total);
@@ -2297,7 +2319,7 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
             const invPts=userInv.reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount),0);
             const totalInv=(invoices||[]).filter(inv=>inv.participantId===p.id).length;
             let gamePts=0,exact=0,correct=0;
-            matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);if(pts===null)return;gamePts+=pts;if(pts===5)exact++;if(pts>=3)correct++;});
+            matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);if(pts===null)return;gamePts+=pts;if(pts===5)exact++;if(pts>=3)correct++;});
             const {bonus:classPts}=calcClassificationBonus(p.predictions,matches);
             return {...p,_total:gamePts+invPts+classPts,_invPts:invPts,_classPts:classPts,_exact:exact,_correct:correct,_totalInv:totalInv};
           }).sort((a,b)=>b._total-a._total).map((p,i)=>(
