@@ -391,62 +391,9 @@ function calcAllClassified(allMatches, getScore) {
   return result;
 }
 
-// Calculate bonus points for classification predictions
+// Classification bonus desactivado
 function calcClassificationBonus(predictions, allMatches) {
-  // Check if real results have enough data
-  const realGroupMatches = allMatches.filter(m=>m.phase==="groups"&&m.realHome!==null);
-  if (realGroupMatches.length === 0) return {bonus:0, details:[]};
-
-  // Real classified
-  const realClassified = calcAllClassified(allMatches, m=>({h:m.realHome, a:m.realAway}));
-
-  // Predicted classified (from participant's predictions)
-  const predClassified = calcAllClassified(allMatches, m=>{
-    const pred = predictions?.[m.id];
-    if (!pred||pred.home===null||pred.away===null) return null;
-    return {h:Number(pred.home), a:Number(pred.away)};
-  });
-
-  let bonus = 0;
-  const details = [];
-
-  // Check 1st and 2nd place for each group
-  Object.keys(GROUPS).forEach(grp => {
-    ["1st","2nd"].forEach(pos => {
-      const key = grp+"_"+pos;
-      const real = realClassified.byGroup[key];
-      const pred = predClassified.byGroup[key];
-      if (!real||!pred) return;
-      if (pred===real) {
-        bonus+=10;
-        details.push({type:"group_pos", grp, pos, team:real, pts:10, msg:"Acerto "+pos+" del Grupo "+grp+": "+real+" (10pts)"});
-      } else {
-        // Check if predicted team classified but wrong position
-        const realGrp = realClassified.byGroup[grp];
-        if (realGrp && realGrp.slice(0,2).some(s=>s.team===pred)) {
-          bonus+=5;
-          details.push({type:"group_team", grp, pos, team:pred, pts:5, msg:"Acerto clasificado Grupo "+grp+": "+pred+" (5pts)"});
-        }
-      }
-    });
-  });
-
-  // Check best 8 thirds
-  const realTop8 = realClassified.top8thirds;
-  const predTop8 = predClassified.top8thirds;
-  if (realTop8.length>0 && predTop8.length>0) {
-    predTop8.forEach((team,i) => {
-      if (realTop8[i]===team) {
-        bonus+=10;
-        details.push({type:"third_pos", team, pts:10, msg:"Acerto mejor 3ro posicion "+(i+1)+": "+team+" (10pts)"});
-      } else if (realTop8.includes(team)) {
-        bonus+=5;
-        details.push({type:"third_team", team, pts:5, msg:"Acerto mejor 3ro: "+team+" (5pts)"});
-      }
-    });
-  }
-
-  return {bonus, details};
+  return {bonus:0, details:[]};
 }
 
 function calcParticipantPoints(predictions, matches, invoices) {
