@@ -178,16 +178,21 @@ function calcInvoicePoints(amount) {
 function isPhaseLocked(phase, adminUnlocked = {}) {
   if (adminUnlocked[phase+"_forced"]) return true;
   if (adminUnlocked[phase]) return false;
-  return false; // Sin bloqueo automático — solo manual
+  const lockDate = LOCK_DATES[phase];
+  if (!lockDate) return false;
+  return new Date() >= lockDate;
 }
 
 function isMatchLocked(match, adminUnlocked = {}) {
   if (!match) return false;
+  // Manual overrides from admin
   if (adminUnlocked["match_"+match.id]) return false;
   if (adminUnlocked["match_"+match.id+"_forced"]) return true;
   if (adminUnlocked[match.phase]) return false;
   if (adminUnlocked[match.phase+"_forced"]) return true;
-  return false; // Por defecto abierto
+  // Todos los partidos: bloquear 24h antes del lockTime
+  if (match.lockTime) return new Date() >= new Date(new Date(match.lockTime).getTime() - 24*60*60*1000);
+  return isPhaseLocked(match.phase, adminUnlocked);
 }
 
 function generateGroupMatches() {
@@ -286,22 +291,22 @@ function generateElimMatches() {
   // * = pending UEFA/IC playoff confirmation
   return [
     // ── DIECISEISAVOS (Ronda de 32) ─────────────────────────────────────
-    {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"2º Grupo A vs 2º Grupo B",        home:"2º Grupo A",    away:"2º Grupo B",    realHome:null,realAway:null},
-    {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"1º Grupo E vs 3º A/B/C/D/F",     home:"1º Grupo E",    away:"3º A/B/C/D/F",  realHome:null,realAway:null},
-    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º Grupo F vs 2º Grupo C",       home:"1º Grupo F",    away:"2º Grupo C",    realHome:null,realAway:null},
-    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º Grupo C vs 2º Grupo F",       home:"1º Grupo C",    away:"2º Grupo F",    realHome:null,realAway:null},
-    {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"1º Grupo I vs 3º C/D/F/G/H",     home:"1º Grupo I",    away:"3º C/D/F/G/H",  realHome:null,realAway:null},
-    {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"2º Grupo E vs 2º Grupo I",       home:"2º Grupo E",    away:"2º Grupo I",    realHome:null,realAway:null},
-    {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"1º Grupo A vs 3º C/E/F/H/I",     home:"1º Grupo A",    away:"3º C/E/F/H/I",  realHome:null,realAway:null},
-    {id:1008,phase:"round32",label:"Ronda de 32",matchNum:8, date:"1 Jul", desc:"1º Grupo L vs 3º E/H/I/J/K",     home:"1º Grupo L",    away:"3º E/H/I/J/K",  realHome:null,realAway:null},
-    {id:1009,phase:"round32",label:"Ronda de 32",matchNum:9, date:"1 Jul", desc:"1º Grupo D vs 3º B/E/F/I/J",     home:"1º Grupo D",    away:"3º B/E/F/I/J",  realHome:null,realAway:null},
-    {id:1010,phase:"round32",label:"Ronda de 32",matchNum:10,date:"1 Jul", desc:"1º Grupo G vs 3º A/E/H/I/J",     home:"1º Grupo G",    away:"3º A/E/H/I/J",  realHome:null,realAway:null},
-    {id:1011,phase:"round32",label:"Ronda de 32",matchNum:11,date:"2 Jul", desc:"2º Grupo K vs 2º Grupo L",       home:"2º Grupo K",    away:"2º Grupo L",    realHome:null,realAway:null},
-    {id:1012,phase:"round32",label:"Ronda de 32",matchNum:12,date:"2 Jul", desc:"1º Grupo H vs 2º Grupo J",       home:"1º Grupo H",    away:"2º Grupo J",    realHome:null,realAway:null},
-    {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"2 Jul", desc:"1º Grupo B vs 3º E/F/G/I/J",     home:"1º Grupo B",    away:"3º E/F/G/I/J",  realHome:null,realAway:null},
-    {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"2 Jul", desc:"1º Grupo J vs 2º Grupo H",       home:"1º Grupo J",    away:"2º Grupo H",    realHome:null,realAway:null},
-    {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º Grupo K vs 3º D/E/I/J/L",     home:"1º Grupo K",    away:"3º D/E/I/J/L",  realHome:null,realAway:null},
-    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo D vs 2º Grupo G",       home:"2º Grupo D",    away:"2º Grupo G",    realHome:null,realAway:null},
+    {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"2º Grupo A vs 2º Grupo B",        home:"Sudáfrica",      away:"Canadá",         realHome:null,realAway:null,lockTime:"2026-06-28T18:00:00"},
+    {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"1º Grupo C vs 2º Grupo F",        home:"Brasil",         away:"Japón",           realHome:null,realAway:null,lockTime:"2026-06-29T15:00:00"},
+    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º Grupo E vs 3º Grupo D",        home:"Alemania",       away:"Paraguay",        realHome:null,realAway:null,lockTime:"2026-06-29T18:00:00"},
+    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º Grupo F vs 2º Grupo C",        home:"Países Bajos",   away:"Marruecos",       realHome:null,realAway:null,lockTime:"2026-06-29T21:00:00"},
+    {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"2º Grupo E vs 2º Grupo I",        home:"Costa de Marfil",away:"Noruega",          realHome:null,realAway:null,lockTime:"2026-06-30T15:00:00"},
+    {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"1º Grupo I vs 3º Grupo F",        home:"Francia",        away:"Suecia",           realHome:null,realAway:null,lockTime:"2026-06-30T18:00:00"},
+    {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"1º Grupo A vs 3º Grupo E",        home:"México",         away:"Ecuador",          realHome:null,realAway:null,lockTime:"2026-06-30T21:00:00"},
+    {id:1008,phase:"round32",label:"Ronda de 32",matchNum:8, date:"1 Jul", desc:"1º Grupo L vs 3º Grupo K",        home:"Inglaterra",     away:"R.D. Congo",       realHome:null,realAway:null,lockTime:"2026-07-01T15:00:00"},
+    {id:1009,phase:"round32",label:"Ronda de 32",matchNum:9, date:"1 Jul", desc:"2º Grupo G vs 1º Grupo H",        home:"Bélgica",        away:"Senegal",          realHome:null,realAway:null,lockTime:"2026-07-01T18:00:00"},
+    {id:1010,phase:"round32",label:"Ronda de 32",matchNum:10,date:"1 Jul", desc:"1º Grupo D vs 3º Grupo B",        home:"Estados Unidos", away:"Bosnia y Herzegovina",realHome:null,realAway:null,lockTime:"2026-07-01T21:00:00"},
+    {id:1011,phase:"round32",label:"Ronda de 32",matchNum:11,date:"2 Jul", desc:"1º Grupo H vs 2º Grupo J",        home:"España",         away:"Austria",          realHome:null,realAway:null,lockTime:"2026-07-02T15:00:00"},
+    {id:1012,phase:"round32",label:"Ronda de 32",matchNum:12,date:"2 Jul", desc:"2º Grupo K vs 2º Grupo L",        home:"Portugal",       away:"Croacia",          realHome:null,realAway:null,lockTime:"2026-07-02T18:00:00"},
+    {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"2 Jul", desc:"1º Grupo B vs 3º Grupo J",        home:"Suiza",          away:"Argelia",          realHome:null,realAway:null,lockTime:"2026-07-02T21:00:00"},
+    {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"3 Jul", desc:"1º Grupo J vs 2º Grupo H",        home:"Argentina",      away:"Cabo Verde",       realHome:null,realAway:null,lockTime:"2026-07-03T15:00:00"},
+    {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º Grupo K vs 2º Grupo D",        home:"Colombia",       away:"Ghana",            realHome:null,realAway:null,lockTime:"2026-07-03T18:00:00"},
+    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo C vs 3º Grupo A",        home:"Australia",      away:"Egipto",           realHome:null,realAway:null,lockTime:"2026-07-03T21:00:00"},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
     {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul",desc:"Gan. P74 vs Gan. P77",  home:"Gan. P74",away:"Gan. P77",realHome:null,realAway:null},
     {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul",desc:"Gan. P73 vs Gan. P75",  home:"Gan. P73",away:"Gan. P75",realHome:null,realAway:null},
@@ -388,15 +393,11 @@ function calcAllClassified(allMatches, getScore) {
 
 // Calculate bonus points for classification predictions
 function calcClassificationBonus(predictions, allMatches) {
+  // Check if real results have enough data
   const realGroupMatches = allMatches.filter(m=>m.phase==="groups"&&m.realHome!==null);
   if (realGroupMatches.length === 0) return {bonus:0, details:[]};
 
-  // Solo calcular cuando TODOS los partidos de grupos tengan resultado
-  const allGroupMatches = allMatches.filter(m=>m.phase==="groups");
-  const allGroupsComplete = allGroupMatches.length > 0 &&
-    allGroupMatches.every(m=>m.realHome!==null&&m.realAway!==null);
-  if (!allGroupsComplete) return {bonus:0, details:[]};
-
+  // Real classified
   const realClassified = calcAllClassified(allMatches, m=>({h:m.realHome, a:m.realAway}));
 
   // Predicted classified (from participant's predictions)
@@ -1203,7 +1204,15 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function getLockMsg(phase) {
     const locked = isPhaseLocked(phase, adminUnlocked);
-    return locked ? {locked:true, msg:"Bloqueado"} : {locked:false, msg:"Abierto"};
+    if (!locked) {
+      const d = LOCK_DATES[phase];
+      if (d) {
+        const diff = Math.ceil((d-new Date())/(1000*60*60*24));
+        if (diff>0) return {locked:false, msg:"Abierto - se bloquea en "+diff+" dia"+(diff!==1?"s":"")};
+      }
+      return {locked:false, msg:"Abierto"};
+    }
+    return {locked:true, msg:"Bloqueado"};
   }
 
   function handleLogin() {
@@ -2112,67 +2121,64 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 
       {activeTab==="locks" && (
         <div>
-          <p style={{color:"#6b7280",marginBottom:14,fontSize:"0.85rem"}}>Bloquea o desbloquea manualmente cada partido.</p>
+          <p style={{color:"#6b7280",marginBottom:14,fontSize:"0.85rem"}}>Bloquea o desbloquea manualmente cada fase para pruebas o correcciones.</p>
 
-          {/* GRUPOS - bloqueo por partido */}
-          {["A","B","C","D","E","F","G","H","I","J","K","L"].map(grp => {
-            const grpMatches = matches.filter(m=>m.phase==="groups"&&m.group===grp);
-            const allLocked = grpMatches.length>0 && grpMatches.every(m=>isMatchLocked(m,adminUnlocked));
-            const color = GROUP_COLORS[grp] || "#6b7280";
+
+          {/* GRUPOS - bloqueo general */}
+          {(()=>{
+            const phase="groups";
+            const color="#1F618D";
+            const manLocked=!!adminUnlocked[phase+"_forced"];
+            const autoLocked=isPhaseLocked(phase,adminUnlocked);
+            const manUnlocked=!!adminUnlocked[phase];
+            const isLocked = manLocked || (autoLocked && !manUnlocked);
             return (
-              <div key={grp} style={{marginBottom:16}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-                  <div style={{fontWeight:800,fontSize:"0.8rem",color:"#6b7280",letterSpacing:2}}>GRUPO {grp}</div>
+              <div style={{marginBottom:20}}>
+                <div style={{fontWeight:800,fontSize:"0.8rem",color:"#6b7280",letterSpacing:2,marginBottom:8}}>FASE DE GRUPOS</div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#f9fafb",border:"1px solid "+color+"44",borderRadius:10,padding:"12px 16px",flexWrap:"wrap",gap:8}}>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:"0.95rem",color:"#111827"}}>Todos los grupos</div>
+                    <div style={{fontSize:"0.75rem",color:"#9ca3af",marginTop:2}}>Bloqueo automático: 10 Jun 2026 00:00</div>
+                    <div style={{fontSize:"0.8rem",marginTop:3,fontWeight:600,color:isLocked?"#e74c3c":"#16a34a"}}>
+                      {isLocked ? "🔒 BLOQUEADO" : "🔓 ABIERTO"}
+                    </div>
+                  </div>
                   <button
-                    style={{...S.btn(allLocked?"#16a34a":"#e74c3c",true),fontSize:"0.72rem",padding:"3px 10px"}}
+                    style={{...S.btn(isLocked?"#16a34a":"#e74c3c",true),fontSize:"0.78rem",padding:"6px 14px"}}
                     onClick={async ()=>{
-                      let updated = {...adminUnlocked};
-                      grpMatches.forEach(m=>{
-                        if (allLocked) {
-                          updated["match_"+m.id] = true;
-                          updated["match_"+m.id+"_forced"] = false;
-                        } else {
-                          updated["match_"+m.id] = false;
-                          updated["match_"+m.id+"_forced"] = true;
-                        }
-                      });
+                      const updated = isLocked
+                        ? {...adminUnlocked, [phase]:true, [phase+"_forced"]:false}
+                        : {...adminUnlocked, [phase]:false, [phase+"_forced"]:true};
                       setAdminUnlocked(updated);
                       await setDoc(SETTINGS_DOC, {adminUnlocked: updated});
                     }}>
-                    {allLocked ? "Desbloquear grupo" : "Bloquear grupo"}
+                    {isLocked ? "Desbloquear" : "Bloquear"}
                   </button>
                 </div>
-                {grpMatches.map(m=>{
-                  const locked = isMatchLocked(m, adminUnlocked);
-                  const manLocked = !!adminUnlocked["match_"+m.id+"_forced"];
-                  const manUnlocked = !!adminUnlocked["match_"+m.id];
-                  return (
-                    <div key={m.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#f9fafb",border:"1px solid "+color+"33",borderRadius:8,padding:"8px 12px",marginBottom:5,flexWrap:"wrap",gap:6}}>
-                      <div>
-                        <div style={{fontWeight:600,fontSize:"0.82rem",color:"#111827"}}>{m.date} · {m.home} vs {m.away}</div>
-                        <div style={{fontSize:"0.72rem",marginTop:2,fontWeight:600,color:locked?"#e74c3c":"#16a34a"}}>
-                          {locked?"🔒 Bloqueado":"🔓 Abierto"}
-                          {manLocked&&<span style={{color:"#9ca3af"}}> (manual)</span>}
-                          {manUnlocked&&<span style={{color:"#9ca3af"}}> (desbloqueado)</span>}
-                        </div>
-                      </div>
-                      <button
-                        style={{...S.btn(locked?"#16a34a":"#e74c3c",true),fontSize:"0.72rem",padding:"4px 10px"}}
-                        onClick={async ()=>{
-                          const updated = locked
-                            ? {...adminUnlocked, ["match_"+m.id]:true, ["match_"+m.id+"_forced"]:false}
-                            : {...adminUnlocked, ["match_"+m.id]:false, ["match_"+m.id+"_forced"]:true};
-                          setAdminUnlocked(updated);
-                          await setDoc(SETTINGS_DOC, {adminUnlocked: updated});
-                        }}>
-                        {locked?"Desbloquear":"Bloquear"}
-                      </button>
-                    </div>
-                  );
-                })}
               </div>
             );
-          })}
+          })()}
+
+          {/* SINCRONIZAR EQUIPOS ROUND32 A FIREBASE */}
+          <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:10,padding:"12px 16px",marginBottom:20}}>
+            <div style={{fontWeight:700,fontSize:"0.85rem",color:"#1e40af",marginBottom:6}}>🔄 Sincronizar equipos Ronda de 32</div>
+            <div style={{fontSize:"0.78rem",color:"#3b82f6",marginBottom:10}}>Actualiza los nombres de los equipos en Firebase con los datos del código. Úsalo si los equipos no se ven correctamente.</div>
+            <button
+              style={{...S.btn("#1e40af"),fontSize:"0.78rem",padding:"6px 14px"}}
+              onClick={async ()=>{
+                const saved = matches.filter(m=>m.phase!=="round32");
+                const round32 = INITIAL_MATCHES.filter(m=>m.phase==="round32").map(nm=>{
+                  const old = matches.find(m=>m.id===nm.id);
+                  return {...nm, realHome: old?.realHome??null, realAway: old?.realAway??null};
+                });
+                const updated = [...saved, ...round32];
+                setMatches(updated);
+                await setDoc(MATCHES_DOC, {list: updated});
+                alert("✅ Equipos de la Ronda de 32 sincronizados en Firebase");
+              }}>
+              Sincronizar ahora
+            </button>
+          </div>
 
           {/* ELIMINATORIAS - bloqueo por partido */}
           {[
