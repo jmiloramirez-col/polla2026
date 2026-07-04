@@ -308,33 +308,14 @@ function generateElimMatches() {
     {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º K vs 3º L",         home:"Colombia",       away:"Ghana",               realHome:2, realAway:0,  lockTime:"2026-07-03T18:00:00"},
     {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º D vs 2º G",         home:"Australia",      away:"Egipto",              realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-07-03T21:00:00"},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
-    // ── OCTAVOS DE FINAL (Round of 16) ────────────────────────────────────
-    // M89: Gan(M73) vs Gan(M74) = Gan(Sudáfrica/Canadá) vs Gan(Brasil/Japón)    → Marruecos vs Francia (ver nota)
-    // Basado en resultados reales del Round of 32:
-    // M73: Sudáfrica vs Canadá → Canadá ganó
-    // M74: Brasil vs Japón → Brasil ganó
-    // M75: Alemania vs Paraguay → Paraguay ganó (penaltis)
-    // M76: Países Bajos vs Marruecos → Marruecos ganó (penaltis)
-    // M77: Costa de Marfil vs Noruega → Noruega ganó
-    // M78: Francia vs Suecia → Francia ganó
-    // M79: México vs Ecuador → México ganó
-    // M80: Inglaterra vs R.D. Congo → Inglaterra ganó
-    // M81: Bélgica vs Senegal → Bélgica ganó (AET)
-    // M82: Estados Unidos vs Bosnia → Estados Unidos ganó
-    // M83: España vs Austria → España ganó
-    // M84: Portugal vs Croacia → Portugal ganó
-    // M85: Suiza vs Argelia → Suiza ganó
-    // M86: Argentina vs Cabo Verde → Argentina ganó (AET)
-    // M87: Colombia vs Ghana → Colombia ganó
-    // M88: Australia vs Egipto → Egipto ganó (penaltis)
-    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Gan.M73 vs Gan.M74", home:"Canadá",   away:"Brasil",    realHome:null,realAway:null,lockTime:"2026-07-04T18:00:00"},
-    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Gan.M75 vs Gan.M76", home:"Paraguay", away:"Marruecos", realHome:null,realAway:null,lockTime:"2026-07-04T22:00:00"},
-    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Gan.M77 vs Gan.M78", home:"Noruega",  away:"Francia",   realHome:null,realAway:null,lockTime:"2026-07-05T21:00:00"},
-    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"Gan.M79 vs Gan.M80", home:"México",   away:"Inglaterra",realHome:null,realAway:null,lockTime:"2026-07-06T01:00:00"},
-    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Gan.M81 vs Gan.M82", home:"Bélgica",  away:"Estados Unidos",realHome:null,realAway:null,lockTime:"2026-07-07T01:00:00"},
-    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Gan.M83 vs Gan.M84", home:"España",   away:"Portugal",  realHome:null,realAway:null,lockTime:"2026-07-06T20:00:00"},
-    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Gan.M85 vs Gan.M86", home:"Suiza",    away:"Argentina", realHome:null,realAway:null,lockTime:"2026-07-07T17:00:00"},
-    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Gan.M87 vs Gan.M88", home:"Colombia", away:"Egipto",    realHome:null,realAway:null,lockTime:"2026-07-07T21:00:00"},
+    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Gan.M73 vs Gan.M76", home:"Canadá",        away:"Marruecos",      realHome:0,   realAway:3,   lockTime:"2026-07-04T18:00:00"},
+    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Gan.M75 vs Gan.M78", home:"Paraguay",       away:"Francia",        realHome:null,realAway:null,lockTime:"2026-07-04T22:00:00"},
+    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Gan.M74 vs Gan.M77", home:"Brasil",         away:"Noruega",        realHome:null,realAway:null,lockTime:"2026-07-05T21:00:00"},
+    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"Gan.M79 vs Gan.M80", home:"México",         away:"Inglaterra",     realHome:null,realAway:null,lockTime:"2026-07-06T01:00:00"},
+    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Gan.M84 vs Gan.M83", home:"Portugal",       away:"España",         realHome:null,realAway:null,lockTime:"2026-07-06T20:00:00"},
+    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Gan.M82 vs Gan.M81", home:"Estados Unidos", away:"Bélgica",        realHome:null,realAway:null,lockTime:"2026-07-07T01:00:00"},
+    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Gan.M86 vs Gan.M88", home:"Argentina",      away:"Egipto",         realHome:null,realAway:null,lockTime:"2026-07-07T17:00:00"},
+    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Gan.M85 vs Gan.M87", home:"Suiza",          away:"Colombia",       realHome:null,realAway:null,lockTime:"2026-07-07T21:00:00"},
     // ── CUARTOS DE FINAL ────────────────────────────────────────────────
     {id:1025,phase:"quarters",label:"Cuartos de Final",matchNum:1,date:"9 Jul", desc:"Gan. P89 vs Gan. P90",home:"Gan. P89",away:"Gan. P90",realHome:null,realAway:null},
     {id:1026,phase:"quarters",label:"Cuartos de Final",matchNum:2,date:"10 Jul",desc:"Gan. P93 vs Gan. P94",home:"Gan. P93",away:"Gan. P94",realHome:null,realAway:null},
@@ -1665,22 +1646,20 @@ function resolveElimWinners(matches) {
   // M95 = Gan(M85) vs Gan(M86) → 1013 vs 1014 → id 1023
   // M96 = Gan(M87) vs Gan(M88) → 1015 vs 1016 → id 1024
   const bracket = {
-    // Round32 → Round16
-    1001: [1017,"home"], 1002: [1017,"away"],
-    1003: [1018,"home"], 1004: [1018,"away"],
-    1005: [1019,"home"], 1006: [1019,"away"],
-    1007: [1020,"home"], 1008: [1020,"away"],
-    1009: [1021,"home"], 1010: [1021,"away"],
-    1011: [1022,"home"], 1012: [1022,"away"],
-    1013: [1023,"home"], 1014: [1023,"away"],
-    1015: [1024,"home"], 1016: [1024,"away"],
+    // Round32 → Round16 (según bracket real FIFA)
+    1001: [1017,"home"], 1004: [1017,"away"],  // Canadá vs Marruecos
+    1003: [1018,"home"], 1006: [1018,"away"],  // Paraguay vs Francia
+    1002: [1019,"home"], 1005: [1019,"away"],  // Brasil vs Noruega
+    1007: [1020,"home"], 1008: [1020,"away"],  // México vs Inglaterra
+    1012: [1021,"home"], 1011: [1021,"away"],  // Portugal vs España
+    1010: [1022,"home"], 1009: [1022,"away"],  // Estados Unidos vs Bélgica
+    1014: [1023,"home"], 1016: [1023,"away"],  // Argentina vs Egipto
+    1013: [1024,"home"], 1015: [1024,"away"],  // Suiza vs Colombia
     // Round16 → Quarters
-    // M97=Gan(M89)vsGan(M90) M98=Gan(M91)vsGan(M92)
-    // M99=Gan(M93)vsGan(M94) M100=Gan(M95)vsGan(M96)
-    1017: [1025,"home"], 1018: [1025,"away"],
-    1019: [1026,"home"], 1020: [1026,"away"],
-    1021: [1027,"home"], 1022: [1027,"away"],
-    1023: [1028,"home"], 1024: [1028,"away"],
+    1017: [1025,"home"], 1018: [1025,"away"],  // Gan(Canadá/Mar) vs Gan(Par/Fra)
+    1019: [1026,"home"], 1020: [1026,"away"],  // Gan(Bra/Nor) vs Gan(Mex/Ing)
+    1021: [1027,"home"], 1022: [1027,"away"],  // Gan(Por/Esp) vs Gan(USA/Bel)
+    1023: [1028,"home"], 1024: [1028,"away"],  // Gan(Arg/Egi) vs Gan(Sui/Col)
     // Quarters → Semis
     1025: [1029,"home"], 1026: [1029,"away"],
     1027: [1030,"home"], 1028: [1030,"away"],
