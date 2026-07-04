@@ -1996,8 +1996,11 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
     setMatches(prev=>prev.map(m=>m.id===matchId?{...m,[side==="home"?"realHome":"realAway"]:v}:m));
   }
 
-  function setPkWinner(matchId, val) {
-    setMatches(prev=>prev.map(m=>m.id===matchId?{...m, pkWinner: val||null}:m));
+  async function setPkWinner(matchId, val) {
+    const updated = matches.map(m=>m.id===matchId?{...m, pkWinner: val||null}:m);
+    const resolved = resolveElimWinners(updated);
+    setMatches(resolved);
+    await setDoc(MATCHES_DOC, {list: resolved});
   }
 
   function setTeamName(matchId, side, val) {
