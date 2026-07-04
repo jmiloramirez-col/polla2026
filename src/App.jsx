@@ -291,31 +291,50 @@ function generateElimMatches() {
   // * = pending UEFA/IC playoff confirmation
   return [
     // ── DIECISEISAVOS (Ronda de 32) ─────────────────────────────────────
-    {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"2º Grupo A vs 2º Grupo B",        home:"Sudáfrica",      away:"Canadá",         realHome:null,realAway:null,lockTime:"2026-06-28T18:00:00"},
-    {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"1º Grupo C vs 2º Grupo F",        home:"Brasil",         away:"Japón",           realHome:null,realAway:null,lockTime:"2026-06-29T15:00:00"},
-    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º Grupo E vs 3º Grupo D",        home:"Alemania",       away:"Paraguay",        realHome:null,realAway:null,lockTime:"2026-06-29T18:00:00"},
-    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º Grupo F vs 2º Grupo C",        home:"Países Bajos",   away:"Marruecos",       realHome:null,realAway:null,lockTime:"2026-06-29T21:00:00"},
-    {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"2º Grupo E vs 2º Grupo I",        home:"Costa de Marfil",away:"Noruega",          realHome:null,realAway:null,lockTime:"2026-06-30T15:00:00"},
-    {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"1º Grupo I vs 3º Grupo F",        home:"Francia",        away:"Suecia",           realHome:null,realAway:null,lockTime:"2026-06-30T18:00:00"},
-    {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"1º Grupo A vs 3º Grupo E",        home:"México",         away:"Ecuador",          realHome:null,realAway:null,lockTime:"2026-06-30T21:00:00"},
-    {id:1008,phase:"round32",label:"Ronda de 32",matchNum:8, date:"1 Jul", desc:"1º Grupo L vs 3º Grupo K",        home:"Inglaterra",     away:"R.D. Congo",       realHome:null,realAway:null,lockTime:"2026-07-01T15:00:00"},
-    {id:1009,phase:"round32",label:"Ronda de 32",matchNum:9, date:"1 Jul", desc:"2º Grupo G vs 1º Grupo H",        home:"Bélgica",        away:"Senegal",          realHome:null,realAway:null,lockTime:"2026-07-01T18:00:00"},
-    {id:1010,phase:"round32",label:"Ronda de 32",matchNum:10,date:"1 Jul", desc:"1º Grupo D vs 3º Grupo B",        home:"Estados Unidos", away:"Bosnia y Herzegovina",realHome:null,realAway:null,lockTime:"2026-07-01T21:00:00"},
-    {id:1011,phase:"round32",label:"Ronda de 32",matchNum:11,date:"2 Jul", desc:"1º Grupo H vs 2º Grupo J",        home:"España",         away:"Austria",          realHome:null,realAway:null,lockTime:"2026-07-02T15:00:00"},
-    {id:1012,phase:"round32",label:"Ronda de 32",matchNum:12,date:"2 Jul", desc:"2º Grupo K vs 2º Grupo L",        home:"Portugal",       away:"Croacia",          realHome:null,realAway:null,lockTime:"2026-07-02T18:00:00"},
-    {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"2 Jul", desc:"1º Grupo B vs 3º Grupo J",        home:"Suiza",          away:"Argelia",          realHome:null,realAway:null,lockTime:"2026-07-02T21:00:00"},
-    {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"3 Jul", desc:"1º Grupo J vs 2º Grupo H",        home:"Argentina",      away:"Cabo Verde",       realHome:null,realAway:null,lockTime:"2026-07-03T15:00:00"},
-    {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º Grupo K vs 2º Grupo D",        home:"Colombia",       away:"Ghana",            realHome:null,realAway:null,lockTime:"2026-07-03T18:00:00"},
-    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo C vs 3º Grupo A",        home:"Australia",      away:"Egipto",           realHome:null,realAway:null,lockTime:"2026-07-03T21:00:00"},
+    {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"2º A vs 2º B",         home:"Sudáfrica",      away:"Canadá",              realHome:0, realAway:1,  lockTime:"2026-06-28T18:00:00"},
+    {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"1º C vs 2º F",         home:"Brasil",         away:"Japón",               realHome:2, realAway:1,  lockTime:"2026-06-29T15:00:00"},
+    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º E vs 3º D",         home:"Alemania",       away:"Paraguay",            realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-06-29T18:00:00"},
+    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º F vs 2º C",         home:"Países Bajos",   away:"Marruecos",           realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-06-29T21:00:00"},
+    {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"2º E vs 2º I",         home:"Costa de Marfil",away:"Noruega",             realHome:1, realAway:2,  lockTime:"2026-06-30T15:00:00"},
+    {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"1º I vs 3º F",         home:"Francia",        away:"Suecia",              realHome:3, realAway:0,  lockTime:"2026-06-30T18:00:00"},
+    {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"1º A vs 3º E",         home:"México",         away:"Ecuador",             realHome:2, realAway:0,  lockTime:"2026-06-30T21:00:00"},
+    {id:1008,phase:"round32",label:"Ronda de 32",matchNum:8, date:"1 Jul", desc:"1º L vs 3º K",         home:"Inglaterra",     away:"R.D. Congo",          realHome:3, realAway:0,  lockTime:"2026-07-01T15:00:00"},
+    {id:1009,phase:"round32",label:"Ronda de 32",matchNum:9, date:"1 Jul", desc:"2º G vs 1º H",         home:"Bélgica",        away:"Senegal",             realHome:3, realAway:2,  lockTime:"2026-07-01T18:00:00"},
+    {id:1010,phase:"round32",label:"Ronda de 32",matchNum:10,date:"1 Jul", desc:"1º D vs 3º B",         home:"Estados Unidos", away:"Bosnia y Herzegovina",realHome:2, realAway:0,  lockTime:"2026-07-01T21:00:00"},
+    {id:1011,phase:"round32",label:"Ronda de 32",matchNum:11,date:"2 Jul", desc:"1º H vs 2º J",         home:"España",         away:"Austria",             realHome:2, realAway:0,  lockTime:"2026-07-02T20:00:00"},
+    {id:1012,phase:"round32",label:"Ronda de 32",matchNum:12,date:"2 Jul", desc:"2º K vs 2º L",         home:"Portugal",       away:"Croacia",             realHome:3, realAway:1,  lockTime:"2026-07-02T23:00:00"},
+    {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"2 Jul", desc:"1º B vs 3º J",         home:"Suiza",          away:"Argelia",             realHome:2, realAway:0,  lockTime:"2026-07-02T17:00:00"},
+    {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"3 Jul", desc:"1º J vs 2º H",         home:"Argentina",      away:"Cabo Verde",          realHome:2, realAway:1,  lockTime:"2026-07-03T15:00:00"},
+    {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º K vs 3º L",         home:"Colombia",       away:"Ghana",               realHome:2, realAway:0,  lockTime:"2026-07-03T18:00:00"},
+    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º D vs 2º G",         home:"Australia",      away:"Egipto",              realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-07-03T21:00:00"},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
-    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Gan. M73 vs Gan. M74", home:"Gan. M73",away:"Gan. M74",realHome:null,realAway:null},
-    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Gan. M75 vs Gan. M76", home:"Gan. M75",away:"Gan. M76",realHome:null,realAway:null},
-    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Gan. M77 vs Gan. M78", home:"Gan. M77",away:"Gan. M78",realHome:null,realAway:null},
-    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"Gan. M79 vs Gan. M80", home:"Gan. M79",away:"Gan. M80",realHome:null,realAway:null},
-    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Gan. M81 vs Gan. M82", home:"Gan. M81",away:"Gan. M82",realHome:null,realAway:null},
-    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Gan. M83 vs Gan. M84", home:"Gan. M83",away:"Gan. M84",realHome:null,realAway:null},
-    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Gan. M85 vs Gan. M86", home:"Gan. M85",away:"Gan. M86",realHome:null,realAway:null},
-    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Gan. M87 vs Gan. M88", home:"Gan. M87",away:"Gan. M88",realHome:null,realAway:null},
+    // ── OCTAVOS DE FINAL (Round of 16) ────────────────────────────────────
+    // M89: Gan(M73) vs Gan(M74) = Gan(Sudáfrica/Canadá) vs Gan(Brasil/Japón)    → Marruecos vs Francia (ver nota)
+    // Basado en resultados reales del Round of 32:
+    // M73: Sudáfrica vs Canadá → Canadá ganó
+    // M74: Brasil vs Japón → Brasil ganó
+    // M75: Alemania vs Paraguay → Paraguay ganó (penaltis)
+    // M76: Países Bajos vs Marruecos → Marruecos ganó (penaltis)
+    // M77: Costa de Marfil vs Noruega → Noruega ganó
+    // M78: Francia vs Suecia → Francia ganó
+    // M79: México vs Ecuador → México ganó
+    // M80: Inglaterra vs R.D. Congo → Inglaterra ganó
+    // M81: Bélgica vs Senegal → Bélgica ganó (AET)
+    // M82: Estados Unidos vs Bosnia → Estados Unidos ganó
+    // M83: España vs Austria → España ganó
+    // M84: Portugal vs Croacia → Portugal ganó
+    // M85: Suiza vs Argelia → Suiza ganó
+    // M86: Argentina vs Cabo Verde → Argentina ganó (AET)
+    // M87: Colombia vs Ghana → Colombia ganó
+    // M88: Australia vs Egipto → Egipto ganó (penaltis)
+    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Gan.M73 vs Gan.M74", home:"Canadá",   away:"Brasil",    realHome:null,realAway:null,lockTime:"2026-07-04T18:00:00"},
+    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Gan.M75 vs Gan.M76", home:"Paraguay", away:"Marruecos", realHome:null,realAway:null,lockTime:"2026-07-04T22:00:00"},
+    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Gan.M77 vs Gan.M78", home:"Noruega",  away:"Francia",   realHome:null,realAway:null,lockTime:"2026-07-05T21:00:00"},
+    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"Gan.M79 vs Gan.M80", home:"México",   away:"Inglaterra",realHome:null,realAway:null,lockTime:"2026-07-06T01:00:00"},
+    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Gan.M81 vs Gan.M82", home:"Bélgica",  away:"Estados Unidos",realHome:null,realAway:null,lockTime:"2026-07-07T01:00:00"},
+    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Gan.M83 vs Gan.M84", home:"España",   away:"Portugal",  realHome:null,realAway:null,lockTime:"2026-07-06T20:00:00"},
+    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Gan.M85 vs Gan.M86", home:"Suiza",    away:"Argentina", realHome:null,realAway:null,lockTime:"2026-07-07T17:00:00"},
+    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Gan.M87 vs Gan.M88", home:"Colombia", away:"Egipto",    realHome:null,realAway:null,lockTime:"2026-07-07T21:00:00"},
     // ── CUARTOS DE FINAL ────────────────────────────────────────────────
     {id:1025,phase:"quarters",label:"Cuartos de Final",matchNum:1,date:"9 Jul", desc:"Gan. P89 vs Gan. P90",home:"Gan. P89",away:"Gan. P90",realHome:null,realAway:null},
     {id:1026,phase:"quarters",label:"Cuartos de Final",matchNum:2,date:"10 Jul",desc:"Gan. P93 vs Gan. P94",home:"Gan. P93",away:"Gan. P94",realHome:null,realAway:null},
@@ -2452,21 +2471,23 @@ export default function App() {
     const unsubM = onSnapshot(MATCHES_DOC, snap => {
       if (snap.exists()) {
         const saved = snap.data().list || [];
-        // Merge: keep new match structure but restore saved results & team names for elim
         const merged = INITIAL_MATCHES.map(m => {
           const old = saved.find(s => s.id === m.id);
           if (!old) return m;
           if (m.phase === "groups") {
-            // Groups: keep new team names, only restore real results
+            // Grupos: nombres del código, solo resultados de Firebase
             return {...m, realHome: old.realHome, realAway: old.realAway};
+          } else if (m.phase === "round32" || m.phase === "round16") {
+            // Round32 y Round16: nombres del código (ya tienen equipos reales), resultados y pkWinner de Firebase
+            return {...m, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
           } else {
-            // Playoffs: restore team names + results (admin edits them)
-            return {...m, home: old.home||m.home, away: old.away||m.away, realHome: old.realHome, realAway: old.realAway};
+            // Cuartos en adelante: nombres de Firebase (el admin los llena), resultados y pkWinner de Firebase
+            return {...m, home: old.home||m.home, away: old.away||m.away, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
           }
         });
-        setMatches(merged);
+        setMatches(resolveElimWinners(merged));
       } else {
-        setMatches(INITIAL_MATCHES);
+        setMatches(resolveElimWinners(INITIAL_MATCHES));
       }
     });
     const unsubS = onSnapshot(SETTINGS_DOC, snap => {
