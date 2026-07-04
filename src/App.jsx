@@ -1615,6 +1615,85 @@ function FixtureView({ matches }) {
 
 
 // Auto-resolve Round32 team names from group standings
+// Obtiene el equipo ganador de un partido (considera penaltis)
+function getElimWinner(match) {
+  if (!match || match.realHome === null || match.realAway === null) return null;
+  const h = Number(match.realHome), a = Number(match.realAway);
+  if (match.pkWinner === "home") return match.home;
+  if (match.pkWinner === "away") return match.away;
+  if (h > a) return match.home;
+  if (a > h) return match.away;
+  return null; // empate sin penaltis definidos
+}
+
+// Propaga ganadores de cada ronda eliminatoria a la siguiente
+function resolveElimWinners(matches) {
+  const byId = {};
+  matches.forEach(m => { byId[m.id] = m; });
+
+  // Mapa: partido → [siguiente partido, lado (home/away)]
+  // Basado en el bracket oficial FIFA 2026
+  const bracket = {
+    // Round32 → Round16
+    1001: [1017,"home"], 1004: [1017,"away"],
+    1002: [1018,"home"], 1003: [1018,"away"],
+    1005: [1019,"home"], 1006: [1019,"away"],
+    1009: [1020,"home"], 1010: [1020,"away"],
+    1007: [1021,"home"], 1008: [1021,"away"],
+    1011: [1022,"home"], 1012: [1022,"away"],
+    1013: [1023,"home"], 1014: [1023,"away"],
+    1015: [1024,"home"], 1016: [1024,"away"],
+    // Round16 → Quarters
+    1017: [1025,"home"], 1018: [1025,"away"],
+    1019: [1026,"home"], 1020: [1026,"away"],
+    1021: [1027,"home"], 1022: [1027,"away"],
+    1023: [1028,"home"], 1024: [1028,"away"],
+    // Quarters → Semis
+    1025: [1029,"home"], 1026: [1029,"away"],
+    1027: [1030,"home"], 1028: [1030,"away"],
+    // Semis → Final
+    1029: [1032,"home"], 1030: [1032,"away"],
+  };
+
+  // Perdedores de semis → Tercer lugar
+  const semiLosers = {
+    1029: [1031,"home"],
+    1030: [1031,"away"],
+  };
+
+  const updated = matches.map(m => ({...m}));
+  const updById = {};
+  updated.forEach(m => { updById[m.id] = m; });
+
+  Object.entries(bracket).forEach(([sourceId, [targetId, side]]) => {
+    const source = updById[Number(sourceId)];
+    const target = updById[targetId];
+    if (!source || !target) return;
+    const winner = getElimWinner(source);
+    if (winner) {
+      if (side === "home") target.home = winner;
+      else target.away = winner;
+    }
+  });
+
+  // Perdedores de semis → Tercer lugar
+  Object.entries(semiLosers).forEach(([sourceId, [targetId, side]]) => {
+    const source = updById[Number(sourceId)];
+    const target = updById[targetId];
+    if (!source || !target) return;
+    const winner = getElimWinner(source);
+    if (!winner) return;
+    // El perdedor es el otro equipo
+    const loser = winner === source.home ? source.away : source.home;
+    if (loser) {
+      if (side === "home") target.home = loser;
+      else target.away = loser;
+    }
+  });
+
+  return updated;
+}
+
 function resolveRound32Teams(matches) {
   // 1. Calculate standings for each group
   const standings = {};
@@ -1927,8 +2006,10 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 
   async function handleSave() {
     try {
-      // Auto-fill Round32 teams from group standings before saving
-      const resolved = resolveRound32Teams(matches);
+      // 1. Auto-fill Round32 teams from group standings
+      let resolved = resolveRound32Teams(matches);
+      // 2. Propagate elim winners to next rounds
+      resolved = resolveElimWinners(resolved);
       setMatches(resolved);
       await setDoc(MATCHES_DOC, {list: resolved});
       setSaved(true);
