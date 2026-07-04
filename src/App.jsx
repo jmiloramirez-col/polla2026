@@ -308,14 +308,14 @@ function generateElimMatches() {
     {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º Grupo K vs 2º Grupo D",        home:"Colombia",       away:"Ghana",            realHome:null,realAway:null,lockTime:"2026-07-03T18:00:00"},
     {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo C vs 3º Grupo A",        home:"Australia",      away:"Egipto",           realHome:null,realAway:null,lockTime:"2026-07-03T21:00:00"},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
-    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul",desc:"Gan. P74 vs Gan. P77",  home:"Gan. P74",away:"Gan. P77",realHome:null,realAway:null},
-    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul",desc:"Gan. P73 vs Gan. P75",  home:"Gan. P73",away:"Gan. P75",realHome:null,realAway:null},
-    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul",desc:"Gan. P76 vs Gan. P78",  home:"Gan. P76",away:"Gan. P78",realHome:null,realAway:null},
-    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul",desc:"Gan. P79 vs Gan. P80",  home:"Gan. P79",away:"Gan. P80",realHome:null,realAway:null},
-    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul",desc:"Gan. P83 vs Gan. P84",  home:"Gan. P83",away:"Gan. P84",realHome:null,realAway:null},
-    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul",desc:"Gan. P81 vs Gan. P82",  home:"Gan. P81",away:"Gan. P82",realHome:null,realAway:null},
-    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul",desc:"Gan. P86 vs Gan. P88",  home:"Gan. P86",away:"Gan. P88",realHome:null,realAway:null},
-    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul",desc:"Gan. P85 vs Gan. P87",  home:"Gan. P85",away:"Gan. P87",realHome:null,realAway:null},
+    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Gan. M73 vs Gan. M74", home:"Gan. M73",away:"Gan. M74",realHome:null,realAway:null},
+    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Gan. M75 vs Gan. M76", home:"Gan. M75",away:"Gan. M76",realHome:null,realAway:null},
+    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Gan. M77 vs Gan. M78", home:"Gan. M77",away:"Gan. M78",realHome:null,realAway:null},
+    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"Gan. M79 vs Gan. M80", home:"Gan. M79",away:"Gan. M80",realHome:null,realAway:null},
+    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Gan. M81 vs Gan. M82", home:"Gan. M81",away:"Gan. M82",realHome:null,realAway:null},
+    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Gan. M83 vs Gan. M84", home:"Gan. M83",away:"Gan. M84",realHome:null,realAway:null},
+    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Gan. M85 vs Gan. M86", home:"Gan. M85",away:"Gan. M86",realHome:null,realAway:null},
+    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Gan. M87 vs Gan. M88", home:"Gan. M87",away:"Gan. M88",realHome:null,realAway:null},
     // ── CUARTOS DE FINAL ────────────────────────────────────────────────
     {id:1025,phase:"quarters",label:"Cuartos de Final",matchNum:1,date:"9 Jul", desc:"Gan. P89 vs Gan. P90",home:"Gan. P89",away:"Gan. P90",realHome:null,realAway:null},
     {id:1026,phase:"quarters",label:"Cuartos de Final",matchNum:2,date:"10 Jul",desc:"Gan. P93 vs Gan. P94",home:"Gan. P93",away:"Gan. P94",realHome:null,realAway:null},
@@ -1631,19 +1631,33 @@ function resolveElimWinners(matches) {
   const byId = {};
   matches.forEach(m => { byId[m.id] = m; });
 
-  // Mapa: partido → [siguiente partido, lado (home/away)]
-  // Basado en el bracket oficial FIFA 2026
+  // Mapa bracket oficial FIFA 2026
+  // Round32 IDs: 1001(M73) 1002(M74) 1003(M75) 1004(M76) 1005(M77) 1006(M78)
+  //              1007(M79) 1008(M80) 1009(M81) 1010(M82) 1011(M83) 1012(M84)
+  //              1013(M85) 1014(M86) 1015(M87) 1016(M88)
+  // Round16 IDs: 1017(M89) 1018(M90) 1019(M91) 1020(M92) 1021(M93) 1022(M94)
+  //              1023(M95) 1024(M96)
+  // M89 = Gan(M73) vs Gan(M74) → 1001 vs 1002 → id 1017
+  // M90 = Gan(M75) vs Gan(M76) → 1003 vs 1004 → id 1018
+  // M91 = Gan(M77) vs Gan(M78) → 1005 vs 1006 → id 1019
+  // M92 = Gan(M79) vs Gan(M80) → 1007 vs 1008 → id 1020
+  // M93 = Gan(M81) vs Gan(M82) → 1009 vs 1010 → id 1021
+  // M94 = Gan(M83) vs Gan(M84) → 1011 vs 1012 → id 1022
+  // M95 = Gan(M85) vs Gan(M86) → 1013 vs 1014 → id 1023
+  // M96 = Gan(M87) vs Gan(M88) → 1015 vs 1016 → id 1024
   const bracket = {
     // Round32 → Round16
-    1001: [1017,"home"], 1004: [1017,"away"],
-    1002: [1018,"home"], 1003: [1018,"away"],
+    1001: [1017,"home"], 1002: [1017,"away"],
+    1003: [1018,"home"], 1004: [1018,"away"],
     1005: [1019,"home"], 1006: [1019,"away"],
-    1009: [1020,"home"], 1010: [1020,"away"],
-    1007: [1021,"home"], 1008: [1021,"away"],
+    1007: [1020,"home"], 1008: [1020,"away"],
+    1009: [1021,"home"], 1010: [1021,"away"],
     1011: [1022,"home"], 1012: [1022,"away"],
     1013: [1023,"home"], 1014: [1023,"away"],
     1015: [1024,"home"], 1016: [1024,"away"],
     // Round16 → Quarters
+    // M97=Gan(M89)vsGan(M90) M98=Gan(M91)vsGan(M92)
+    // M99=Gan(M93)vsGan(M94) M100=Gan(M95)vsGan(M96)
     1017: [1025,"home"], 1018: [1025,"away"],
     1019: [1026,"home"], 1020: [1026,"away"],
     1021: [1027,"home"], 1022: [1027,"away"],
