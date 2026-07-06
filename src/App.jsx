@@ -4,12 +4,12 @@ import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/fires
 
 // FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyC9rb0ETv5sq4LKs9zJrb1OoebveOjJe8Y",
-  authDomain: "polla2026-88080.firebaseapp.com",
-  projectId: "polla2026-88080",
-  storageBucket: "polla2026-88080.firebasestorage.app",
-  messagingSenderId: "500836837009",
-  appId: "1:500836837009:web:360bfca31f374444da8130"
+  apiKey: "AIzaSyDL2FV0gfT5b58f5mXmAPJMqSbwKde0IV0",
+  authDomain: "mundial2026-2026.firebaseapp.com",
+  projectId: "mundial2026-2026",
+  storageBucket: "mundial2026-2026.firebasestorage.app",
+  messagingSenderId: "76029862427",
+  appId: "1:76029862427:web:23f21566a32e1c40610ebe"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -18,6 +18,7 @@ const MATCHES_DOC = doc(db, "tournament", "matches");
 const SETTINGS_DOC = doc(db, "tournament", "settings");
 const INVOICES_DOC = doc(db, "tournament", "invoices");
 const PIN_REQUESTS_DOC = doc(db, "tournament", "pinRequests");
+const RULETA_DOC = doc(db, "tournament", "ruleta");
 
 // ERROR BOUNDARY — catches silent white screens
 class ErrorBoundary extends React.Component {
@@ -37,11 +38,11 @@ class ErrorBoundary extends React.Component {
 }
 
 // LANG CONTEXT
-const LangContext = createContext("es");
+const LangContext = createContext("fr");
 const useLang = () => useContext(LangContext);
 const T = {
   es: {
-    nav: { inicio:"Inicio", clasificacion:"Clasificación", reglamento:"Reglamento", resultados:"Resultados", admin:"Admin" },
+    nav: { inicio:"Inicio", clasificacion:"Clasificación", reglamento:"Reglamento", resultados:"Resultados", ruleta:"Ruleta", admin:"Admin" },
     status: { loading:"CARGANDO...", participants:"PARTICIPANTES", matches:"PARTIDOS" },
     clasificacion: {
       title:"CLASIFICACIÓN GENERAL", participants:"PARTICIPANTES",
@@ -49,10 +50,10 @@ const T = {
       exactos:"exactos", acertados:"acertados", ptsFact:"pts facturas", ptsClas:"pts clasificados",
       validOk:"Tu participación es válida — factura aprobada con producto elegible.",
       pendingTitle:"Factura pendiente de aprobación",
-      pendingMsg:"Tu factura de $50+ con producto elegible está siendo revisada por el administrador.",
+      pendingMsg:"Tus facturas con producto elegible están siendo revisadas. Suma acumulada en proceso.",
       invalidTitle:"Participación no válida",
-      noProductMsg:"Tienes una factura de $50+ pero no confirmaste que incluye un producto elegible. Edítala en Mi Perfil.",
-      invalidMsg:"Registra una factura de $50 o más que incluya alguno de los productos elegibles* para validar tu participación.",
+      noProductMsg:"Algunas facturas no tienen producto elegible confirmado. Edítalas en Mi Perfil.",
+      invalidMsg:"Registra facturas de más de $10 con producto elegible que sumen al menos $50 para validar tu participación.",
     },
     profile: {
       totalPts:"TOTAL DE PUNTOS", position:"POSICIÓN",
@@ -61,12 +62,12 @@ const T = {
       validTitle:"Participación válida",
       pendingTitle:"Pendiente de aprobación", pendingMsg:"Tu factura de $50+ con producto elegible está siendo revisada por el administrador.",
       noProductTitle:"Producto elegible no confirmado", noProductMsg:"Tienes una factura de $50+ pero no confirmaste que incluye un producto elegible. Sin esto tu participación no es válida.",
-      invalidTitle:"Participación no válida", invalidMsg:"Necesitas una factura de $50+ con producto elegible* aprobada para participar. Registra tu compra abajo.",
+      invalidTitle:"Participación no válida", invalidMsg:"Necesitas facturas de más de $10 con producto elegible que sumen al menos $50 para participar. Registra tus compras abajo.",
       misDatos:"Mis datos", nombre:"NOMBRE", apellido:"APELLIDO", email:"CORREO", tel:"TELÉFONO", sucursal:"SUCURSAL", pin:"NUEVO PIN", pin2:"CONFIRMAR PIN",
       editarPerfil:"Editar Perfil", guardar:"Guardar", cancelar:"Cancelar", perfilActualizado:"✅ Perfil actualizado",
       registrarFactura:"Registrar Factura", numFactura:"NUMERO DE FACTURA", monto:"MONTO (CAD $)",
       facturaVale:"Esta factura vale", puntos:"puntos", siAprobada:"si es aprobada",
-      productoCheck:"Esta factura incluye uno de los productos participantes* del polla",
+      productoCheck:"Esta factura incluye uno de los productos participantes* del concurso",
       sinProductoTitle:"Sin producto participante, esta factura", sinProductoMsg:"no valida tu participación aunque sea de $50+. Igual genera puntos.",
       conProductoMsg:"Esta factura valida tu participación si es aprobada por el administrador.",
       facturaSent:"Factura enviada! Pendiente de aprobacion por el administrador.",
@@ -74,11 +75,11 @@ const T = {
       misFacturas:"MIS FACTURAS", ptsAcumulados:"puntos acumulados",
       aprobada:"Aprobada", rechazada:"Rechazada", pendiente:"Pendiente",
       productoIncluido:"✅ Producto participante incluido", sinProducto:"⚠️ Sin producto participante",
-      facturaMinima:"El monto minimo es $10 CAD", facturaRepetida:"Esta factura ya fue registrada", facturaNum:"Ingresa el numero de factura",
+      facturaMinima:"Ingresa un monto válido", facturaRepetida:"Esta factura ya fue registrada", facturaNum:"Ingresa el numero de factura",
     },
     login: {
       login:"Iniciar Sesión", register:"Registrarse", logout:"Cerrar Sesión",
-      email:"CORREO ELECTRÓNICO", pin:"PIN (4 dígitos)", nombre:"NOMBRE", apellido:"APELLIDO", tel:"TELÉFONO", sucursal:"SUCURSAL",
+      email:"CORREO ELECTRÓNICO", pin:"PIN (6 dígitos)", nombre:"NOMBRE", apellido:"APELLIDO", tel:"TELÉFONO", sucursal:"SUCURSAL",
       btnLogin:"Entrar", btnRegister:"Crear Cuenta", btnLogout:"Cerrar Sesión",
       forgotPin:"¿Olvidaste tu PIN?", backLogin:"← Volver al inicio de sesión",
       noAccount:"¿No tienes cuenta?", hasAccount:"¿Ya tienes cuenta?",
@@ -86,7 +87,7 @@ const T = {
     invoice: { approuved:"Aprobada", rejected:"Rechazada", pending:"Pendiente", withProduct:"✅ Producto elegible", noProduct:"⚠️ Sin producto elegible" },
   },
   fr: {
-    nav: { inicio:"Accueil", clasificacion:"Classement", reglamento:"Règlement", resultados:"Résultats", admin:"Admin" },
+    nav: { inicio:"Accueil", clasificacion:"Classement", reglamento:"Règlement", resultados:"Résultats", ruleta:"Roulette", admin:"Admin" },
     status: { loading:"CHARGEMENT...", participants:"PARTICIPANTS", matches:"MATCHS" },
     clasificacion: {
       title:"CLASSEMENT GÉNÉRAL", participants:"PARTICIPANTS",
@@ -97,7 +98,7 @@ const T = {
       pendingMsg:"Ta facture de 50 $+ avec produit éligible est en cours de vérification par l'administrateur.",
       invalidTitle:"Participation non valide",
       noProductMsg:"Tu as une facture de 50 $+ mais tu n'as pas confirmé qu'elle inclut un produit éligible. Modifie-la dans Mon Profil.",
-      invalidMsg:"Enregistre une facture de 50 $ ou plus incluant un des produits éligibles* pour valider ta participation.",
+      invalidMsg:"Enregistre des factures de plus de 10 $ avec produit éligible totalisant au moins 50 $ pour valider ta participation.",
     },
     profile: {
       totalPts:"TOTAL DE POINTS", position:"POSITION",
@@ -106,7 +107,7 @@ const T = {
       validTitle:"Participation valide",
       pendingTitle:"En attente d'approbation", pendingMsg:"Ta facture de 50 $+ avec produit éligible est en cours de vérification par l'administrateur.",
       noProductTitle:"Produit éligible non confirmé", noProductMsg:"Tu as une facture de 50 $+ mais tu n'as pas confirmé qu'elle inclut un produit éligible. Sans cela, ta participation n'est pas valide.",
-      invalidTitle:"Participation non valide", invalidMsg:"Tu as besoin d'une facture de 50 $+ avec produit éligible* approuvée pour participer. Enregistre ton achat ci-dessous.",
+      invalidTitle:"Participation non valide", invalidMsg:"Tu as besoin de factures de plus de 10 $ avec produit éligible totalisant au moins 50 $ pour participer. Enregistre tes achats ci-dessous.",
       misDatos:"Mes informations", nombre:"PRÉNOM", apellido:"NOM", email:"COURRIEL", tel:"TÉLÉPHONE", sucursal:"SUCCURSALE", pin:"NOUVEAU NIP", pin2:"CONFIRMER NIP",
       editarPerfil:"Modifier le profil", guardar:"Enregistrer", cancelar:"Annuler", perfilActualizado:"✅ Profil mis à jour",
       registrarFactura:"Enregistrer une facture", numFactura:"NUMÉRO DE FACTURE", monto:"MONTANT (CAD $)",
@@ -119,11 +120,11 @@ const T = {
       misFacturas:"MES FACTURES", ptsAcumulados:"points accumulés",
       aprobada:"Approuvée", rechazada:"Rejetée", pendiente:"En attente",
       productoIncluido:"✅ Produit participant inclus", sinProducto:"⚠️ Sans produit participant",
-      facturaMinima:"Le montant minimum est de 10 $ CAD", facturaRepetida:"Cette facture a déjà été enregistrée", facturaNum:"Entrez le numéro de facture",
+      facturaMinima:"Veuillez entrer un montant valide", facturaRepetida:"Cette facture a déjà été enregistrée", facturaNum:"Entrez le numéro de facture",
     },
     login: {
       login:"Connexion", register:"S'inscrire", logout:"Déconnexion",
-      email:"ADRESSE COURRIEL", pin:"NIP (4 chiffres)", nombre:"PRÉNOM", apellido:"NOM", tel:"TÉLÉPHONE", sucursal:"SUCCURSALE",
+      email:"ADRESSE COURRIEL", pin:"NIP (6 chiffres)", nombre:"PRÉNOM", apellido:"NOM", tel:"TÉLÉPHONE", sucursal:"SUCCURSALE",
       btnLogin:"Entrer", btnRegister:"Créer un compte", btnLogout:"Se déconnecter",
       forgotPin:"Mot de passe oublié ?", backLogin:"← Retour à la connexion",
       noAccount:"Pas encore de compte ?", hasAccount:"Déjà un compte ?",
@@ -134,18 +135,18 @@ const T = {
 
 // GROUPS
 const GROUPS = {
-  A: ["México","Corea del Sur","Sudáfrica","Chequia"],
-  B: ["Canadá","Suiza","Catar","Bosnia y Herzegovina"],
-  C: ["Brasil","Marruecos","Escocia","Haití"],
-  D: ["Estados Unidos","Australia","Paraguay","Turquía"],
-  E: ["Alemania","Ecuador","Costa de Marfil","Curazao"],
-  F: ["Países Bajos","Japón","Túnez","Suecia"],
-  G: ["Bélgica","Irán","Egipto","Nueva Zelanda"],
-  H: ["España","Uruguay","Arabia Saudí","Cabo Verde"],
-  I: ["Francia","Senegal","Noruega","Irak"],
-  J: ["Argentina","Austria","Argelia","Jordania"],
-  K: ["Portugal","Colombia","Uzbekistán","R.D. Congo"],
-  L: ["Inglaterra","Croacia","Panamá","Ghana"],
+  A: ["México","Sudáfrica","Corea del Sur","Chequia"],
+  B: ["Canadá","Bosnia y Herzegovina","Catar","Suiza"],
+  C: ["Brasil","Marruecos","Haití","Escocia"],
+  D: ["Estados Unidos","Paraguay","Australia","Turquía"],
+  E: ["Alemania","Curazao","Costa de Marfil","Ecuador"],
+  F: ["Países Bajos","Japón","Suecia","Túnez"],
+  G: ["Bélgica","Egipto","Irán","Nueva Zelanda"],
+  H: ["España","Cabo Verde","Arabia Saudí","Uruguay"],
+  I: ["Francia","Senegal","Irak","Noruega"],
+  J: ["Argentina","Argelia","Austria","Jordania"],
+  K: ["Portugal","DR Congo","Uzbekistán","Colombia"],
+  L: ["Inglaterra","Croacia","Ghana","Panamá"],
 }
 
 const GROUP_COLORS = {
@@ -165,14 +166,35 @@ const LOCK_DATES = {
 };
 
 // INVOICE POINTS SCALE (CAD)
+// Tabla por factura (progresiva y equilibrada):
+// $10-$25  → 1 entrada,  0 pts
+// $26-$50  → 2 entradas, 2 pts
+// $51-$75  → 3 entradas, 4 pts
+// $76-$100 → 4 entradas, 6 pts
+// $101-$150→ 6 entradas, 8 pts
+// $151-$200→ 8 entradas, 8 pts
+// $201+    → 10 entradas, 8 pts
+// Nota: puntos máx 8 para que no generen entrada adicional (cada 10 pts = 1 entrada)
 function calcInvoicePoints(amount) {
   const a = parseFloat(amount);
-  if (isNaN(a) || a < 10) return 0;
-  if (a <= 50)  return 1;
-  if (a <= 100) return 3;
+  if (isNaN(a) || a <= 0) return 0;
+  if (a <= 25)  return 0;
+  if (a <= 50)  return 2;
+  if (a <= 75)  return 4;
+  if (a <= 100) return 6;
+  return 8; // $101+ (capped at 8 to avoid extra ruleta entry)
+}
+
+function calcInvoiceEntradas(amount) {
+  const a = parseFloat(amount);
+  if (isNaN(a) || a <= 0) return 0;
+  if (a <= 25)  return 1;
+  if (a <= 50)  return 2;
+  if (a <= 75)  return 3;
+  if (a <= 100) return 4;
   if (a <= 150) return 6;
-  if (a <= 200) return 9;
-  return 12;
+  if (a <= 200) return 8;
+  return 10; // $201+
 }
 
 function isPhaseLocked(phase, adminUnlocked = {}) {
@@ -185,13 +207,19 @@ function isPhaseLocked(phase, adminUnlocked = {}) {
 
 function isMatchLocked(match, adminUnlocked = {}) {
   if (!match) return false;
-  // Manual overrides from admin
-  if (adminUnlocked["match_"+match.id]) return false;
-  if (adminUnlocked["match_"+match.id+"_forced"]) return true;
+  // Per-match manual override (admin)
+  if (adminUnlocked["match_"+match.id]) return false;        // manually unlocked
+  if (adminUnlocked["match_"+match.id+"_forced"]) return true; // manually locked
+  // Phase-level override (admin)
   if (adminUnlocked[match.phase]) return false;
   if (adminUnlocked[match.phase+"_forced"]) return true;
-  // Todos los partidos: bloquear 24h antes del lockTime
-  if (match.lockTime) return new Date() >= new Date(new Date(match.lockTime).getTime() - 24*60*60*1000);
+  // Partidos de grupos: bloquear 1h antes del lockTime
+  // Partidos eliminatorios: bloquear 24h antes del lockTime
+  if (match.lockTime) {
+    const offset = match.phase === "groups" ? 1*60*60*1000 : 24*60*60*1000;
+    return new Date() >= new Date(new Date(match.lockTime).getTime() - offset);
+  }
+  // Fallback to phase lock
   return isPhaseLocked(match.phase, adminUnlocked);
 }
 
@@ -199,89 +227,89 @@ function generateGroupMatches() {
   // Official FIFA 2026 schedule - all 72 group matches
   const matches = [
     // GRUPO A
-    {id:1,  phase:"groups",group:"A",date:"11 Jun",home:"México",            away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-11T15:00:00"},
-    {id:2,  phase:"groups",group:"A",date:"11 Jun",home:"Corea del Sur",     away:"Chequia",           realHome:null,realAway:null,lockTime:"2026-06-11T18:00:00"},
-    {id:3,  phase:"groups",group:"A",date:"18 Jun",home:"Chequia",           away:"Sudáfrica",         realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
-    {id:4,  phase:"groups",group:"A",date:"18 Jun",home:"México",            away:"Corea del Sur",     realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
-    {id:5,  phase:"groups",group:"A",date:"24 Jun",home:"Chequia",           away:"México",            realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
-    {id:6,  phase:"groups",group:"A",date:"24 Jun",home:"Sudáfrica",         away:"Corea del Sur",     realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
+    {id:1,  phase:"groups",group:"A",date:"11 Jun",home:"México",             away:"Sudáfrica",          realHome:null,realAway:null,lockTime:"2026-06-11T15:00:00"},
+    {id:2,  phase:"groups",group:"A",date:"11 Jun",home:"Corea del Sur",      away:"Chequia",            realHome:null,realAway:null,lockTime:"2026-06-11T22:00:00"},
+    {id:3,  phase:"groups",group:"A",date:"18 Jun",home:"Chequia",            away:"Sudáfrica",          realHome:null,realAway:null,lockTime:"2026-06-18T12:00:00"},
+    {id:4,  phase:"groups",group:"A",date:"18 Jun",home:"México",             away:"Corea del Sur",      realHome:null,realAway:null,lockTime:"2026-06-18T21:00:00"},
+    {id:5,  phase:"groups",group:"A",date:"24 Jun",home:"Chequia",            away:"México",             realHome:null,realAway:null,lockTime:"2026-06-24T21:00:00"},
+    {id:6,  phase:"groups",group:"A",date:"24 Jun",home:"Sudáfrica",          away:"Corea del Sur",      realHome:null,realAway:null,lockTime:"2026-06-24T21:00:00"},
     // GRUPO B
-    {id:7,  phase:"groups",group:"B",date:"12 Jun",home:"Canadá",            away:"Bosnia y Herzegovina", realHome:null,realAway:null,lockTime:"2026-06-12T15:00:00"},
-    {id:8,  phase:"groups",group:"B",date:"13 Jun",home:"Catar",             away:"Suiza",             realHome:null,realAway:null,lockTime:"2026-06-13T15:00:00"},
-    {id:9,  phase:"groups",group:"B",date:"18 Jun",home:"Suiza",             away:"Bosnia y Herzegovina", realHome:null,realAway:null,lockTime:"2026-06-18T12:00:00"},
-    {id:10, phase:"groups",group:"B",date:"18 Jun",home:"Canadá",            away:"Catar",             realHome:null,realAway:null,lockTime:"2026-06-18T21:00:00"},
-    {id:11, phase:"groups",group:"B",date:"24 Jun",home:"Suiza",             away:"Canadá",            realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
-    {id:12, phase:"groups",group:"B",date:"24 Jun",home:"Bosnia y Herzegovina", away:"Catar",          realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
+    {id:7,  phase:"groups",group:"B",date:"12 Jun",home:"Canadá",             away:"Bosnia y Herzegovina",realHome:null,realAway:null,lockTime:"2026-06-12T15:00:00"},
+    {id:8,  phase:"groups",group:"B",date:"13 Jun",home:"Catar",              away:"Suiza",              realHome:null,realAway:null,lockTime:"2026-06-13T15:00:00"},
+    {id:9,  phase:"groups",group:"B",date:"18 Jun",home:"Suiza",              away:"Bosnia y Herzegovina",realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
+    {id:10, phase:"groups",group:"B",date:"18 Jun",home:"Canadá",             away:"Catar",              realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
+    {id:11, phase:"groups",group:"B",date:"24 Jun",home:"Suiza",              away:"Canadá",             realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
+    {id:12, phase:"groups",group:"B",date:"24 Jun",home:"Bosnia y Herzegovina",away:"Catar",             realHome:null,realAway:null,lockTime:"2026-06-24T15:00:00"},
     // GRUPO C
-    {id:13, phase:"groups",group:"C",date:"13 Jun",home:"Brasil",            away:"Marruecos",         realHome:null,realAway:null,lockTime:"2026-06-13T18:00:00"},
-    {id:14, phase:"groups",group:"C",date:"13 Jun",home:"Haití",             away:"Escocia",           realHome:null,realAway:null,lockTime:"2026-06-13T21:00:00"},
-    {id:15, phase:"groups",group:"C",date:"19 Jun",home:"Escocia",           away:"Marruecos",         realHome:null,realAway:null,lockTime:"2026-06-19T15:00:00"},
-    {id:16, phase:"groups",group:"C",date:"19 Jun",home:"Brasil",            away:"Haití",             realHome:null,realAway:null,lockTime:"2026-06-19T18:00:00"},
-    {id:17, phase:"groups",group:"C",date:"24 Jun",home:"Brasil",            away:"Escocia",           realHome:null,realAway:null,lockTime:"2026-06-25T15:00:00"},
-    {id:18, phase:"groups",group:"C",date:"24 Jun",home:"Marruecos",         away:"Haití",             realHome:null,realAway:null,lockTime:"2026-06-25T15:00:00"},
+    {id:13, phase:"groups",group:"C",date:"13 Jun",home:"Brasil",             away:"Marruecos",          realHome:null,realAway:null,lockTime:"2026-06-13T18:00:00"},
+    {id:14, phase:"groups",group:"C",date:"13 Jun",home:"Haití",              away:"Escocia",            realHome:null,realAway:null,lockTime:"2026-06-13T21:00:00"},
+    {id:15, phase:"groups",group:"C",date:"19 Jun",home:"Escocia",            away:"Marruecos",          realHome:null,realAway:null,lockTime:"2026-06-19T18:00:00"},
+    {id:16, phase:"groups",group:"C",date:"19 Jun",home:"Brasil",             away:"Haití",              realHome:null,realAway:null,lockTime:"2026-06-19T21:00:00"},
+    {id:17, phase:"groups",group:"C",date:"24 Jun",home:"Escocia",            away:"Brasil",             realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
+    {id:18, phase:"groups",group:"C",date:"24 Jun",home:"Marruecos",          away:"Haití",              realHome:null,realAway:null,lockTime:"2026-06-24T18:00:00"},
     // GRUPO D
-    {id:19, phase:"groups",group:"D",date:"12 Jun",home:"Estados Unidos",    away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-12T18:00:00"},
-    {id:20, phase:"groups",group:"D",date:"12 Jun",home:"Australia",         away:"Turquía",           realHome:null,realAway:null,lockTime:"2026-06-12T21:00:00"},
-    {id:21, phase:"groups",group:"D",date:"18 Jun",home:"Turquía",           away:"Paraguay",          realHome:null,realAway:null,lockTime:"2026-06-18T18:00:00"},
-    {id:22, phase:"groups",group:"D",date:"19 Jun",home:"Estados Unidos",    away:"Australia",         realHome:null,realAway:null,lockTime:"2026-06-19T21:00:00"},
-    {id:23, phase:"groups",group:"D",date:"25 Jun",home:"Turquía",           away:"Estados Unidos",    realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
-    {id:24, phase:"groups",group:"D",date:"25 Jun",home:"Paraguay",          away:"Australia",         realHome:null,realAway:null,lockTime:"2026-06-25T18:00:00"},
+    {id:19, phase:"groups",group:"D",date:"12 Jun",home:"Estados Unidos",     away:"Paraguay",           realHome:null,realAway:null,lockTime:"2026-06-12T21:00:00"},
+    {id:20, phase:"groups",group:"D",date:"13 Jun",home:"Australia",          away:"Turquía",            realHome:null,realAway:null,lockTime:"2026-06-13T00:00:00"},
+    {id:21, phase:"groups",group:"D",date:"19 Jun",home:"Turquía",            away:"Paraguay",           realHome:null,realAway:null,lockTime:"2026-06-19T00:00:00"},
+    {id:22, phase:"groups",group:"D",date:"19 Jun",home:"Estados Unidos",     away:"Australia",          realHome:null,realAway:null,lockTime:"2026-06-19T15:00:00"},
+    {id:23, phase:"groups",group:"D",date:"25 Jun",home:"Turquía",            away:"Estados Unidos",     realHome:null,realAway:null,lockTime:"2026-06-25T22:00:00"},
+    {id:24, phase:"groups",group:"D",date:"25 Jun",home:"Paraguay",           away:"Australia",          realHome:null,realAway:null,lockTime:"2026-06-25T22:00:00"},
     // GRUPO E
-    {id:25, phase:"groups",group:"E",date:"14 Jun",home:"Alemania",          away:"Curazao",           realHome:null,realAway:null,lockTime:"2026-06-14T15:00:00"},
-    {id:26, phase:"groups",group:"E",date:"14 Jun",home:"Costa de Marfil",   away:"Ecuador",           realHome:null,realAway:null,lockTime:"2026-06-14T18:00:00"},
-    {id:27, phase:"groups",group:"E",date:"20 Jun",home:"Alemania",          away:"Costa de Marfil",   realHome:null,realAway:null,lockTime:"2026-06-20T15:00:00"},
-    {id:28, phase:"groups",group:"E",date:"20 Jun",home:"Ecuador",           away:"Curazao",           realHome:null,realAway:null,lockTime:"2026-06-20T18:00:00"},
-    {id:29, phase:"groups",group:"E",date:"25 Jun",home:"Curazao",           away:"Costa de Marfil",   realHome:null,realAway:null,lockTime:"2026-06-26T15:00:00"},
-    {id:30, phase:"groups",group:"E",date:"25 Jun",home:"Ecuador",           away:"Alemania",          realHome:null,realAway:null,lockTime:"2026-06-26T15:00:00"},
+    {id:25, phase:"groups",group:"E",date:"14 Jun",home:"Alemania",           away:"Curazao",            realHome:null,realAway:null,lockTime:"2026-06-14T13:00:00"},
+    {id:26, phase:"groups",group:"E",date:"14 Jun",home:"Costa de Marfil",    away:"Ecuador",            realHome:null,realAway:null,lockTime:"2026-06-14T19:00:00"},
+    {id:27, phase:"groups",group:"E",date:"20 Jun",home:"Alemania",           away:"Costa de Marfil",    realHome:null,realAway:null,lockTime:"2026-06-20T16:00:00"},
+    {id:28, phase:"groups",group:"E",date:"20 Jun",home:"Ecuador",            away:"Curazao",            realHome:null,realAway:null,lockTime:"2026-06-20T20:00:00"},
+    {id:29, phase:"groups",group:"E",date:"25 Jun",home:"Curazao",            away:"Costa de Marfil",    realHome:null,realAway:null,lockTime:"2026-06-25T16:00:00"},
+    {id:30, phase:"groups",group:"E",date:"25 Jun",home:"Ecuador",            away:"Alemania",           realHome:null,realAway:null,lockTime:"2026-06-25T16:00:00"},
     // GRUPO F
-    {id:31, phase:"groups",group:"F",date:"14 Jun",home:"Países Bajos",      away:"Japón",             realHome:null,realAway:null,lockTime:"2026-06-15T15:00:00"},
-    {id:32, phase:"groups",group:"F",date:"14 Jun",home:"Suecia",            away:"Túnez",             realHome:null,realAway:null,lockTime:"2026-06-15T18:00:00"},
-    {id:33, phase:"groups",group:"F",date:"19 Jun",home:"Túnez",             away:"Japón",             realHome:null,realAway:null,lockTime:"2026-06-20T21:00:00"},
-    {id:34, phase:"groups",group:"F",date:"20 Jun",home:"Países Bajos",      away:"Suecia",            realHome:null,realAway:null,lockTime:"2026-06-21T15:00:00"},
-    {id:35, phase:"groups",group:"F",date:"25 Jun",home:"Japón",             away:"Suecia",            realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
-    {id:36, phase:"groups",group:"F",date:"25 Jun",home:"Túnez",             away:"Países Bajos",      realHome:null,realAway:null,lockTime:"2026-06-26T18:00:00"},
+    {id:31, phase:"groups",group:"F",date:"14 Jun",home:"Países Bajos",       away:"Japón",              realHome:null,realAway:null,lockTime:"2026-06-14T16:00:00"},
+    {id:32, phase:"groups",group:"F",date:"14 Jun",home:"Suecia",             away:"Túnez",              realHome:null,realAway:null,lockTime:"2026-06-14T22:00:00"},
+    {id:33, phase:"groups",group:"F",date:"20 Jun",home:"Países Bajos",       away:"Suecia",             realHome:null,realAway:null,lockTime:"2026-06-20T13:00:00"},
+    {id:34, phase:"groups",group:"F",date:"20 Jun",home:"Túnez",              away:"Japón",              realHome:null,realAway:null,lockTime:"2026-06-20T00:00:00"},
+    {id:35, phase:"groups",group:"F",date:"25 Jun",home:"Japón",              away:"Suecia",             realHome:null,realAway:null,lockTime:"2026-06-25T19:00:00"},
+    {id:36, phase:"groups",group:"F",date:"25 Jun",home:"Túnez",              away:"Países Bajos",       realHome:null,realAway:null,lockTime:"2026-06-25T19:00:00"},
     // GRUPO G
-    {id:37, phase:"groups",group:"G",date:"15 Jun",home:"Bélgica",           away:"Egipto",            realHome:null,realAway:null,lockTime:"2026-06-15T21:00:00"},
-    {id:38, phase:"groups",group:"G",date:"15 Jun",home:"Irán",              away:"Nueva Zelanda",     realHome:null,realAway:null,lockTime:"2026-06-16T15:00:00"},
-    {id:39, phase:"groups",group:"G",date:"21 Jun",home:"Bélgica",           away:"Irán",              realHome:null,realAway:null,lockTime:"2026-06-21T18:00:00"},
-    {id:40, phase:"groups",group:"G",date:"21 Jun",home:"Nueva Zelanda",     away:"Egipto",            realHome:null,realAway:null,lockTime:"2026-06-21T21:00:00"},
-    {id:41, phase:"groups",group:"G",date:"26 Jun",home:"Egipto",            away:"Irán",              realHome:null,realAway:null,lockTime:"2026-06-26T21:00:00"},
-    {id:42, phase:"groups",group:"G",date:"26 Jun",home:"Nueva Zelanda",     away:"Bélgica",           realHome:null,realAway:null,lockTime:"2026-06-26T21:00:00"},
+    {id:37, phase:"groups",group:"G",date:"15 Jun",home:"Bélgica",            away:"Egipto",             realHome:null,realAway:null,lockTime:"2026-06-15T15:00:00"},
+    {id:38, phase:"groups",group:"G",date:"15 Jun",home:"Irán",               away:"Nueva Zelanda",      realHome:null,realAway:null,lockTime:"2026-06-15T21:00:00"},
+    {id:39, phase:"groups",group:"G",date:"21 Jun",home:"Bélgica",            away:"Irán",               realHome:null,realAway:null,lockTime:"2026-06-21T15:00:00"},
+    {id:40, phase:"groups",group:"G",date:"21 Jun",home:"Nueva Zelanda",      away:"Egipto",             realHome:null,realAway:null,lockTime:"2026-06-21T21:00:00"},
+    {id:41, phase:"groups",group:"G",date:"26 Jun",home:"Egipto",             away:"Irán",               realHome:null,realAway:null,lockTime:"2026-06-26T23:00:00"},
+    {id:42, phase:"groups",group:"G",date:"26 Jun",home:"Nueva Zelanda",      away:"Bélgica",            realHome:null,realAway:null,lockTime:"2026-06-26T23:00:00"},
     // GRUPO H
-    {id:43, phase:"groups",group:"H",date:"15 Jun",home:"España",            away:"Cabo Verde",        realHome:null,realAway:null,lockTime:"2026-06-16T18:00:00"},
-    {id:44, phase:"groups",group:"H",date:"15 Jun",home:"Arabia Saudí",      away:"Uruguay",           realHome:null,realAway:null,lockTime:"2026-06-16T21:00:00"},
-    {id:45, phase:"groups",group:"H",date:"21 Jun",home:"España",            away:"Arabia Saudí",      realHome:null,realAway:null,lockTime:"2026-06-22T15:00:00"},
-    {id:46, phase:"groups",group:"H",date:"21 Jun",home:"Uruguay",           away:"Cabo Verde",        realHome:null,realAway:null,lockTime:"2026-06-22T18:00:00"},
-    {id:47, phase:"groups",group:"H",date:"26 Jun",home:"Cabo Verde",        away:"Arabia Saudí",      realHome:null,realAway:null,lockTime:"2026-06-27T15:00:00"},
-    {id:48, phase:"groups",group:"H",date:"26 Jun",home:"Uruguay",           away:"España",            realHome:null,realAway:null,lockTime:"2026-06-27T15:00:00"},
+    {id:43, phase:"groups",group:"H",date:"15 Jun",home:"España",             away:"Cabo Verde",         realHome:null,realAway:null,lockTime:"2026-06-15T12:00:00"},
+    {id:44, phase:"groups",group:"H",date:"15 Jun",home:"Arabia Saudí",       away:"Uruguay",            realHome:null,realAway:null,lockTime:"2026-06-15T18:00:00"},
+    {id:45, phase:"groups",group:"H",date:"21 Jun",home:"España",             away:"Arabia Saudí",       realHome:null,realAway:null,lockTime:"2026-06-21T12:00:00"},
+    {id:46, phase:"groups",group:"H",date:"21 Jun",home:"Uruguay",            away:"Cabo Verde",         realHome:null,realAway:null,lockTime:"2026-06-21T18:00:00"},
+    {id:47, phase:"groups",group:"H",date:"26 Jun",home:"Cabo Verde",         away:"Arabia Saudí",       realHome:null,realAway:null,lockTime:"2026-06-26T20:00:00"},
+    {id:48, phase:"groups",group:"H",date:"26 Jun",home:"Uruguay",            away:"España",             realHome:null,realAway:null,lockTime:"2026-06-26T20:00:00"},
     // GRUPO I
-    {id:49, phase:"groups",group:"I",date:"16 Jun",home:"Francia",           away:"Senegal",           realHome:null,realAway:null,lockTime:"2026-06-17T15:00:00"},
-    {id:50, phase:"groups",group:"I",date:"16 Jun",home:"Irak",              away:"Noruega",           realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
-    {id:51, phase:"groups",group:"I",date:"22 Jun",home:"Francia",           away:"Irak",              realHome:null,realAway:null,lockTime:"2026-06-22T21:00:00"},
-    {id:52, phase:"groups",group:"I",date:"22 Jun",home:"Noruega",           away:"Senegal",           realHome:null,realAway:null,lockTime:"2026-06-23T15:00:00"},
-    {id:53, phase:"groups",group:"I",date:"26 Jun",home:"Noruega",           away:"Francia",           realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
-    {id:54, phase:"groups",group:"I",date:"26 Jun",home:"Senegal",           away:"Irak",              realHome:null,realAway:null,lockTime:"2026-06-27T18:00:00"},
+    {id:49, phase:"groups",group:"I",date:"16 Jun",home:"Francia",            away:"Senegal",            realHome:null,realAway:null,lockTime:"2026-06-16T15:00:00"},
+    {id:50, phase:"groups",group:"I",date:"16 Jun",home:"Irak",               away:"Noruega",            realHome:null,realAway:null,lockTime:"2026-06-16T18:00:00"},
+    {id:51, phase:"groups",group:"I",date:"22 Jun",home:"Francia",            away:"Irak",               realHome:null,realAway:null,lockTime:"2026-06-22T17:00:00"},
+    {id:52, phase:"groups",group:"I",date:"22 Jun",home:"Noruega",            away:"Senegal",            realHome:null,realAway:null,lockTime:"2026-06-22T20:00:00"},
+    {id:53, phase:"groups",group:"I",date:"26 Jun",home:"Noruega",            away:"Francia",            realHome:null,realAway:null,lockTime:"2026-06-26T15:00:00"},
+    {id:54, phase:"groups",group:"I",date:"26 Jun",home:"Senegal",            away:"Irak",               realHome:null,realAway:null,lockTime:"2026-06-26T15:00:00"},
     // GRUPO J
-    {id:55, phase:"groups",group:"J",date:"15 Jun",home:"Austria",           away:"Jordania",          realHome:null,realAway:null,lockTime:"2026-06-17T21:00:00"},
-    {id:56, phase:"groups",group:"J",date:"16 Jun",home:"Argentina",         away:"Argelia",           realHome:null,realAway:null,lockTime:"2026-06-18T15:00:00"},
-    {id:57, phase:"groups",group:"J",date:"22 Jun",home:"Argentina",         away:"Austria",           realHome:null,realAway:null,lockTime:"2026-06-23T18:00:00"},
-    {id:58, phase:"groups",group:"J",date:"22 Jun",home:"Jordania",          away:"Argelia",           realHome:null,realAway:null,lockTime:"2026-06-23T21:00:00"},
-    {id:59, phase:"groups",group:"J",date:"27 Jun",home:"Argelia",           away:"Austria",           realHome:null,realAway:null,lockTime:"2026-06-27T21:00:00"},
-    {id:60, phase:"groups",group:"J",date:"27 Jun",home:"Jordania",          away:"Argentina",         realHome:null,realAway:null,lockTime:"2026-06-27T21:00:00"},
+    {id:55, phase:"groups",group:"J",date:"16 Jun",home:"Argentina",          away:"Argelia",            realHome:null,realAway:null,lockTime:"2026-06-16T21:00:00"},
+    {id:56, phase:"groups",group:"J",date:"17 Jun",home:"Austria",            away:"Jordania",           realHome:null,realAway:null,lockTime:"2026-06-17T00:00:00"},
+    {id:57, phase:"groups",group:"J",date:"22 Jun",home:"Argentina",          away:"Austria",            realHome:null,realAway:null,lockTime:"2026-06-22T13:00:00"},
+    {id:58, phase:"groups",group:"J",date:"22 Jun",home:"Jordania",           away:"Argelia",            realHome:null,realAway:null,lockTime:"2026-06-22T23:00:00"},
+    {id:59, phase:"groups",group:"J",date:"27 Jun",home:"Argelia",            away:"Austria",            realHome:null,realAway:null,lockTime:"2026-06-27T22:00:00"},
+    {id:60, phase:"groups",group:"J",date:"27 Jun",home:"Jordania",           away:"Argentina",          realHome:null,realAway:null,lockTime:"2026-06-27T22:00:00"},
     // GRUPO K
-    {id:61, phase:"groups",group:"K",date:"17 Jun",home:"Portugal",          away:"R.D. Congo",        realHome:null,realAway:null,lockTime:"2026-06-17T12:00:00"},
-    {id:62, phase:"groups",group:"K",date:"17 Jun",home:"Uzbekistán",        away:"Colombia",          realHome:null,realAway:null,lockTime:"2026-06-17T21:00:00"},
+    {id:61, phase:"groups",group:"K",date:"17 Jun",home:"Portugal",           away:"DR Congo",           realHome:null,realAway:null,lockTime:"2026-06-17T13:00:00"},
+    {id:62, phase:"groups",group:"K",date:"17 Jun",home:"Uzbekistán",         away:"Colombia",           realHome:null,realAway:null,lockTime:"2026-06-17T22:00:00"},
     {id:63, phase:"groups",group:"K",date:"23 Jun",home:"Portugal",          away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-23T12:00:00"},
-    {id:64, phase:"groups",group:"K",date:"23 Jun",home:"Colombia",          away:"R.D. Congo",        realHome:null,realAway:null,lockTime:"2026-06-23T18:00:00"},
-    {id:65, phase:"groups",group:"K",date:"27 Jun",home:"Colombia",          away:"Portugal",          realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
-    {id:66, phase:"groups",group:"K",date:"27 Jun",home:"R.D. Congo",        away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-28T12:00:00"},
+    {id:64, phase:"groups",group:"K",date:"23 Jun",home:"Colombia",          away:"DR Congo",          realHome:null,realAway:null,lockTime:"2026-06-23T22:00:00"},
+    {id:65, phase:"groups",group:"K",date:"27 Jun",home:"Colombia",          away:"Portugal",          realHome:null,realAway:null,lockTime:"2026-06-27T19:30:00"},
+    {id:66, phase:"groups",group:"K",date:"27 Jun",home:"DR Congo",          away:"Uzbekistán",        realHome:null,realAway:null,lockTime:"2026-06-27T19:30:00"},
     // GRUPO L
-    {id:67, phase:"groups",group:"L",date:"17 Jun",home:"Inglaterra",        away:"Croacia",           realHome:null,realAway:null,lockTime:"2026-06-17T15:00:00"},
-    {id:68, phase:"groups",group:"L",date:"17 Jun",home:"Ghana",             away:"Panamá",            realHome:null,realAway:null,lockTime:"2026-06-17T18:00:00"},
-    {id:69, phase:"groups",group:"L",date:"23 Jun",home:"Inglaterra",        away:"Ghana",             realHome:null,realAway:null,lockTime:"2026-06-23T15:00:00"},
-    {id:70, phase:"groups",group:"L",date:"23 Jun",home:"Panamá",            away:"Croacia",           realHome:null,realAway:null,lockTime:"2026-06-23T21:00:00"},
-    {id:71, phase:"groups",group:"L",date:"27 Jun",home:"Panamá",            away:"Inglaterra",        realHome:null,realAway:null,lockTime:"2026-06-28T15:00:00"},
-    {id:72, phase:"groups",group:"L",date:"27 Jun",home:"Croacia",           away:"Ghana",             realHome:null,realAway:null,lockTime:"2026-06-28T15:00:00"},
+    {id:67, phase:"groups",group:"L",date:"17 Jun",home:"Inglaterra",        away:"Croacia",           realHome:null,realAway:null,lockTime:"2026-06-17T16:00:00"},
+    {id:68, phase:"groups",group:"L",date:"17 Jun",home:"Ghana",             away:"Panamá",            realHome:null,realAway:null,lockTime:"2026-06-17T19:00:00"},
+    {id:69, phase:"groups",group:"L",date:"23 Jun",home:"Inglaterra",        away:"Ghana",             realHome:null,realAway:null,lockTime:"2026-06-23T16:00:00"},
+    {id:70, phase:"groups",group:"L",date:"23 Jun",home:"Panamá",            away:"Croacia",           realHome:null,realAway:null,lockTime:"2026-06-23T19:00:00"},
+    {id:71, phase:"groups",group:"L",date:"27 Jun",home:"Panamá",            away:"Inglaterra",        realHome:null,realAway:null,lockTime:"2026-06-27T17:00:00"},
+    {id:72, phase:"groups",group:"L",date:"27 Jun",home:"Croacia",           away:"Ghana",             realHome:null,realAway:null,lockTime:"2026-06-27T17:00:00"},
   ];
   return matches;
 }
@@ -291,31 +319,31 @@ function generateElimMatches() {
   // * = pending UEFA/IC playoff confirmation
   return [
     // ── DIECISEISAVOS (Ronda de 32) ─────────────────────────────────────
-    {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"2º A vs 2º B",         home:"Sudáfrica",      away:"Canadá",              realHome:0, realAway:1,  lockTime:"2026-06-28T18:00:00"},
-    {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"1º C vs 2º F",         home:"Brasil",         away:"Japón",               realHome:2, realAway:1,  lockTime:"2026-06-29T15:00:00"},
-    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º E vs 3º D",         home:"Alemania",       away:"Paraguay",            realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-06-29T18:00:00"},
-    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º F vs 2º C",         home:"Países Bajos",   away:"Marruecos",           realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-06-29T21:00:00"},
-    {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"2º E vs 2º I",         home:"Costa de Marfil",away:"Noruega",             realHome:1, realAway:2,  lockTime:"2026-06-30T15:00:00"},
-    {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"1º I vs 3º F",         home:"Francia",        away:"Suecia",              realHome:3, realAway:0,  lockTime:"2026-06-30T18:00:00"},
-    {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"1º A vs 3º E",         home:"México",         away:"Ecuador",             realHome:2, realAway:0,  lockTime:"2026-06-30T21:00:00"},
-    {id:1008,phase:"round32",label:"Ronda de 32",matchNum:8, date:"1 Jul", desc:"1º L vs 3º K",         home:"Inglaterra",     away:"R.D. Congo",          realHome:3, realAway:0,  lockTime:"2026-07-01T15:00:00"},
-    {id:1009,phase:"round32",label:"Ronda de 32",matchNum:9, date:"1 Jul", desc:"2º G vs 1º H",         home:"Bélgica",        away:"Senegal",             realHome:3, realAway:2,  lockTime:"2026-07-01T18:00:00"},
-    {id:1010,phase:"round32",label:"Ronda de 32",matchNum:10,date:"1 Jul", desc:"1º D vs 3º B",         home:"Estados Unidos", away:"Bosnia y Herzegovina",realHome:2, realAway:0,  lockTime:"2026-07-01T21:00:00"},
-    {id:1011,phase:"round32",label:"Ronda de 32",matchNum:11,date:"2 Jul", desc:"1º H vs 2º J",         home:"España",         away:"Austria",             realHome:2, realAway:0,  lockTime:"2026-07-02T20:00:00"},
-    {id:1012,phase:"round32",label:"Ronda de 32",matchNum:12,date:"2 Jul", desc:"2º K vs 2º L",         home:"Portugal",       away:"Croacia",             realHome:3, realAway:1,  lockTime:"2026-07-02T23:00:00"},
-    {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"2 Jul", desc:"1º B vs 3º J",         home:"Suiza",          away:"Argelia",             realHome:2, realAway:0,  lockTime:"2026-07-02T17:00:00"},
-    {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"3 Jul", desc:"1º J vs 2º H",         home:"Argentina",      away:"Cabo Verde",          realHome:2, realAway:1,  lockTime:"2026-07-03T15:00:00"},
-    {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º K vs 3º L",         home:"Colombia",       away:"Ghana",               realHome:2, realAway:0,  lockTime:"2026-07-03T18:00:00"},
-    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º D vs 2º G",         home:"Australia",      away:"Egipto",              realHome:1, realAway:1,  pkWinner:"away", lockTime:"2026-07-03T21:00:00"},
+    {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"Sudáfrica vs Canadá", home:"Sudáfrica", away:"Canadá", realHome:null,realAway:null,lockTime:"2026-06-28T15:00:00"},
+    {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"Brasil vs Japón", home:"Brasil", away:"Japón", realHome:null,realAway:null,lockTime:"2026-06-29T13:00:00"},
+    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"Alemania vs Paraguay", home:"Alemania", away:"Paraguay", realHome:null,realAway:null,lockTime:"2026-06-29T16:30:00"},
+    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"Países Bajos vs Marruecos", home:"Países Bajos", away:"Marruecos", realHome:null,realAway:null,lockTime:"2026-06-29T21:00:00"},
+    {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"Costa de Marfil vs Noruega", home:"Costa de Marfil", away:"Noruega", realHome:null,realAway:null,lockTime:"2026-06-30T13:00:00"},
+    {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"Francia vs Suecia", home:"Francia", away:"Suecia", realHome:null,realAway:null,lockTime:"2026-06-30T17:00:00"},
+    {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"México vs Ecuador", home:"México", away:"Ecuador", realHome:null,realAway:null,lockTime:"2026-06-30T21:00:00"},
+    {id:1008,phase:"round32",label:"Ronda de 32",matchNum:8, date:"1 Jul", desc:"Inglaterra vs Congo DR",          home:"Inglaterra",    away:"Congo DR",       realHome:null,realAway:null,lockTime:"2026-07-01T16:00:00"},
+    {id:1009,phase:"round32",label:"Ronda de 32",matchNum:9, date:"1 Jul", desc:"Bélgica vs Senegal",              home:"Bélgica",       away:"Senegal",        realHome:null,realAway:null,lockTime:"2026-07-01T13:00:00"},
+    {id:1010,phase:"round32",label:"Ronda de 32",matchNum:10,date:"1 Jul", desc:"USA vs Bosnia y Herzegovina",    home:"USA",           away:"Bosnia y Herzegovina",realHome:null,realAway:null,lockTime:"2026-07-01T19:00:00"},
+    {id:1011,phase:"round32",label:"Ronda de 32",matchNum:11,date:"2 Jul", desc:"España vs Austria",              home:"España",        away:"Austria",        realHome:null,realAway:null,lockTime:"2026-07-02T13:00:00"},
+    {id:1012,phase:"round32",label:"Ronda de 32",matchNum:12,date:"2 Jul", desc:"Portugal vs Croacia",            home:"Portugal",      away:"Croacia",        realHome:null,realAway:null,lockTime:"2026-07-02T16:30:00"},
+    {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"3 Jul", desc:"Suiza vs Argelia",               home:"Suiza",         away:"Argelia",        realHome:null,realAway:null,lockTime:"2026-07-03T13:00:00"},
+    {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"3 Jul", desc:"Australia vs Egipto",            home:"Australia",     away:"Egipto",         realHome:null,realAway:null,lockTime:"2026-07-03T16:30:00"},
+    {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"4 Jul", desc:"Argentina vs Cabo Verde",        home:"Argentina",     away:"Cabo Verde",     realHome:null,realAway:null,lockTime:"2026-07-04T13:30:00"},
+    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"4 Jul", desc:"Colombia vs Ghana",              home:"Colombia",      away:"Ghana",          realHome:null,realAway:null,lockTime:"2026-07-04T17:00:00"},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
-    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Gan.M73 vs Gan.M76", home:"Canadá",        away:"Marruecos",      realHome:0,   realAway:3,   lockTime:"2026-07-04T18:00:00"},
-    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Gan.M75 vs Gan.M78", home:"Paraguay",       away:"Francia",        realHome:null,realAway:null,lockTime:"2026-07-04T22:00:00"},
-    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Gan.M74 vs Gan.M77", home:"Brasil",         away:"Noruega",        realHome:null,realAway:null,lockTime:"2026-07-05T21:00:00"},
-    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"Gan.M79 vs Gan.M80", home:"México",         away:"Inglaterra",     realHome:null,realAway:null,lockTime:"2026-07-06T01:00:00"},
-    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Gan.M84 vs Gan.M83", home:"Portugal",       away:"España",         realHome:null,realAway:null,lockTime:"2026-07-06T20:00:00"},
-    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Gan.M82 vs Gan.M81", home:"Estados Unidos", away:"Bélgica",        realHome:null,realAway:null,lockTime:"2026-07-07T01:00:00"},
-    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Gan.M86 vs Gan.M88", home:"Argentina",      away:"Egipto",         realHome:null,realAway:null,lockTime:"2026-07-07T17:00:00"},
-    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Gan.M85 vs Gan.M87", home:"Suiza",          away:"Colombia",       realHome:null,realAway:null,lockTime:"2026-07-07T21:00:00"},
+    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul",desc:"Marruecos vs Canadá",   home:"Marruecos",  away:"Canadá",    realHome:null,realAway:null,lockTime:"2026-07-04T13:00:00"},
+    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul",desc:"Francia vs Paraguay",   home:"Francia",    away:"Paraguay",  realHome:null,realAway:null,lockTime:"2026-07-04T17:00:00"},
+    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul",desc:"Noruega vs Brasil",     home:"Noruega",    away:"Brasil",    realHome:null,realAway:null,lockTime:"2026-07-05T16:00:00"},
+    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul",desc:"Inglaterra vs México",  home:"Inglaterra", away:"México",    realHome:null,realAway:null,lockTime:"2026-07-05T20:00:00"},
+    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul",desc:"Portugal vs España",   home:"Portugal",   away:"España",    realHome:null,realAway:null,lockTime:"2026-07-06T15:00:00"},
+    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul",desc:"USA vs Bélgica",       home:"USA",        away:"Bélgica",   realHome:null,realAway:null,lockTime:"2026-07-06T20:00:00"},
+    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul",desc:"Argentina vs Egipto",  home:"Argentina",  away:"Egipto",    realHome:null,realAway:null,lockTime:"2026-07-07T12:00:00"},
+    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul",desc:"Colombia vs Suiza",    home:"Colombia",   away:"Suiza",     realHome:null,realAway:null,lockTime:"2026-07-07T16:00:00"},
     // ── CUARTOS DE FINAL ────────────────────────────────────────────────
     {id:1025,phase:"quarters",label:"Cuartos de Final",matchNum:1,date:"9 Jul", desc:"Gan. P89 vs Gan. P90",home:"Gan. P89",away:"Gan. P90",realHome:null,realAway:null},
     {id:1026,phase:"quarters",label:"Cuartos de Final",matchNum:2,date:"10 Jul",desc:"Gan. P93 vs Gan. P94",home:"Gan. P93",away:"Gan. P94",realHome:null,realAway:null},
@@ -334,14 +362,13 @@ function generateElimMatches() {
 const INITIAL_MATCHES = [...generateGroupMatches(), ...generateElimMatches()];
 
 // SCORING
-function calcPoints(predH, predA, realH, realA, pkWinner) {
+function calcPoints(predH, predA, realH, realA) {
   if (realH===null||realA===null||predH===null||predA===null) return null;
   const ph=Number(predH),pa=Number(predA),rh=Number(realH),ra=Number(realA);
   if (isNaN(ph)||isNaN(pa)||isNaN(rh)||isNaN(ra)) return null;
   if (ph===rh&&pa===ra) return 5;
   const pw=ph>pa?"H":ph<pa?"A":"D";
-  // Si hubo empate en tiempo regular (con penaltis), el resultado real es empate
-  const rw = pkWinner ? "D" : (rh>ra?"H":rh<ra?"A":"D");
+  const rw=rh>ra?"H":rh<ra?"A":"D";
   if (pw===rw) return 3;
   return 0;
 }
@@ -392,9 +419,73 @@ function calcAllClassified(allMatches, getScore) {
   return result;
 }
 
-// Classification bonus desactivado
+// Calculate bonus points for classification predictions
+// Los puntos de cada grupo solo se suman cuando TODOS los partidos del grupo están completos
 function calcClassificationBonus(predictions, allMatches) {
-  return {bonus:0, details:[]};
+  const realGroupMatches = allMatches.filter(m=>m.phase==="groups"&&m.realHome!==null);
+  if (realGroupMatches.length === 0) return {bonus:0, details:[]};
+
+  // Real classified
+  const realClassified = calcAllClassified(allMatches, m=>({h:m.realHome, a:m.realAway}));
+
+  // Predicted classified
+  const predClassified = calcAllClassified(allMatches, m=>{
+    const pred = predictions?.[m.id];
+    if (!pred||pred.home===null||pred.away===null) return null;
+    return {h:Number(pred.home), a:Number(pred.away)};
+  });
+
+  let bonus = 0;
+  const details = [];
+
+  // Check 1st and 2nd place for each group
+  // Solo calcular si TODOS los partidos de ese grupo tienen resultado
+  Object.keys(GROUPS).forEach(grp => {
+    const grpMatches = allMatches.filter(m=>m.phase==="groups"&&m.group===grp);
+    const grpComplete = grpMatches.length > 0 && grpMatches.every(m=>m.realHome!==null&&m.realAway!==null);
+    if (!grpComplete) return; // grupo incompleto, no sumar puntos aún
+
+    ["1st","2nd"].forEach(pos => {
+      const key = grp+"_"+pos;
+      const real = realClassified.byGroup[key];
+      const pred = predClassified.byGroup[key];
+      if (!real||!pred) return;
+      if (pred===real) {
+        bonus+=10;
+        details.push({type:"group_pos", grp, pos, team:real, pts:10, msg:"Acerto "+pos+" del Grupo "+grp+": "+real+" (10pts)"});
+      } else {
+        const realGrp = realClassified.byGroup[grp];
+        if (realGrp && realGrp.slice(0,2).some(s=>s.team===pred)) {
+          bonus+=5;
+          details.push({type:"group_team", grp, pos, team:pred, pts:5, msg:"Acerto clasificado Grupo "+grp+": "+pred+" (5pts)"});
+        }
+      }
+    });
+  });
+
+  // Check best 8 thirds — solo cuando TODOS los grupos están completos
+  const allGroupsComplete = Object.keys(GROUPS).every(grp => {
+    const grpMatches = allMatches.filter(m=>m.phase==="groups"&&m.group===grp);
+    return grpMatches.length > 0 && grpMatches.every(m=>m.realHome!==null&&m.realAway!==null);
+  });
+
+  if (allGroupsComplete) {
+    const realTop8 = realClassified.top8thirds;
+    const predTop8 = predClassified.top8thirds;
+    if (realTop8.length>0 && predTop8.length>0) {
+      predTop8.forEach((team,i) => {
+        if (realTop8[i]===team) {
+          bonus+=10;
+          details.push({type:"third_pos", team, pts:10, msg:"Acerto mejor 3ro posicion "+(i+1)+": "+team+" (10pts)"});
+        } else if (realTop8.includes(team)) {
+          bonus+=5;
+          details.push({type:"third_team", team, pts:5, msg:"Acerto mejor 3ro: "+team+" (5pts)"});
+        }
+      });
+    }
+  }
+
+  return {bonus, details};
 }
 
 function calcParticipantPoints(predictions, matches, invoices) {
@@ -402,7 +493,7 @@ function calcParticipantPoints(predictions, matches, invoices) {
   matches.forEach(m => {
     const pred=predictions?.[m.id];
     if (!pred) return;
-    const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);
+    const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);
     if (pts===null) return;
     total+=pts;
     if (pts===5) exact++;
@@ -570,169 +661,430 @@ const FontStyle = () => (
 
 // LEADERBOARD
 // REGLAMENTO VIEW
+// ─── CARRUSEL DE LOGOS DE MARCAS PARTICIPANTES ────────────────────────────────
+const LOGOS_MARCAS = [
+  { src: "/logos/goya.jpg",          name: "Goya" },
+  { src: "/logos/charras.png",        name: "Charras" },
+  { src: "/logos/mama-nelly.png",     name: "Mamá Nelly Foods" },
+  { src: "/logos/festival.png",       name: "Festival" },
+  { src: "/logos/postobon.png",       name: "Postobón" },
+  { src: "/logos/tortilla-veloz.png", name: "La Tortilla Veloz" },
+];
+
+function LogosCarrusel({ titulo }) {
+  const lang = useLang();
+  const track = [...LOGOS_MARCAS, ...LOGOS_MARCAS]; // duplicar para loop continuo
+
+  return (
+    <div style={{marginBottom:16}}>
+      {titulo && (
+        <div style={{textAlign:"center",fontSize:"0.72rem",color:"#9ca3af",fontWeight:700,
+          letterSpacing:2,marginBottom:8}}>
+          {lang==="fr" ? "PRODUITS PARTICIPANTS" : "PRODUCTOS PARTICIPANTES"}
+        </div>
+      )}
+      <div style={{overflow:"hidden",borderRadius:10,background:"#fff",
+        border:"1px solid #e5e7eb",padding:"10px 0",position:"relative"}}>
+        {/* Fade izquierda */}
+        <div style={{position:"absolute",left:0,top:0,bottom:0,width:32,
+          background:"linear-gradient(to right,#fff,transparent)",zIndex:2,pointerEvents:"none"}}/>
+        {/* Fade derecha */}
+        <div style={{position:"absolute",right:0,top:0,bottom:0,width:32,
+          background:"linear-gradient(to left,#fff,transparent)",zIndex:2,pointerEvents:"none"}}/>
+        <div style={{
+          display:"flex", gap:24, alignItems:"center",
+          animation:"scrollLogos 18s linear infinite",
+          width:"max-content",
+        }}>
+          {track.map((logo, i) => (
+            <div key={i} style={{
+              width:90, height:60, flexShrink:0,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              background:"#fff", borderRadius:8, padding:"6px",
+              boxShadow:"0 1px 4px rgba(0,0,0,0.08)",
+            }}>
+              <img src={logo.src} alt={logo.name}
+                style={{maxWidth:"100%", maxHeight:"100%",
+                  objectFit:"contain",
+                  backgroundColor:"#fff",
+                  borderRadius:4,
+                }} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <style>{`
+        @keyframes scrollLogos {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function ReglamentoView() {
   const lang = useLang();
+  const [showLang, setShowLang] = useState("es");
 
-  const T = {
-    fr: {
-      toggle: "Ver en Español",
-      title: "RÈGLEMENT OFFICIEL — CONCOURS MUNDIAL 2026",
-      subtitle: "Sabor Latino · mundial26.vercel.app",
-      s1: "1. Objectif du concours",
-      s1b: "Le Concours Mundial 2026 de Sabor Latino est une compétition de pronostics sportifs dans laquelle les participants prédisent les résultats des matchs de la Coupe du Monde de Football 2026. Le participant ayant le plus grand nombre de points à la fin du tournoi sera déclaré gagnant.",
-      s2: "2. Conditions de participation",
-      s2intro: "Pour participer de façon valide au concours, TOUTES les conditions suivantes doivent être remplies :",
-      s2items: [
-        "S'inscrire sur la plateforme officielle (mundial26.vercel.app) avant le 10 juin 2026.",
-        "Avoir effectué au moins UN achat de 50,00 $ CAD ou plus chez Sabor Latino.",
-        "La facture de 50,00 $ CAD ou plus doit inclure au moins un des produits participants au concours*. La liste sera publiée prochainement.",
-        "Si le participant remporte un prix, il doit accepter qu'une photo le montrant en train de recevoir son prix soit publiée sur les réseaux sociaux officiels de Sabor Latino.",
-      ],
-      s2note1: "⚠️ IMPORTANT : Les achats inférieurs à 50,00 $ CAD génèrent des points supplémentaires, mais NE valident PAS la participation. Si un gagnant ne dispose pas d'une facture de 50,00 $ + incluant un produit participant, son prix ne lui sera pas remis et passera au suivant au classement.",
-      s2note2: "* Les produits participants seront publiés prochainement sur les réseaux sociaux de Sabor Latino.",
-      s3: "3. Prix",
-      s3b: "Les prix seront annoncés prochainement sur les réseaux sociaux et la plateforme du concours.",
-      s3items: ["1re place : Prix à annoncer *", "2e place : Prix à annoncer *", "3e place : Prix à annoncer *"],
-      s4: "4. Système de points",
-      s4a: "4.1  Pronostics de matchs",
-      s4aRows: [["Résultat exact (score correct)","5 pts"],["Vainqueur correct (nul, domicile ou extérieur)","3 pts"],["Pronostic incorrect","0 pt"]],
-      s4b: "4.2  Équipes qualifiées de la phase de groupes",
-      s4bRows: [["Équipe correcte + position exacte (1re ou 2e du groupe)","10 pts"],["Équipe correcte, mauvaise position","5 pts"],["Meilleur 3e : position exacte","10 pts"],["Meilleur 3e : équipe correcte, mauvaise position","5 pts"]],
-      s4c: "4.3  Points par factures (CAD $)",
-      s4cRows: [["10 $ – 50 $","1 pt"],["51 $ – 100 $","3 pts"],["101 $ – 150 $","6 pts"],["151 $ – 200 $","9 pts"],["201 $ ou plus","12 pts"]],
-      s4note: "Les factures doivent être enregistrées sur la plateforme. Seules les factures approuvées par l'administrateur génèrent des points.",
-      s5: "5. Enregistrement des factures",
-      s5items: [
-        "Enregistrer les factures dans la section « Mon Profil » sur la plateforme.",
-        "Saisir le numéro de facture et le montant total en dollars canadiens (CAD).",
-        "L'administrateur approuvera ou rejettera chaque facture enregistrée.",
-        "Une même facture ne peut pas être enregistrée deux fois.",
-        "Montant minimum pour obtenir des points : 10,00 $ CAD.",
-      ],
-      s6: "6. Clôture des pronostics",
-      s6items: [
-        "Phase de groupes : tous les pronostics doivent être saisis avant le 10 juin 2026 à 00 h 00. Aucune modification acceptée après cette heure.",
-        "Phases éliminatoires : chaque match sera verrouillé 24 heures avant son heure de coup d'envoi officielle.",
-      ],
-      s7: "7. Conditions générales",
-      s7items: [
-        "Sabor Latino se réserve le droit de modifier, suspendre ou annuler le concours en cas de force majeure.",
-        "La décision de l'administrateur sur la validité des factures et pronostics est définitive.",
-        "En cas d'égalité : (1) plus de résultats exacts, (2) plus de vainqueurs corrects, (3) score de factures le plus élevé.",
-        "En participant, le concurrent accepte toutes les conditions du présent règlement.",
-      ],
-    },
-    es: {
-      toggle: "Voir en Français",
-      title: "REGLAMENTO OFICIAL — CONCURSO MUNDIAL 2026",
-      subtitle: "Sabor Latino · mundial26.vercel.app",
-      s1: "1. Objetivo del polla",
-      s1b: "El Polla Mundial 2026 de Sabor Latino es una competencia de pronósticos deportivos en la que los participantes predicen los resultados de los partidos de la Copa Mundial de Fútbol 2026. El participante con mayor puntaje al finalizar el torneo será declarado ganador.",
-      s2: "2. Requisitos de participación",
-      s2intro: "Para participar de forma válida en el polla, se deben cumplir TODOS los siguientes requisitos:",
-      s2items: [
-        "Registrarse en la plataforma oficial (mundial26.vercel.app) antes del 10 de junio de 2026.",
-        "Haber realizado al menos UNA compra de $50.00 CAD o más en Sabor Latino.",
-        "La factura de $50.00 CAD o más debe incluir al menos uno de los productos participantes del polla*. La lista será publicada próximamente.",
-        "Si el participante resulta ganador de algún premio, debe permitir que una fotografía recibiendo el premio sea publicada en las redes sociales oficiales de Sabor Latino.",
-      ],
-      s2note1: "⚠️ IMPORTANTE: Las compras menores de $50.00 CAD generan puntos adicionales, pero NO validan la participación. Si un ganador no cuenta con una factura de $50.00+ que incluya un producto participante, su premio no será entregado y pasará al siguiente clasificado.",
-      s2note2: "* Los productos participantes serán publicados próximamente en las redes sociales de Sabor Latino.",
-      s3: "3. Premios",
-      s3b: "Los premios serán anunciados próximamente en las redes sociales y en la plataforma del polla.",
-      s3items: ["1er lugar: Premio por anunciar *", "2do lugar: Premio por anunciar *", "3er lugar: Premio por anunciar *"],
-      s4: "1. Sistema de puntos",
-      s4a: "1.1  Pronósticos de partidos",
-      s4aRows: [["Resultado exacto (marcador correcto)","5 pts"],["Ganador correcto (empate, local o visitante)","3 pts"],["Pronóstico incorrecto","0 pts"]],
-      s4b: "1.2  Clasificados de grupos",
-      s4bRows: [["Equipo correcto + posición exacta (1° o 2° del grupo)","10 pts"],["Equipo correcto, posición equivocada","5 pts"],["Mejor tercero: posición exacta","10 pts"],["Mejor tercero: equipo correcto, posición equivocada","5 pts"]],
-      s4c: null, s4cRows: [], s4note: null,
-      s5: null, s5items: [],
-      s6: "2. Cierre de pronósticos",
-      s6items: [
-        "Cada partido se bloquea automáticamente 24 horas antes de su horario oficial de juego. No se pueden cambiar pronósticos después de ese momento.",
-      ],
-      s7: null, s7items: [],
-    }
-  };
+  const Section = ({icon, title, children, color="#d3172e"}) => (
+    <div style={{marginBottom:24}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,fontWeight:800,fontSize:"1rem",color,borderBottom:"2px solid "+color,paddingBottom:6,marginBottom:12}}>
+        <span style={{fontSize:"1.1rem"}}>{icon}</span>{title}
+      </div>
+      {children}
+    </div>
+  );
 
-  const t = T[lang];
+  const BulletItem = ({text, highlight}) => (
+    <div style={{display:"flex",gap:10,marginBottom:8,alignItems:"flex-start",background:highlight?"#fff7ed":"transparent",borderRadius:highlight?8:0,padding:highlight?"8px 10px":"0"}}>
+      <span style={{color:"#d3172e",fontWeight:900,flexShrink:0,marginTop:2,fontSize:"0.9rem"}}>›</span>
+      <span style={{fontSize:"0.86rem",color:"#374151",lineHeight:1.65}}>{text}</span>
+    </div>
+  );
 
-  const Section = ({title, children}) => {
-    if (!title) return null;
+  const Alerta = ({children, tipo="warning"}) => {
+    const cfg = {
+      warning: {bg:"#fff7ed",border:"#f59e0b",color:"#92400e",icon:"⚠️"},
+      info:    {bg:"#eff6ff",border:"#3b82f6",color:"#1e40af",icon:"ℹ️"},
+      success: {bg:"#f0fdf4",border:"#22c55e",color:"#166534",icon:"✅"},
+    };
+    const c = cfg[tipo];
     return (
-      <div style={{marginBottom:22}}>
-        <div style={{fontWeight:800,fontSize:"0.95rem",color:BRAND.red,borderBottom:"2px solid "+BRAND.red,paddingBottom:5,marginBottom:10,letterSpacing:0.5}}>
-          {title}
-        </div>
-        {children}
+      <div style={{background:c.bg,border:`1px solid ${c.border}`,borderRadius:10,padding:"10px 14px",marginTop:8,marginBottom:8,display:"flex",gap:8,alignItems:"flex-start"}}>
+        <span style={{flexShrink:0}}>{c.icon}</span>
+        <span style={{fontSize:"0.82rem",color:c.color,lineHeight:1.6}}>{children}</span>
       </div>
     );
   };
 
-  const BulletItem = ({text}) => (
-    <div style={{display:"flex",gap:8,marginBottom:6,alignItems:"flex-start"}}>
-      <span style={{color:BRAND.red,fontWeight:800,flexShrink:0,marginTop:1}}>•</span>
-      <span style={{fontSize:"0.85rem",color:"#374151",lineHeight:1.6}}>{text}</span>
-    </div>
-  );
-
-  const Note = ({text}) => (
-    <div style={{background:"#fff5f5",border:"1px solid #fca5a5",borderRadius:8,padding:"10px 14px",marginTop:8,marginBottom:8}}>
-      <span style={{fontSize:"0.8rem",color:"#991b1b",lineHeight:1.6}}>{text}</span>
-    </div>
-  );
-
-  const PointsTable = ({rows}) => (
-    <div style={{border:"1px solid #e5e7eb",borderRadius:10,overflow:"hidden",marginBottom:8}}>
-      {rows.map(([desc,pts],i)=>(
-        <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",background:i%2===0?"#fff":"#f9fafb",borderBottom:i<rows.length-1?"1px solid #f3f4f6":"none"}}>
-          <span style={{fontSize:"0.83rem",color:"#374151"}}>{desc}</span>
-          <span style={{fontWeight:800,color:BRAND.red,fontSize:"0.9rem",flexShrink:0,marginLeft:12}}>{pts}</span>
+  const Tabla = ({rows, header}) => (
+    <div style={{border:"1px solid #e5e7eb",borderRadius:10,overflow:"hidden",marginBottom:10}}>
+      {header && (
+        <div style={{display:"flex",background:"#d3172e",padding:"7px 14px",gap:8}}>
+          {header.map((h,i)=>(
+            <span key={i} style={{fontSize:"0.75rem",fontWeight:800,color:"#fff",letterSpacing:0.5,
+              flex: i===0 ? 2 : 1, textAlign: i===0 ? "left" : "center"}}>{h}</span>
+          ))}
+        </div>
+      )}
+      {rows.map((cols,i)=>(
+        <div key={i} style={{display:"flex",alignItems:"center",padding:"9px 14px",gap:8,background:i%2===0?"#fff":"#f9fafb",borderBottom:i<rows.length-1?"1px solid #f3f4f6":"none"}}>
+          <span style={{fontSize:"0.84rem",color:"#374151",lineHeight:1.5,flex:2}}>{cols[0]}</span>
+          <span style={{fontWeight:800,color:"#d3172e",fontSize:"0.88rem",flex:1,textAlign:"center",background:"#fff5f5",borderRadius:6,padding:"2px 6px"}}>{cols[1]}</span>
+          {cols[2] !== undefined && (
+            <span style={{fontWeight:700,color:cols[2]==="0 pts"||cols[2]==="0 pt"?"#9ca3af":"#059669",fontSize:"0.88rem",flex:1,textAlign:"center",background:cols[2]==="0 pts"||cols[2]==="0 pt"?"#f9fafb":"#f0fdf4",borderRadius:6,padding:"2px 6px"}}>{cols[2]}</span>
+          )}
         </div>
       ))}
     </div>
   );
 
+  const EjemploBox = ({titulo, items}) => (
+    <div style={{background:"#f0fdf4",border:"1px solid #86efac",borderRadius:10,padding:"10px 14px",marginTop:6,marginBottom:10}}>
+      <div style={{fontSize:"0.75rem",fontWeight:800,color:"#166534",marginBottom:6,letterSpacing:0.5}}>💡 {titulo}</div>
+      {items.map((it,i)=>(
+        <div key={i} style={{fontSize:"0.82rem",color:"#166534",lineHeight:1.6,marginBottom:2}}>• {it}</div>
+      ))}
+    </div>
+  );
+
+  const es = (
+    <>
+      <Section icon="🎯" title="1. ¿En qué consiste el concurso?">
+        <p style={{fontSize:"0.86rem",color:"#374151",lineHeight:1.7,margin:"0 0 8px"}}>
+          El <strong>Concurso Copa con Sabor de Sabor Latino</strong> es una competencia de pronósticos deportivos. Tú predices los resultados de los partidos de la Copa y acumulas puntos. Al final del torneo se realizará un <strong>sorteo por ruleta</strong> — entre más puntos tengas, más entradas en la ruleta obtienes y más chances de ganar.
+        </p>
+        <Alerta tipo="info">El sorteo final se realiza por ruleta, no por mayor puntaje. Cada 10 puntos acumulados = 1 entrada en la ruleta 🎰</Alerta>
+      </Section>
+
+      <Section icon="📋" title="2. ¿Cómo participar?" color="#2563eb">
+        <p style={{fontSize:"0.86rem",color:"#374151",marginBottom:10,fontWeight:600}}>Para participar de forma válida debes cumplir <u>todos</u> los siguientes requisitos:</p>
+        <BulletItem text="Registrarte en la plataforma oficial: copaconsabor.saborlatino.ca. Puedes participar en cualquier momento hasta el 19 de julio de 2026." />
+        <BulletItem text="Registrar compras en Sabor Latino de más de $10 CAD que incluyan un producto participante* y que en total sumen mínimo $50.00 CAD." />
+        <BulletItem text="Registrar esa factura en la plataforma (sección Mi Perfil) para que sea aprobada por el administrador." />
+        <Alerta tipo="warning">
+          <strong>Importante:</strong> Facturas de $10 o menos no cuentan para la validación. Las facturas de más de $10 con producto participante se van sumando — cuando la suma llegue a $50 o más tu participación queda validada. Si resultaras ganador sin cumplir esto, el premio pasaría al siguiente en la ruleta.
+        </Alerta>
+        <div style={{fontSize:"0.78rem",color:"#9ca3af",marginTop:4}}>* Los productos participantes serán publicados en las redes sociales de Sabor Latino.</div>
+      </Section>
+
+      <Section icon="🏆" title="3. Premios">
+        <p style={{fontSize:"0.86rem",color:"#374151",marginBottom:10}}>Los premios serán anunciados próximamente en las redes sociales y en la plataforma del concurso.</p>
+        {[["🥇","1er lugar","Premio por anunciar"],["🥈","2do lugar","Premio por anunciar"],["🥉","3er lugar","Premio por anunciar"]].map(([ico,pos,desc],i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:9,padding:"9px 14px",marginBottom:7}}>
+            <span style={{fontSize:"1.4rem"}}>{ico}</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:"0.88rem",color:"#111827"}}>{pos}</div>
+              <div style={{fontSize:"0.78rem",color:"#9ca3af"}}>{desc}</div>
+            </div>
+          </div>
+        ))}
+      </Section>
+
+      <Section icon="⭐" title="4. ¿Cómo se acumulan los puntos?">
+        <Alerta tipo="success">Las entradas en la ruleta se determinan por tus facturas aprobadas (no por puntos). Registra más compras para tener más chances 🎰</Alerta>
+
+        <div style={{fontWeight:700,fontSize:"0.88rem",color:"#374151",margin:"14px 0 6px"}}>4.1 Pronósticos de partidos</div>
+        <Tabla
+          header={["Tipo de pronóstico","Puntos"]}
+          rows={[
+            ["🎯 Resultado exacto — acertaste el marcador exacto (ej: 2-1)","5 pts"],
+            ["✅ Ganador correcto — acertaste quién ganó o que fue empate","3 pts"],
+            ["❌ Pronóstico incorrecto","0 pts"],
+          ]}
+        />
+        <EjemploBox titulo="Ejemplo"
+          items={[
+            "Real resultado: Colombia 2 – Argentina 1",
+            "Tu pronóstico: Colombia 2 – Argentina 1 → 5 pts (exacto) ✓",
+            "Tu pronóstico: Colombia 1 – Argentina 0 → 3 pts (ganador correcto) ✓",
+            "Tu pronóstico: Argentina 1 – Colombia 0 → 0 pts (incorrecto) ✗",
+          ]}
+        />
+
+        <div style={{fontWeight:700,fontSize:"0.88rem",color:"#374151",margin:"14px 0 6px"}}>4.2 Pronósticos de clasificados de grupos</div>
+        <p style={{fontSize:"0.83rem",color:"#6b7280",marginBottom:8,lineHeight:1.6}}>Antes del torneo predices qué equipos clasifican desde cada grupo y en qué posición terminan (1° o 2°).</p>
+        <Tabla
+          header={["Acierto","Puntos"]}
+          rows={[
+            ["Equipo correcto + posición exacta (1° o 2° del grupo)","10 pts"],
+            ["Equipo correcto pero posición equivocada","5 pts"],
+            ["Mejor 3ro: posición exacta","10 pts"],
+            ["Mejor 3ro: equipo correcto, posición equivocada","5 pts"],
+          ]}
+        />
+
+        <div style={{fontWeight:700,fontSize:"0.88rem",color:"#374151",margin:"14px 0 6px"}}>4.3 Entradas a la ruleta por factura de compra</div>
+        <p style={{fontSize:"0.83rem",color:"#6b7280",marginBottom:8,lineHeight:1.6}}>Cada factura aprobada de Sabor Latino te da <strong>entradas en la ruleta</strong> y puntos adicionales según su monto. Puedes registrar múltiples facturas para acumular más entradas.</p>
+        <Tabla
+          header={["Monto de la factura (CAD)","Entradas ruleta","Puntos extra"]}
+          rows={[
+            ["$10 – $25","1 entrada","0 pts"],
+            ["$26 – $50","2 entradas","+ 2 pts"],
+            ["$51 – $75","3 entradas","+ 4 pts"],
+            ["$76 – $100","4 entradas","+ 6 pts"],
+            ["$101 – $150","6 entradas","+ 8 pts"],
+            ["$151 – $200","8 entradas","+ 8 pts"],
+            ["$201 o más","10 entradas","+ 8 pts"],
+          ]}
+        />
+        <EjemploBox titulo="Ejemplo de entradas en la ruleta"
+          items={[
+            "Ana registra una factura de $60 → 3 entradas + 4 pts",
+            "Carlos registra dos facturas: $40 + $90 → 6 entradas en total",
+            "María registra una factura de $170 → 8 entradas + 8 pts",
+            "¡Más compras = más entradas = más chances de ganar!",
+          ]}
+        />
+      </Section>
+
+      <Section icon="🧾" title="5. Cómo registrar tus facturas" color="#059669">
+        <BulletItem text="Ve a la sección Mi Perfil dentro de la plataforma." />
+        <BulletItem text="Ingresa el número de factura y el monto total en dólares canadienses (CAD)." />
+        <BulletItem text="Indica si la factura incluye un producto participante (obligatorio para validar tu participación)." />
+        <BulletItem text="Los puntos y entradas se acumulan automáticamente al registrar la factura." />
+        <BulletItem text="No se puede registrar la misma factura dos veces." />
+        <Alerta tipo="warning"><strong>Verificación en el sorteo:</strong> Al momento de realizar la rifa, se verificará que cada factura sea real y que el monto registrado sea correcto. Si se detecta que una factura es falsa o tiene un monto diferente al real, el premio no será válido y pasará al siguiente participante.</Alerta>
+        <Alerta tipo="info">Compras de más de $10 CAD te dan entradas en la ruleta. Para validar tu participación necesitas que tus facturas con producto participante <strong>sumen al menos $50.00 CAD</strong>.</Alerta>
+      </Section>
+
+      <Section icon="🔒" title="6. Cierre de pronósticos" color="#7c3aed">
+        <BulletItem highlight text="Puedes ingresar y modificar tus pronósticos en cualquier momento durante la Copa, siempre que el partido aún no haya sido bloqueado." />
+        <BulletItem highlight text="Fase de grupos: cada partido se bloquea automáticamente 1 hora antes de su horario oficial de inicio." />
+        <BulletItem highlight text="Fases eliminatorias (octavos, cuartos, semis, final): cada partido se bloquea 24 horas antes de su horario oficial de juego." />
+        <Alerta tipo="warning">Una vez bloqueado un partido ya no puedes modificar ese pronóstico — pero los demás partidos del torneo siguen abiertos hasta su propio cierre.</Alerta>
+      </Section>
+
+      {/* Logos marcas participantes */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontWeight:800,fontSize:"1rem",color:"#d3172e",borderBottom:"2px solid #d3172e",
+          paddingBottom:6,marginBottom:12,display:"flex",alignItems:"center",gap:8}}>
+          <span>🏷️</span>{lang==="fr"?"Produits participants":"Productos participantes"}
+        </div>
+        <p style={{fontSize:"0.84rem",color:"#6b7280",marginBottom:12,lineHeight:1.6}}>
+          {lang==="fr"
+            ? "Les achats de ces marques comptent pour valider ta participation au concours."
+            : "Las compras de estas marcas cuentan para validar tu participación en el concurso."}
+        </p>
+        <LogosCarrusel titulo={false} />
+      </div>
+
+      <Section icon="⚖️" title="7. Condiciones generales" color="#6b7280">
+        <BulletItem text="Sabor Latino se reserva el derecho de modificar, suspender o cancelar el concurso en caso de fuerza mayor." />
+        <BulletItem text="La decisión del administrador sobre la validez de facturas y pronósticos es definitiva." />
+        <BulletItem text="El sorteo final se realiza por ruleta, segmentado por sucursal (St-Hubert y Brossard)." />
+        <BulletItem text="Al participar, el concursante acepta todas las condiciones de este reglamento." />
+      </Section>
+    </>
+  );
+
+  const fr = (
+    <>
+      <Section icon="🎯" title="1. En quoi consiste le concours ?">
+        <p style={{fontSize:"0.86rem",color:"#374151",lineHeight:1.7,margin:"0 0 8px"}}>
+          Le <strong>Concours Copa con Sabor de Sabor Latino</strong> est une compétition de pronostics sportifs. Tu prédis les résultats des matchs de la Coupe et tu accumules des points. À la fin du tournoi, un <strong>tirage au sort par roulette</strong> est organisé — plus tu as de points, plus tu as d'entrées dans la roulette et plus tu as de chances de gagner.
+        </p>
+        <Alerta tipo="info">Le tirage final se fait par roulette, pas par score le plus élevé. Chaque 10 points accumulés = 1 entrée dans la roulette 🎰</Alerta>
+      </Section>
+
+      <Section icon="📋" title="2. Comment participer ?" color="#2563eb">
+        <p style={{fontSize:"0.86rem",color:"#374151",marginBottom:10,fontWeight:600}}>Pour participer de façon valide, tu dois remplir <u>toutes</u> les conditions suivantes :</p>
+        <BulletItem text="T'inscrire sur la plateforme officielle : copaconsabor.saborlatino.ca. Tu peux participer à tout moment jusqu'au 19 juillet 2026." />
+        <BulletItem text="Enregistrer des achats chez Sabor Latino de plus de 10 $ CAD incluant un produit participant* et totalisant au moins 50,00 $ CAD." />
+        <BulletItem text="Enregistrer cette facture sur la plateforme (section Mon Profil) pour qu'elle soit approuvée par l'administrateur." />
+        <Alerta tipo="warning">
+          <strong>Important :</strong> Les factures de 10 $ ou moins ne comptent pas pour la validation. Les factures de plus de 10 $ avec produit participant s'accumulent — quand la somme atteint 50 $ ou plus, ta participation est validée. Si tu étais déclaré gagnant sans remplir cette condition, le prix passerait au suivant dans la roulette.
+        </Alerta>
+        <div style={{fontSize:"0.78rem",color:"#9ca3af",marginTop:4}}>* Les produits participants seront publiés sur les réseaux sociaux de Sabor Latino.</div>
+      </Section>
+
+      <Section icon="🏆" title="3. Prix">
+        <p style={{fontSize:"0.86rem",color:"#374151",marginBottom:10}}>Les prix seront annoncés prochainement sur les réseaux sociaux et la plateforme du concours.</p>
+        {[["🥇","1re place","Prix à annoncer"],["🥈","2e place","Prix à annoncer"],["🥉","3e place","Prix à annoncer"]].map(([ico,pos,desc],i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:9,padding:"9px 14px",marginBottom:7}}>
+            <span style={{fontSize:"1.4rem"}}>{ico}</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:"0.88rem",color:"#111827"}}>{pos}</div>
+              <div style={{fontSize:"0.78rem",color:"#9ca3af"}}>{desc}</div>
+            </div>
+          </div>
+        ))}
+      </Section>
+
+      <Section icon="⭐" title="4. Comment accumuler des points ?">
+        <Alerta tipo="success">Les entrées dans la roulette dépendent de tes factures approuvées (pas des points). Plus tu achètes, plus tu as de chances 🎰</Alerta>
+
+        <div style={{fontWeight:700,fontSize:"0.88rem",color:"#374151",margin:"14px 0 6px"}}>4.1 Pronostics de matchs</div>
+        <Tabla
+          header={["Type de pronostic","Points"]}
+          rows={[
+            ["🎯 Résultat exact — tu as deviné le score exact (ex : 2-1)","5 pts"],
+            ["✅ Vainqueur correct — tu as deviné le gagnant ou le nul","3 pts"],
+            ["❌ Pronostic incorrect","0 pt"],
+          ]}
+        />
+        <EjemploBox titulo="Exemple"
+          items={[
+            "Vrai résultat : Colombie 2 – Argentine 1",
+            "Ton pronostic : Colombie 2 – Argentine 1 → 5 pts (exact) ✓",
+            "Ton pronostic : Colombie 1 – Argentine 0 → 3 pts (vainqueur correct) ✓",
+            "Ton pronostic : Argentine 1 – Colombie 0 → 0 pt (incorrect) ✗",
+          ]}
+        />
+
+        <div style={{fontWeight:700,fontSize:"0.88rem",color:"#374151",margin:"14px 0 6px"}}>4.2 Pronostics de qualifiés par groupe</div>
+        <p style={{fontSize:"0.83rem",color:"#6b7280",marginBottom:8,lineHeight:1.6}}>Avant le tournoi, tu prédis quelles équipes se qualifient dans chaque groupe et à quelle position (1re ou 2e).</p>
+        <Tabla
+          header={["Pronostic","Points"]}
+          rows={[
+            ["Équipe correcte + position exacte (1re ou 2e du groupe)","10 pts"],
+            ["Équipe correcte mais mauvaise position","5 pts"],
+            ["Meilleur 3e : position exacte","10 pts"],
+            ["Meilleur 3e : équipe correcte, mauvaise position","5 pts"],
+          ]}
+        />
+
+        <div style={{fontWeight:700,fontSize:"0.88rem",color:"#374151",margin:"14px 0 6px"}}>4.3 Entrées à la roulette par facture d'achat</div>
+        <p style={{fontSize:"0.83rem",color:"#6b7280",marginBottom:8,lineHeight:1.6}}>Chaque facture approuvée de Sabor Latino te donne des <strong>entrées dans la roulette</strong> et des points supplémentaires selon son montant. Tu peux enregistrer plusieurs factures pour accumuler plus d'entrées.</p>
+        <Tabla
+          header={["Montant de la facture (CAD)","Entrées roulette","Points extra"]}
+          rows={[
+            ["10 $ – 25 $","1 entrée","0 pt"],
+            ["26 $ – 50 $","2 entrées","+ 2 pts"],
+            ["51 $ – 75 $","3 entrées","+ 4 pts"],
+            ["76 $ – 100 $","4 entrées","+ 6 pts"],
+            ["101 $ – 150 $","6 entrées","+ 8 pts"],
+            ["151 $ – 200 $","8 entrées","+ 8 pts"],
+            ["201 $ ou plus","10 entrées","+ 8 pts"],
+          ]}
+        />
+        <EjemploBox titulo="Exemple d'entrées dans la roulette"
+          items={[
+            "Ana enregistre une facture de 60 $ → 3 entrées + 4 pts",
+            "Carlos enregistre deux factures : 40 $ + 90 $ → 6 entrées au total",
+            "María enregistre une facture de 170 $ → 8 entrées + 8 pts",
+            "Plus d'achats = plus d'entrées = plus de chances de gagner !",
+          ]}
+        />
+      </Section>
+
+      <Section icon="🧾" title="5. Comment enregistrer tes factures" color="#059669">
+        <BulletItem text="Va dans la section Mon Profil sur la plateforme." />
+        <BulletItem text="Saisis le numéro de facture et le montant total en dollars canadiens (CAD)." />
+        <BulletItem text="Indique si la facture inclut un produit participant (obligatoire pour valider ta participation)." />
+        <BulletItem text="Les points et entrées s'accumulent automatiquement dès l'enregistrement de la facture." />
+        <BulletItem text="Une même facture ne peut pas être enregistrée deux fois." />
+        <Alerta tipo="warning"><strong>Vérification lors du tirage :</strong> Au moment du tirage, chaque facture sera vérifiée pour s'assurer qu'elle est réelle et que le montant enregistré est exact. Si une facture s'avère fausse ou avec un montant différent, le prix ne sera pas remis et passera au participant suivant.</Alerta>
+        <Alerta tipo="info">Les achats de plus de 10 $ CAD te donnent des entrées dans la roulette. Pour valider ta participation, tes factures avec produit participant doivent <strong>totaliser au moins 50,00 $ CAD</strong>.</Alerta>
+      </Section>
+
+      <Section icon="🔒" title="6. Clôture des pronostics" color="#7c3aed">
+        <BulletItem highlight text="Tu peux saisir et modifier tes pronostics à tout moment pendant la Coupe, tant que le match n'a pas encore été verrouillé." />
+        <BulletItem highlight text="Phase de groupes : chaque match est automatiquement verrouillé 1 heure avant son coup d'envoi officiel." />
+        <BulletItem highlight text="Phases éliminatoires (huitièmes, quarts, demis, finale) : chaque match est verrouillé 24 heures avant son coup d'envoi officiel." />
+        <Alerta tipo="warning">Une fois un match verrouillé, tu ne peux plus modifier ce pronostic — mais les autres matchs du tournoi restent ouverts jusqu'à leur propre clôture.</Alerta>
+      </Section>
+
+      <Section icon="⚖️" title="7. Conditions générales" color="#6b7280">
+        <BulletItem text="Sabor Latino se réserve le droit de modifier, suspendre ou annuler le concours en cas de force majeure." />
+        <BulletItem text="La décision de l'administrateur sur la validité des factures et pronostics est définitive." />
+        <BulletItem text="Le tirage final se fait par roulette, séparé par succursale (St-Hubert et Brossard)." />
+        <BulletItem text="En participant, le concurrent accepte toutes les conditions du présent règlement." />
+      </Section>
+    </>
+  );
+
   return (
     <div className="fi" style={{maxWidth:600,margin:"0 auto"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,#d3172e,#a01020)",borderRadius:14,padding:"18px 20px",marginBottom:18,textAlign:"center",color:"#fff"}}>
-        <div style={{fontSize:"1rem",fontWeight:800,letterSpacing:1,lineHeight:1.3}}>{t.title}</div>
+      <div style={{background:"linear-gradient(135deg,#d3172e,#7f0d1a)",borderRadius:14,padding:"20px",marginBottom:16,textAlign:"center",color:"#fff"}}>
+        <div style={{fontSize:"1.8rem",marginBottom:6}}>⚽🏆</div>
+        <div style={{fontSize:"0.7rem",letterSpacing:3,opacity:0.8,marginBottom:4}}>SABOR LATINO</div>
+        <div style={{fontSize:"1.05rem",fontWeight:800,letterSpacing:0.5,lineHeight:1.3}}>
+          {showLang==="es" ? "REGLAMENTO OFICIAL" : "RÈGLEMENT OFFICIEL"}
+        </div>
+        <div style={{fontSize:"0.8rem",opacity:0.8,marginTop:4}}>Concurso / Concours — Copa con Sabor</div>
       </div>
 
-      {/* Sections */}
+      {/* Toggle idioma */}
+      <div style={{display:"flex",marginBottom:18,borderRadius:10,overflow:"hidden",border:"2px solid #e5e7eb"}}>
+        {[["es","🇪🇸 Español"],["fr","🇫🇷 Français"]].map(([l,label])=>(
+          <button key={l} onClick={()=>setShowLang(l)}
+            style={{flex:1,padding:"10px",border:"none",cursor:"pointer",fontWeight:700,fontSize:"0.88rem",
+              background:showLang===l?"#d3172e":"#fff",color:showLang===l?"#fff":"#6b7280",transition:"all 0.2s"}}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Contenido */}
       <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e7eb",padding:"20px 18px"}}>
+        {showLang==="es" ? es : fr}
+      </div>
 
-        <Section title={t.s4}>
-          <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:4}}>{t.s4a}</div>
-          <PointsTable rows={t.s4aRows}/>
-          <div style={{fontWeight:700,fontSize:"0.82rem",color:"#374151",marginBottom:6,marginTop:12}}>{t.s4b}</div>
-          <PointsTable rows={t.s4bRows}/>
-        </Section>
-
-        <Section title={t.s6}>
-          {t.s6items.map((item,i)=><BulletItem key={i} text={item}/>)}
-        </Section>
-
+      <div style={{textAlign:"center",fontSize:"0.72rem",color:"#9ca3af",marginTop:12,marginBottom:8}}>
+        copaconsabor.saborlatino.ca · Sabor Latino © 2026
       </div>
     </div>
   );
 }
 
 // Helper: verifica si un participante tiene participación válida
+// Nueva regla: suma de facturas >$10 con producto elegible debe ser >= $50
 function getParticipationStatus(participantId, invoices) {
   const myInv = (invoices||[]).filter(inv=>inv.participantId===participantId);
-  // Válida: $50+ con producto elegible Y aprobada
-  if (myInv.find(inv=>parseFloat(inv.amount)>=50 && inv.hasProduct && inv.status==="approved"))
-    return "valid";
-  // Pendiente: $50+ con producto elegible pero aún pendiente
-  if (myInv.find(inv=>parseFloat(inv.amount)>=50 && inv.hasProduct && inv.status==="pending"))
-    return "pending";
-  // Sin producto: tiene $50+ pero sin marcar producto elegible
-  if (myInv.find(inv=>parseFloat(inv.amount)>=50 && !inv.hasProduct))
+  // Facturas aprobadas >$10 con producto elegible
+  const approvedWithProduct = myInv.filter(inv=>parseFloat(inv.amount)>10 && inv.hasProduct && inv.status==="approved");
+  const sumApproved = approvedWithProduct.reduce((s,inv)=>s+parseFloat(inv.amount),0);
+  if (sumApproved >= 50) return "valid";
+  // Pendientes >$10 con producto elegible (suma aprobadas + pendientes >= $50)
+  const pendingWithProduct = myInv.filter(inv=>parseFloat(inv.amount)>10 && inv.hasProduct && inv.status==="pending");
+  const sumTotal = sumApproved + pendingWithProduct.reduce((s,inv)=>s+parseFloat(inv.amount),0);
+  if (sumTotal >= 50) return "pending";
+  // Tiene facturas >$10 pero sin producto elegible marcado
+  if (myInv.find(inv=>parseFloat(inv.amount)>10 && !inv.hasProduct))
     return "no_product";
-  // Sin factura válida (incluye casos donde fue rechazada)
   return "invalid";
 }
 
@@ -746,7 +1098,7 @@ function ClasificacionView({ participants, matches, invoices, currentUser }) {
       matches.forEach(m => {
         const pred = p.predictions?.[m.id];
         if (!pred) return;
-        const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway, m.pkWinner);
+        const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway);
         if (pts === null) return;
         gamePts += pts;
         if (pts === 5) exact++;
@@ -759,7 +1111,36 @@ function ClasificacionView({ participants, matches, invoices, currentUser }) {
 
   return (
     <div className="fi">
-
+      {currentUser && (()=>{
+        const ps = getParticipationStatus(currentUser.id, invoices);
+        if (ps==="valid") return (
+          <div style={{background:"#f0fdf4",border:"1px solid #86efac",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:"1.2rem"}}>✅</span>
+            <div style={{fontWeight:700,fontSize:"0.85rem",color:"#166534"}}>{tc.validOk}</div>
+          </div>
+        );
+        if (ps==="pending") return (
+          <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:"1.2rem",flexShrink:0}}>🕐</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:"#1e40af",marginBottom:2}}>Factura pendiente de aprobación</div>
+              <div style={{fontSize:"0.8rem",color:"#1e40af",lineHeight:1.5}}>{tc.pendingMsg}</div>
+            </div>
+          </div>
+        );
+        const msg = ps==="no_product"
+          ? tc.noProductMsg
+          : tc.invalidMsg;
+        return (
+          <div style={{background:"#fffbeb",border:"1px solid #f59e0b",borderRadius:12,padding:"12px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:"1.2rem",flexShrink:0}}>⚠️</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:"#92400e",marginBottom:2}}>{tc.invalidTitle}</div>
+              <div style={{fontSize:"0.8rem",color:"#92400e",lineHeight:1.5}}>{msg}</div>
+            </div>
+          </div>
+        );
+      })()}
       <div style={{...S.card, padding:0, overflow:"hidden"}}>
         <div style={{background:BRAND.red, padding:"12px 18px"}}>
           <div style={{color:"#fff", fontWeight:800, fontSize:"1rem", letterSpacing:1}}>{tc.title} — {ranked.length} {tc.participants}</div>
@@ -814,8 +1195,8 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
     .reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount),0);
 
   async function handleSubmit() {
-    if (!invoiceNum.trim()) { alert(tp.facturaNum); return; }
-    if (!amount || parseFloat(amount)<10) { alert(tp.facturaMinima); return; }
+    if (!invoiceNum.trim() || invoiceNum.length < 4) { alert("El número de factura debe tener entre 4 y 7 dígitos"); return; }
+    if (!amount || parseFloat(amount)<=0) { alert(tp.facturaMinima); return; }
     const alreadyExists = invoices.find(inv=>inv.invoiceNum===invoiceNum.trim());
     if (alreadyExists) { alert(tp.facturaRepetida); return; }
 
@@ -829,7 +1210,7 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
         amount: parseFloat(amount),
         points: calcInvoicePoints(amount),
         hasProduct: hasProduct,
-        status: "pending",
+        status: "approved", // Auto-aprobada; se verificará en el sorteo
         createdAt: new Date().toISOString(),
       };
       const updated = [...invoices, newInvoice];
@@ -855,8 +1236,8 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
           <label style={{fontSize:"0.75rem",color:"#d3172e",letterSpacing:2,display:"block",marginBottom:5}}>
             NUMERO DE FACTURA
           </label>
-          <input style={S.input} placeholder="Ej: FAC-001234"
-            value={invoiceNum} onChange={e=>setInvoiceNum(e.target.value)} />
+          <input style={S.input} placeholder="Ej: 001234"
+            value={invoiceNum} onChange={e=>{ if(e.target.value.length<=7) setInvoiceNum(e.target.value.replace(/\D/g,"")); }} maxLength={7} inputMode="numeric" />
         </div>
         <div>
           <label style={{fontSize:"0.75rem",color:"#d3172e",letterSpacing:2,display:"block",marginBottom:5}}>
@@ -866,14 +1247,16 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
             value={amount} onChange={e=>setAmount(e.target.value)} />
         </div>
       </div>
-      {amount && parseFloat(amount)>=10 && (
-        <div style={{background:"#0d2215",border:"1px solid #27ae6044",borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:"0.85rem"}}>
-          {tp.facturaVale} <strong style={{color:"#16a34a",fontSize:"1rem"}}>{calcInvoicePoints(amount)} {tp.puntos}</strong> {tp.siAprobada}
+      {amount && parseFloat(amount)>0 && (
+        <div style={{background:"#0d2215",border:"1px solid #27ae6044",borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:"0.85rem",display:"flex",gap:16,flexWrap:"wrap",alignItems:"center"}}>
+          <span style={{color:"#94a3b8"}}>Esta factura genera:</span>
+          <span>🎰 <strong style={{color:"#facc15",fontSize:"1rem"}}>{calcInvoiceEntradas(amount)}</strong> <span style={{color:"#94a3b8",fontSize:"0.8rem"}}>entradas en ruleta</span></span>
+          {calcInvoicePoints(amount)>0 && <span>⭐ <strong style={{color:"#16a34a",fontSize:"1rem"}}>+{calcInvoicePoints(amount)}</strong> <span style={{color:"#94a3b8",fontSize:"0.8rem"}}>puntos</span></span>}
         </div>
       )}
 
-      {/* Producto participante checkbox - solo mostrar si monto >= 50 */}
-      {amount && parseFloat(amount)>=50 && (
+      {/* Producto participante checkbox - mostrar si monto > 10 */}
+      {amount && parseFloat(amount)>10 && (
         <div style={{marginBottom:14}}>
           <label style={{display:"flex",alignItems:"flex-start",gap:10,cursor:"pointer",userSelect:"none"}}>
             <input
@@ -890,7 +1273,7 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
             <div style={{marginTop:8,background:"#fffbeb",border:"1px solid #f59e0b",borderRadius:8,padding:"9px 12px",display:"flex",gap:8,alignItems:"flex-start"}}>
               <span style={{fontSize:"1rem",flexShrink:0}}>⚠️</span>
               <span style={{fontSize:"0.78rem",color:"#92400e",lineHeight:1.5}}>
-                Sin producto participante, esta factura <strong>no valida tu participación</strong> aunque sea de $50+. Igual genera puntos.
+                Sin producto participante confirmado, esta factura <strong>no suma para validar tu participación</strong>. Igual genera puntos y entradas.
               </span>
             </div>
           )}
@@ -906,10 +1289,18 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
       )}
 
       {success && (
-        <div style={{background:"#0d2215",border:"1px solid #27ae60",borderRadius:8,padding:"10px 14px",marginBottom:12,color:"#16a34a",fontSize:"0.85rem",fontWeight:700}}>
-          Factura enviada! Pendiente de aprobacion por el administrador.
+        <div style={{background:"#0d2215",border:"1px solid #27ae60",borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:"0.85rem"}}>
+          <div style={{color:"#16a34a",fontWeight:700,marginBottom:4}}>✅ ¡Factura registrada! Tus puntos y entradas ya están acumulados.</div>
+          <div style={{color:"#94a3b8",fontSize:"0.78rem",lineHeight:1.5}}>⚠️ En el momento del sorteo se verificará que la factura sea válida y que el monto registrado sea correcto. Si se encuentra alguna irregularidad, el premio no será entregado.</div>
         </div>
       )}
+      {/* Advertencia verificación sorteo */}
+      <div style={{background:"#fff7ed",border:"1px solid #f59e0b",borderRadius:8,padding:"10px 14px",marginBottom:12,display:"flex",gap:8,alignItems:"flex-start"}}>
+        <span style={{flexShrink:0}}>⚠️</span>
+        <span style={{fontSize:"0.78rem",color:"#92400e",lineHeight:1.5}}>
+          <strong>Importante:</strong> Al registrar una factura, tus puntos y entradas se acumulan de inmediato. Sin embargo, <strong>en el momento del sorteo se verificará</strong> que la factura sea real y que el monto registrado sea correcto. Si se detecta alguna irregularidad, el premio no será válido.
+        </span>
+      </div>
       <button style={S.btn()} onClick={handleSubmit} disabled={saving}>
         {saving?tp.enviando:tp.enviarFactura}
       </button>
@@ -926,7 +1317,7 @@ function InvoiceForm({ currentUser, invoices, setInvoices }) {
                 <div style={{color:"#6b7280",fontSize:"0.78rem",marginTop:2}}>
                   ${inv.amount} CAD &nbsp;|&nbsp; {inv.points} pts potenciales
                 </div>
-                {inv.amount>=50 && (
+                {parseFloat(inv.amount)>10 && (
                   <div style={{fontSize:"0.72rem",marginTop:3,fontWeight:600,color:inv.hasProduct?"#16a34a":"#f59e0b"}}>
                     {inv.hasProduct?tp.productoIncluido:tp.sinProducto}
                   </div>
@@ -997,7 +1388,7 @@ function GroupTable({ grp, table, hasData, emptyMsg }) {
 }
 
 // PARTICIPANT FORM
-const SUCURSALES = ["St-Hubert", "St-Laurent", "Brossard"];
+const SUCURSALES = ["St-Hubert", "Brossard"];
 
 
 function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants, matches, invoices, setInvoices, preds }) {
@@ -1014,14 +1405,14 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
   const userInv = (invoices||[]).filter(inv=>inv.participantId===currentUser.id&&inv.status==="approved");
   const invPts = userInv.reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount), 0);
   let gamePts = 0;
-  matches.forEach(m=>{const pred=preds[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);if(pts!==null)gamePts+=pts;});
+  matches.forEach(m=>{const pred=preds[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);if(pts!==null)gamePts+=pts;});
   const {bonus:classPts} = calcClassificationBonus(preds, matches);
   const total = gamePts + invPts + classPts;
 
   const ranked = [...participants].map(p=>{
     const ui=(invoices||[]).filter(i=>i.participantId===p.id&&i.status==="approved");
     const ip=ui.reduce((s,i)=>s+calcInvoicePoints(i.amount),0);
-    let gp=0; matches.forEach(m=>{const pr=p.predictions?.[m.id];if(!pr)return;const pts=calcPoints(pr.home,pr.away,m.realHome,m.realAway,m.pkWinner);if(pts!==null)gp+=pts;});
+    let gp=0; matches.forEach(m=>{const pr=p.predictions?.[m.id];if(!pr)return;const pts=calcPoints(pr.home,pr.away,m.realHome,m.realAway);if(pts!==null)gp+=pts;});
     const {bonus:cp}=calcClassificationBonus(p.predictions||{},matches);
     return {...p,_total:gp+ip+cp};
   }).sort((a,b)=>b._total-a._total);
@@ -1071,7 +1462,25 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
           ))}
         </div>
       </div>
-
+      {/* INDICADOR DE PARTICIPACIÓN VÁLIDA */}
+      {(()=>{
+        const ps = getParticipationStatus(currentUser.id, invoices);
+        const cfg = {
+          valid:      { icon:"✅", color:"#166534", bg:"#f0fdf4", border:"#86efac", title:tp.validTitle,            msg:tp.validOk },
+          pending:    { icon:"🕐", color:"#1e40af", bg:"#eff6ff", border:"#93c5fd", title:tp.pendingTitle,    msg:tp.pendingMsg },
+          no_product: { icon:"⚠️", color:"#92400e", bg:"#fffbeb", border:"#f59e0b", title:tp.noProductTitle, msg:tp.noProductMsg },
+          invalid:    { icon:"🔴", color:"#991b1b", bg:"#fff5f5", border:"#fca5a5", title:tp.invalidTitle,   msg:tp.invalidMsg },
+        }[ps];
+        return (
+          <div style={{background:cfg.bg,border:"1px solid "+cfg.border,borderRadius:12,padding:"12px 16px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:"1.2rem",flexShrink:0}}>{cfg.icon}</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:cfg.color,marginBottom:3}}>{cfg.title}</div>
+              <div style={{fontSize:"0.78rem",color:cfg.color,lineHeight:1.5}}>{cfg.msg}</div>
+            </div>
+          </div>
+        );
+      })()}
       {editOk && <div style={{background:"#f0fdf4",border:"1px solid #16a34a",borderRadius:10,padding:"10px 14px",marginBottom:12,color:"#16a34a",fontWeight:600,fontSize:"0.85rem"}}>{tp.perfilActualizado}</div>}
       {!editMode ? (
         <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:12,padding:16}}>
@@ -1112,6 +1521,9 @@ function ProfileTab({ currentUser, setCurrentUser, participants, setParticipants
           </div>
         </div>
       )}
+      <div style={{marginTop:20}}>
+        <InvoiceForm currentUser={currentUser} invoices={invoices} setInvoices={setInvoices} />
+      </div>
     </div>
   );
 }
@@ -1125,7 +1537,12 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
   const [loginPin, setLoginPin] = useState("");
   // Register
   const [regNombre, setRegNombre] = useState("");
+  const [regApellido, setRegApellido] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regTel, setRegTel] = useState("");
+  const [regSucursal, setRegSucursal] = useState("");
   const [regPin, setRegPin] = useState("");
+  const [regPin2, setRegPin2] = useState("");
   const [preds, setPreds] = useState(currentUser?.predictions||{});
   const [activeGroup, setActiveGroup] = useState("A");
   const [activePhase, setActivePhase] = useState("groups");
@@ -1165,11 +1582,11 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function handleLogin() {
     setError("");
-    if (!loginEmail.trim()) { setError("Ingresa tu nombre"); return; }
-    if (!loginPin.trim()||loginPin.length<4) { setError("Código de 4 dígitos requerido"); return; }
-    const existing = participants.find(p=>p.nombre&&p.nombre.toLowerCase()===loginEmail.trim().toLowerCase());
-    if (!existing) { setError("Nombre no registrado. Crea una cuenta nueva."); return; }
-    if (existing.pin!==loginPin) { setError("Código incorrecto"); return; }
+    if (!loginEmail.trim()) { setError("Ingresa tu correo"); return; }
+    if (!loginPin.trim()||loginPin.length<6) { setError("PIN mínimo 6 dígitos"); return; }
+    const existing = participants.find(p=>p.email&&p.email.toLowerCase()===loginEmail.trim().toLowerCase());
+    if (!existing) { setError("Correo no registrado. Crea una cuenta nueva."); return; }
+    if (existing.pin!==loginPin) { setError("PIN incorrecto"); return; }
     setCurrentUser(existing);
     setPreds(existing.predictions||{});
     setStep("form");
@@ -1179,15 +1596,28 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
   async function handleRegister() {
     setError("");
     if (!regNombre.trim()) { setError("Ingresa tu nombre"); return; }
-    if (!regPin.trim()||regPin.length!==4) { setError("El código debe ser de exactamente 4 dígitos"); return; }
-    const exists = participants.find(p=>p.nombre&&p.nombre.toLowerCase()===regNombre.trim().toLowerCase());
-    if (exists) { setError("Este nombre ya está registrado. Inicia sesión."); return; }
+    if (!regApellido.trim()) { setError("Ingresa tu apellido"); return; }
+    if (!regEmail.trim()||!regEmail.includes("@")) { setError("Ingresa un correo valido"); return; }
+    if (!regTel.trim()) { setError("Ingresa tu telefono"); return; }
+    if (!regSucursal) { setError("Selecciona una sucursal"); return; }
+    if (!regPin.trim()||regPin.length<6) { setError("PIN minimo 6 digitos"); return; }
+    if (regPin!==regPin2) { setError("Los PINs no coinciden"); return; }
+    const exists = participants.find(p=>p.email&&p.email.toLowerCase()===regEmail.trim().toLowerCase());
+    if (exists) { setError("Este correo ya esta registrado. Inicia sesion."); return; }
     setSaving(true);
     try {
+      // Asignar número único al participante (siguiente disponible)
+      const usedNumbers = participants.map(p => p.participantNumber || 0);
+      const nextNumber = usedNumbers.length > 0 ? Math.max(...usedNumbers) + 1 : 1;
       const newUser = {
         id: Date.now(),
+        participantNumber: nextNumber,
         nombre: regNombre.trim(),
-        name: regNombre.trim(),
+        apellido: regApellido.trim(),
+        name: regNombre.trim()+" "+regApellido.trim(),
+        email: regEmail.trim().toLowerCase(),
+        telefono: regTel.trim(),
+        sucursal: regSucursal,
         pin: regPin,
         predictions: {},
         createdAt: new Date().toISOString(),
@@ -1230,7 +1660,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   function renderMatchRow(m, locked=false) {
     const pred = preds[m.id]||{};
-    const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway, m.pkWinner);
+    const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway);
     const lockTime = m.lockTime ? new Date(m.lockTime) : null;
     const now = new Date();
     const minutesLeft = lockTime ? Math.round((lockTime - now) / 60000) : null;
@@ -1261,6 +1691,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
   if (step==="login") return (
     <div className="fi" style={{maxWidth:460,margin:"0 auto"}}>
+      <LogosCarrusel titulo={true} />
       <div style={S.card}>
         <div style={{display:"flex",borderBottom:"2px solid "+BRAND.gray100,marginBottom:20}}>
           {[["login","Ya tengo cuenta"],["register","Registrarme"]].map(([t,l])=>(
@@ -1278,15 +1709,15 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
           <>
             <div style={S.sectionTitle}>Iniciar Sesion</div>
             <div style={{marginBottom:12}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>TU NOMBRE</label>
-              <input style={S.input} type="text" placeholder="Juan"
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>CORREO ELECTRONICO</label>
+              <input style={S.input} type="email" placeholder="tu@correo.com"
                 value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
                 onKeyDown={e=>e.key==="Enter"&&handleLogin()} />
             </div>
             <div style={{marginBottom:16}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>CÓDIGO (4 dígitos)</label>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:5,fontWeight:700}}>PIN</label>
               <input style={S.input} type="password" placeholder="****"
-                value={loginPin} onChange={e=>setLoginPin(e.target.value.replace(/\D/g,"").slice(0,4))}
+                value={loginPin} onChange={e=>setLoginPin(e.target.value.replace(/\D/g,""))}
                 onKeyDown={e=>e.key==="Enter"&&handleLogin()} />
             </div>
             {error && <div style={{color:"#dc2626",marginBottom:12,fontSize:"0.85rem",background:"#fef2f2",padding:"8px 12px",borderRadius:6}}>{error}</div>}
@@ -1321,13 +1752,42 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         {isNew && (
           <>
             <div style={S.sectionTitle}>Crear Cuenta</div>
-            <div style={{marginBottom:12}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>TU NOMBRE</label>
-              <input style={S.input} placeholder="Juan" value={regNombre} onChange={e=>setRegNombre(e.target.value)} />
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>NOMBRE</label>
+                <input style={S.input} placeholder="Juan" value={regNombre} onChange={e=>setRegNombre(e.target.value)} />
+              </div>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>APELLIDO</label>
+                <input style={S.input} placeholder="Perez" value={regApellido} onChange={e=>setRegApellido(e.target.value)} />
+              </div>
             </div>
-            <div style={{marginBottom:14}}>
-              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CÓDIGO (4 dígitos)</label>
-              <input style={S.input} type="password" placeholder="****" maxLength={4} value={regPin} onChange={e=>setRegPin(e.target.value.replace(/\D/g,"").slice(0,4))} />
+            <div style={{marginBottom:10}}>
+              <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CORREO ELECTRONICO</label>
+              <input style={S.input} type="email" placeholder="tu@correo.com" value={regEmail} onChange={e=>setRegEmail(e.target.value)} />
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>TELEFONO</label>
+                <input style={S.input} placeholder="514-000-0000" value={regTel} onChange={e=>setRegTel(e.target.value)} />
+              </div>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>SUCURSAL</label>
+                <select style={selectStyle} value={regSucursal} onChange={e=>setRegSucursal(e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {SUCURSALES.map(s=><option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>PIN (6 dígitos)</label>
+                <input style={S.input} type="password" placeholder="******" maxLength={6} value={regPin} onChange={e=>setRegPin(e.target.value.replace(/\D/g,""))} />
+              </div>
+              <div>
+                <label style={{fontSize:"0.72rem",color:BRAND.red,letterSpacing:1,display:"block",marginBottom:4,fontWeight:700}}>CONFIRMAR PIN</label>
+                <input style={S.input} type="password" placeholder="******" maxLength={6} value={regPin2} onChange={e=>setRegPin2(e.target.value.replace(/\D/g,""))} />
+              </div>
             </div>
             {error && <div style={{color:"#dc2626",marginBottom:12,fontSize:"0.85rem",background:"#fef2f2",padding:"8px 12px",borderRadius:6}}>{error}</div>}
             <button style={{...S.btn(),width:"100%"}} onClick={handleRegister} disabled={saving}>
@@ -1347,7 +1807,7 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
         <div style={{color:"#6b7280",marginBottom:16}}>Hola <strong style={{color:"#111827"}}>{currentUser?.name}</strong></div>
         <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
           <button style={S.btn()} onClick={()=>setStep("form")}>Editar Pronosticos</button>
-          <button style={S.btn("#6b7280",true)} onClick={()=>{if(window.confirm("¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>Cambiar Usuario</button>
+          <button style={S.btn("#6b7280",true)} onClick={()=>{if(window.confirm(lang==="fr"?"Voulez-vous vraiment vous déconnecter ?":"¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>Cambiar Usuario</button>
         </div>
       </div>
     </div>
@@ -1358,25 +1818,25 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
       {/* Welcome banner */}
       <div style={{background:"linear-gradient(135deg,#d3172e 0%,#a0122a 100%)",borderRadius:12,padding:"14px 18px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
         <div>
-          <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.72rem",letterSpacing:1,fontWeight:600,textTransform:"uppercase"}}>{"Bienvenido"}</div>
+          <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.72rem",letterSpacing:1,fontWeight:600,textTransform:"uppercase"}}>{lang==="fr"?"Bienvenue":"Bienvenido"}</div>
           <div style={{color:"#fff",fontWeight:800,fontSize:"1.1rem"}}>{currentUser?.nombre ? currentUser.nombre+" "+currentUser.apellido : currentUser?.name}</div>
         </div>
         <div style={{display:"flex",gap:10}}>
           <div style={{background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 14px",textAlign:"center"}}>
             <div style={{color:"#fff",fontWeight:800,fontSize:"1.2rem"}}>{Object.keys(preds).length}</div>
-            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{"pronósticos"}</div>
+            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{lang==="fr"?"pronostics":"pronósticos"}</div>
           </div>
           <div style={{background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 14px",textAlign:"center"}}>
             <div style={{color:"#fff",fontWeight:800,fontSize:"1.2rem"}}>{matches.length}</div>
-            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{"partidos total"}</div>
+            <div style={{color:"rgba(255,255,255,0.8)",fontSize:"0.68rem",letterSpacing:0.5}}>{lang==="fr"?"matchs total":"partidos total"}</div>
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button style={{...S.btn("#27ae60"),fontSize:"0.8rem",padding:"6px 14px"}} onClick={handleSave} disabled={saving}>
             {saving?"Guardando...":"Guardar Todo"}
           </button>
-          <button style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"6px 12px",fontSize:"0.8rem",cursor:"pointer",fontWeight:600}} onClick={()=>{if(window.confirm("¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>
-            {"Salir"}
+          <button style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"6px 12px",fontSize:"0.8rem",cursor:"pointer",fontWeight:600}} onClick={()=>{if(window.confirm(lang==="fr"?"Voulez-vous vraiment vous déconnecter ?":"¿Seguro que deseas cerrar sesión?")){setStep("login");setCurrentUser(null);try{localStorage.removeItem("sl_user");}catch(e){}setLoginEmail("");setLoginPin("");setView?.("clasificacion");}}}>
+            {lang==="fr"?"Déconnexion":"Salir"}
           </button>
         </div>
       </div>
@@ -1423,7 +1883,27 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 
       {activeTab==="pronosticos" && (
         <>
-
+          {/* Invoice status banner */}
+          {(()=>{
+            const status = getParticipationStatus(currentUser?.id, invoices);
+            if (status === "valid") return null;
+            const cfg = {
+              invalid:  { bg:"#fff5f5", border:"#fca5a5", icon:"🧾", color:"#991b1b", msg: lang==="fr" ? "Enregistre des achats de plus de 10 $+ avec produit éligible totalisant au moins 50 $ pour valider ta participation." : "Registra compras de más de $10 con producto elegible que sumen al menos $50 para validar tu participación.", btn: lang==="fr"?"Enregistrer ma facture":"Registrar mi factura" },
+              no_product:{ bg:"#fffbeb", border:"#f59e0b", icon:"⚠️", color:"#92400e", msg: lang==="fr" ? "Tes factures n'ont pas de produit éligible confirmé. Modifie-les dans Mon Profil." : "Tus facturas no tienen producto elegible confirmado. Edítalas en Mi Perfil.", btn: lang==="fr"?"Voir Mon Profil":"Ver Mi Perfil" },
+              pending:  { bg:"#eff6ff", border:"#93c5fd", icon:"🕐", color:"#1e40af", msg: lang==="fr" ? "Ta facture est en attente d'approbation par l'administrateur." : "Tu factura está pendiente de aprobación por el administrador.", btn: null },
+            };
+            const c = cfg[status];
+            if (!c) return null;
+            return (
+              <div style={{background:c.bg,border:`1px solid ${c.border}`,borderRadius:10,padding:"12px 16px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+                <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                  <span style={{fontSize:"1.3rem"}}>{c.icon}</span>
+                  <span style={{fontSize:"0.82rem",color:c.color,fontWeight:600,lineHeight:1.4}}>{c.msg}</span>
+                </div>
+                {c.btn && <button style={{...S.btn(BRAND.red),fontSize:"0.78rem",padding:"6px 14px",whiteSpace:"nowrap"}} onClick={()=>setActiveTab("perfil")}>{c.btn}</button>}
+              </div>
+            );
+          })()}
           <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
             {["groups","elim"].map(ph=>(
               <button key={ph} style={S.navBtn(activePhase===ph)} onClick={()=>setActivePhase(ph)}>
@@ -1522,7 +2002,508 @@ function ParticipantForm({ participants, setParticipants, matches, adminUnlocked
 }
 
 // FIXTURE VIEW
+// ── RULETA VIEW ──────────────────────────────────────────────────────────────
+// ─── VISTA DE GANADORES (clientes) ────────────────────────────────────────────
+function GanadoresView() {
+  const lang = useLang();
+  const [ganadores, setGanadores] = useState([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(RULETA_DOC, snap => {
+      if (snap.exists()) setGanadores(snap.data().ganadoresPublicados || []);
+    });
+    return () => unsub();
+  }, []);
+
+  return (
+    <div className="fi" style={{maxWidth:560,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,#d3172e,#7f0d1a)",borderRadius:14,padding:"20px",marginBottom:20,textAlign:"center",color:"#fff"}}>
+        <div style={{fontSize:"2rem",marginBottom:6}}>🏆</div>
+        <div style={{fontWeight:800,fontSize:"1.2rem",letterSpacing:0.5}}>
+          {lang==="fr"?"Gagnants du Tirage":"Ganadores del Sorteo"}
+        </div>
+        <div style={{fontSize:"0.78rem",opacity:0.8,marginTop:4}}>
+          {lang==="fr"?"Concours Copa con Sabor · Sabor Latino":"Concurso Copa con Sabor · Sabor Latino"}
+        </div>
+      </div>
+
+      {ganadores.length === 0 ? (
+        <div style={{textAlign:"center",padding:"40px 20px",background:"#f9fafb",borderRadius:14,border:"1px solid #e5e7eb"}}>
+          <div style={{fontSize:"3rem",marginBottom:12}}>🎰</div>
+          <div style={{fontWeight:700,color:"#374151",fontSize:"1rem",marginBottom:6}}>
+            {lang==="fr"?"Le tirage n'a pas encore eu lieu":"El sorteo aún no se ha realizado"}
+          </div>
+          <div style={{fontSize:"0.84rem",color:"#9ca3af"}}>
+            {lang==="fr"?"Les gagnants seront publiés ici après le tirage officiel.":"Los ganadores serán publicados aquí después del sorteo oficial."}
+          </div>
+        </div>
+      ) : (
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          {ganadores.map((g, i) => (
+            <div key={g.id} style={{background:"#fff",border:"2px solid #d3172e22",borderRadius:14,padding:"18px",boxShadow:"0 4px 20px rgba(211,23,46,0.08)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+                <div style={{background:"linear-gradient(135deg,#d3172e,#7f0d1a)",borderRadius:10,padding:"10px 14px",textAlign:"center",minWidth:56}}>
+                  <div style={{color:"rgba(255,255,255,0.7)",fontSize:"0.6rem",fontWeight:700,letterSpacing:1}}>
+                    {lang==="fr"?"GAGNANT":"GANADOR"}
+                  </div>
+                  {g.number && <div style={{color:"#fff",fontWeight:900,fontSize:"1rem"}}>#{String(g.number).padStart(3,"0")}</div>}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:800,fontSize:"1.05rem",color:"#111827"}}>{g.name}</div>
+                  {g.sucursal && <div style={{fontSize:"0.76rem",color:"#6b7280",marginTop:2}}>📍 {g.sucursal}</div>}
+                  <div style={{fontSize:"0.72rem",color:"#9ca3af",marginTop:2}}>{new Date(g.fecha).toLocaleDateString(lang==="fr"?"fr-CA":"es-CO",{year:"numeric",month:"long",day:"numeric"})}</div>
+                </div>
+              </div>
+              {g.premio && (
+                <div style={{background:"linear-gradient(135deg,#fef3c7,#fde68a)",border:"1px solid #f59e0b",borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:"1.3rem"}}>🎁</span>
+                  <div>
+                    <div style={{fontSize:"0.7rem",fontWeight:700,color:"#92400e",letterSpacing:1}}>{lang==="fr"?"PRIX":"PREMIO"}</div>
+                    <div style={{fontWeight:700,color:"#78350f",fontSize:"0.92rem"}}>{g.premio}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RuletaView({ participants, matches, invoices, isAdmin }) {
+  const lang = useLang();
+  const [spinning, setSpinning] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [savedWinners, setSavedWinners] = useState({});
+  const [ganadoresPublicados, setGanadoresPublicados] = useState([]);
+  const [premioInput, setPremioInput] = useState("");
+  const [sucursalFiltro, setSucursalFiltro] = useState(null); // null = todas, "St-Hubert" | "Brossard"
+  const [offset, setOffset] = useState(0); // current scroll offset in px
+  const rafRef = React.useRef(null);
+  const offsetRef = React.useRef(0);
+
+  const ITEM_HEIGHT = 68; // px per name slot
+
+  useEffect(() => {
+    const unsub = onSnapshot(RULETA_DOC, snap => {
+      if (snap.exists()) {
+        setSavedWinners(snap.data().winners || {});
+        setGanadoresPublicados(snap.data().ganadoresPublicados || []);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Calcular puntos totales de un participante
+  function getTotalPoints(p) {
+    const ui = (invoices||[]).filter(i => i.participantId === p.id && i.status === "approved");
+    const invPts = ui.reduce((s,i) => s + calcInvoicePoints(i.amount), 0);
+    let gamePts = 0;
+    matches.forEach(m => {
+      const pred = p.predictions?.[m.id];
+      if (!pred) return;
+      const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway);
+      if (pts !== null) gamePts += pts;
+    });
+    const {bonus: classPts} = calcClassificationBonus(p.predictions||{}, matches);
+    return gamePts + invPts + classPts;
+  }
+
+  // Calcular entradas totales en ruleta: suma de entradas por cada factura aprobada
+  function getTotalEntradas(p) {
+    const ui = (invoices||[]).filter(i => i.participantId === p.id && i.status === "approved");
+    return ui.reduce((s,i) => s + calcInvoiceEntradas(i.amount), 0);
+  }
+
+  function buildEntrants() {
+    // Construir pool de participantes con sus entradas
+    const pool = [];
+    participants.forEach(p => {
+      if (sucursalFiltro && p.sucursal !== sucursalFiltro) return;
+      const entries = getTotalEntradas(p);
+      if (entries === 0) return;
+      const totalPts = getTotalPoints(p);
+      const name = p.nombre ? p.nombre + " " + p.apellido : p.name;
+      const num = p.participantNumber || null;
+      const label = num ? `#${String(num).padStart(3,"0")} – ${name}` : name;
+      pool.push({ id: p.id, name, label, number: num, totalPts, entries, remaining: entries });
+    });
+
+    // Round-robin: repartir entradas intercaladas vuelta a vuelta
+    // Vuelta 1: todos los que tienen >= 1 entrada (1 entrada c/u)
+    // Vuelta 2: todos los que tienen >= 2 entradas (1 entrada c/u)
+    // ... hasta agotar todas las entradas
+    const entrants = [];
+    const maxEntries = pool.reduce((m, p) => Math.max(m, p.entries), 0);
+    for (let round = 1; round <= maxEntries; round++) {
+      pool.forEach(p => {
+        if (p.entries >= round) {
+          entrants.push({ id: p.id, name: p.name, label: p.label, number: p.number, totalPts: p.totalPts, entries: p.entries });
+        }
+      });
+    }
+    return entrants;
+  }
+
+  const entrants = buildEntrants();
+  const wheelLabels = entrants.map(e => e.label);
+  // Para la lista de participantes únicos
+  const uniqueParticipants = participants
+    .filter(p => !sucursalFiltro || p.sucursal === sucursalFiltro)
+    .map(p => {
+      const entries = getTotalEntradas(p);
+      const totalPts = getTotalPoints(p);
+      const name = p.nombre ? p.nombre + " " + p.apellido : p.name;
+      const num = p.participantNumber || null;
+      return { id: p.id, name, num, totalPts, entries, sucursal: p.sucursal };
+    })
+    .filter(p => p.entries > 0)
+    .sort((a,b) => b.entries - a.entries);
+  const uniqueNames = uniqueParticipants.map(p => p.name);
+  const accentColor = "#d3172e";
+
+  // Build infinite looping list (repeat labels many times)
+  const REPEATS = 20;
+  const loopNames = wheelLabels.length > 0
+    ? Array.from({length: REPEATS}, () => wheelLabels).flat()
+    : [];
+
+  function spin() {
+    if (spinning || wheelLabels.length === 0) return;
+    setWinner(null);
+    setSpinning(true);
+
+    // Pick winner
+    const pickedIndex = Math.floor(Math.random() * wheelLabels.length);
+    const pickedLabel = wheelLabels[pickedIndex];
+    const pickedEntry = entrants[pickedIndex];
+
+    // We want to land on an occurrence of pickedLabel in the middle of loopNames
+    // Start from middle of the loop to avoid edge issues
+    const midRepeat = Math.floor(REPEATS / 2);
+    const targetIndexInLoop = midRepeat * wheelLabels.length + pickedIndex;
+    const targetOffset = targetIndexInLoop * ITEM_HEIGHT;
+
+    // Add extra spins for drama (full loops)
+    const extraSpins = (3 + Math.floor(Math.random() * 3)) * wheelLabels.length * ITEM_HEIGHT;
+    const finalOffset = targetOffset + extraSpins;
+
+    const startOffset = offsetRef.current;
+    const totalDelta = finalOffset - startOffset;
+    const duration = 4000 + Math.random() * 1500;
+    const startTime = performance.now();
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function frame(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+      const cur = startOffset + totalDelta * easeOut(t);
+      offsetRef.current = cur;
+      setOffset(cur);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(frame);
+      } else {
+        offsetRef.current = finalOffset;
+        setOffset(finalOffset);
+        setSpinning(false);
+        const winnerData = { label: pickedLabel, name: pickedEntry.name, number: pickedEntry.number, totalPts: pickedEntry.totalPts };
+        setWinner(winnerData);
+        const newWinners = { ...savedWinners, ruleta: { label: pickedLabel, name: pickedEntry.name, number: pickedEntry.number, date: new Date().toISOString() } };
+        setDoc(RULETA_DOC, { winners: newWinners }).catch(() => {});
+      }
+    }
+    rafRef.current = requestAnimationFrame(frame);
+  }
+
+  useEffect(() => {
+    offsetRef.current = 0;
+    setOffset(0);
+    setWinner(null);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, [sucursalFiltro]);
+
+  useEffect(() => {
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, []);
+
+  const currentSaved = savedWinners;
+
+  // Visible window: show 5 items, center is item index 2
+  const VISIBLE = 7;
+  const WINDOW_HEIGHT = ITEM_HEIGHT * VISIBLE;
+  const centerOffset = Math.round(offset / ITEM_HEIGHT);
+
+  return (
+    <div className="fi" style={{maxWidth:560,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:"2rem",marginBottom:4}}>🎰</div>
+        <div style={{fontWeight:800,fontSize:"1.3rem",color:BRAND.gray900,letterSpacing:1}}>
+          {lang==="fr"?"Roulette du Mondial":"Ruleta del Mundial"}
+        </div>
+        <div style={{color:"#6b7280",fontSize:"0.82rem",marginTop:4}}>
+          {lang==="fr"?"Tirage au sort officiel":"Sorteo oficial"}
+        </div>
+      </div>
+
+      {/* Selector de sucursal — solo visible para admin */}
+      {isAdmin && (
+        <div style={{marginBottom:18}}>
+          <div style={{fontSize:"0.78rem",color:"#6b7280",fontWeight:600,marginBottom:8,textAlign:"center",letterSpacing:1}}>
+            SELECCIONAR SUCURSAL
+          </div>
+          <div style={{display:"flex",gap:8,borderRadius:12,overflow:"hidden",border:"2px solid #e5e7eb"}}>
+            {[
+              [null,        "🌎 Todas"],
+              ["St-Hubert",  "📍 St-Hubert"],
+              ["Brossard",   "📍 Brossard"],
+            ].map(([val, label]) => {
+              const active = sucursalFiltro === val;
+              return (
+                <button key={String(val)} onClick={()=>{ if(!spinning){ setSucursalFiltro(val); setWinner(null); offsetRef.current=0; setOffset(0); } }}
+                  style={{flex:1,padding:"11px 6px",border:"none",cursor:spinning?"not-allowed":"pointer",fontWeight:700,
+                    fontSize:"0.8rem",transition:"all 0.2s",
+                    background: active ? BRAND.red : "#fff",
+                    color: active ? "#fff" : "#6b7280",
+                  }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          {sucursalFiltro && (
+            <div style={{textAlign:"center",marginTop:6,fontSize:"0.72rem",color:BRAND.red,fontWeight:600}}>
+              Mostrando participantes de <strong>{sucursalFiltro}</strong>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Info */}
+      <div style={{background:"#fff5f5",border:"1px solid #fca5a5",borderRadius:10,padding:"10px 14px",marginBottom:16,fontSize:"0.8rem",color:"#991b1b"}}>
+        {lang==="fr" ? "🎰 Chaque facture enregistrée et approuvée te donne des entrées directes à la roulette. Plus d'achats = plus d'entrées !" : "🎰 Cada factura registrada y aprobada te da entradas directas a la ruleta. ¡Más compras = más entradas!"}
+      </div>
+
+      {/* Entradas registradas — mensaje motivacional */}
+      <div style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",border:"2px solid #d3172e44",borderRadius:14,padding:"18px 20px",marginBottom:24,textAlign:"center"}}>
+        <div style={{fontSize:"2rem",marginBottom:6}}>🎟️</div>
+        <div style={{color:"rgba(255,255,255,0.6)",fontSize:"0.72rem",letterSpacing:2,fontWeight:600,marginBottom:4}}>
+          ENTRADAS REGISTRADAS
+        </div>
+        <div style={{color:"#facc15",fontWeight:900,fontSize:"3rem",lineHeight:1,marginBottom:8}}>
+          {entrants.length}
+        </div>
+        <div style={{color:"rgba(255,255,255,0.85)",fontSize:"0.88rem",fontWeight:600}}>
+          {lang==="fr"
+            ? `${entrants.length} entrées enregistrées — Bonne chance ! 🍀`
+            : `${entrants.length} entradas registradas, ¡Buena suerte! 🍀`}
+        </div>
+
+      </div>
+
+      {wheelLabels.length === 0 ? (
+        <div style={{textAlign:"center",padding:"40px 20px",color:"#9ca3af"}}>
+          <div style={{fontSize:"3rem",marginBottom:10}}>🎱</div>
+          <div style={{fontWeight:600}}>
+            {lang==="fr"?"Aucun participant encore.":"Aún no hay participantes."}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Drum / Slot machine */}
+          <div style={{position:"relative",margin:"0 auto 24px",width:"100%",maxWidth:400}}>
+            {/* Viewport */}
+            <div style={{
+              height: WINDOW_HEIGHT,
+              overflow:"hidden",
+              borderRadius:16,
+              background:BRAND.red,
+              boxShadow:`0 8px 40px rgba(211,23,46,0.4), inset 0 0 30px rgba(0,0,0,0.2)`,
+              position:"relative",
+            }}>
+              {/* Scrolling list */}
+              <div style={{
+                position:"absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                transform:`translateY(${-offset + ITEM_HEIGHT * 2}px)`,
+                willChange:"transform",
+              }}>
+                {loopNames.map((name, i) => {
+                  const distFromCenter = i - centerOffset;
+                  const absDist = Math.abs(distFromCenter);
+                  const isCenter = absDist === 0;
+                  const blur = 0; // sin difuminado
+                  const opacity = absDist === 0 ? 1 : absDist === 1 ? 0.92 : absDist === 2 ? 0.82 : 0.7;
+                  const scale = absDist === 0 ? 1.12 : absDist === 1 ? 0.88 : absDist === 2 ? 0.78 : 0.70;
+                  const color = isCenter ? "#fff" : "rgba(255,255,255,0.5)";
+                  return (
+                    <div key={i} style={{
+                      height: ITEM_HEIGHT,
+                      display:"flex",
+                      alignItems:"center",
+                      justifyContent:"center",
+                      fontSize: isCenter ? "1.2rem" : "0.95rem",
+                      fontWeight: isCenter ? 800 : 500,
+                      color,
+                      filter: `blur(${blur}px)`,
+                      opacity,
+                      transform: `scale(${scale})`,
+                      transition: spinning ? "none" : "all 0.3s ease",
+                      letterSpacing: isCenter ? 1 : 0,
+                      userSelect:"none",
+                      padding:"0 20px",
+                      textAlign:"center",
+                    }}>
+                      {name}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Center highlight line top */}
+              <div style={{position:"absolute",top:ITEM_HEIGHT*2,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.9),transparent)",pointerEvents:"none"}} />
+              {/* Center highlight line bottom */}
+              <div style={{position:"absolute",top:ITEM_HEIGHT*3,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.9),transparent)",pointerEvents:"none"}} />
+
+              {/* Top fade */}
+              <div style={{position:"absolute",top:0,left:0,right:0,height:ITEM_HEIGHT*2,background:`linear-gradient(to bottom,${BRAND.red} 0%,transparent 100%)`,pointerEvents:"none"}} />
+              {/* Bottom fade */}
+              <div style={{position:"absolute",bottom:0,left:0,right:0,height:ITEM_HEIGHT*2,background:`linear-gradient(to top,${BRAND.red} 0%,transparent 100%)`,pointerEvents:"none"}} />
+            </div>
+          </div>
+
+          {/* Spin button */}
+          {isAdmin ? (
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <button onClick={spin} disabled={spinning}
+                style={{background:spinning?"#475569":accentColor,color:"#fff",border:"none",borderRadius:12,
+                  padding:"14px 48px",fontSize:"1rem",fontWeight:800,cursor:spinning?"not-allowed":"pointer",
+                  letterSpacing:1,boxShadow:spinning?"none":`0 4px 20px ${accentColor}88`,transition:"all 0.2s",
+                  transform:spinning?"scale(0.97)":"scale(1)"}}>
+                {spinning
+                  ? (lang==="fr"?"⏳ Tirage en cours...":"⏳ Girando...")
+                  : (lang==="fr"?"🎰 Lancer le tirage":"🎰 Girar")}
+              </button>
+            </div>
+          ) : (
+            <div style={{textAlign:"center",marginBottom:20,color:"#9ca3af",fontSize:"0.82rem"}}>
+              {lang==="fr"?"L'administrateur lancera le tirage.":"El administrador girará la ruleta."}
+            </div>
+          )}
+
+          {/* Winner card + panel publicación admin */}
+          {winner && !spinning && (
+            <div style={{marginBottom:20}}>
+              {/* Tarjeta ganador */}
+              <div style={{background:`linear-gradient(135deg,${accentColor} 0%,#7f0d1a 100%)`,
+                borderRadius:16,padding:"24px 20px",textAlign:"center",marginBottom:14,
+                boxShadow:`0 12px 40px ${accentColor}55`}}>
+                <div style={{fontSize:"2.5rem",marginBottom:8}}>🎉</div>
+                {winner.number && (
+                  <div style={{color:"rgba(255,255,255,0.9)",fontSize:"1.1rem",fontWeight:900,letterSpacing:2,marginBottom:4}}>
+                    #{String(winner.number).padStart(3,"0")}
+                  </div>
+                )}
+                <div style={{color:"rgba(255,255,255,0.75)",fontSize:"0.72rem",fontWeight:700,letterSpacing:3,marginBottom:6}}>
+                  GANADOR · WINNER
+                </div>
+                <div style={{color:"#fff",fontWeight:900,fontSize:"1.6rem",letterSpacing:0.5,marginBottom:4}}>{winner.name}</div>
+                {sucursalFiltro && <div style={{color:"rgba(255,255,255,0.7)",fontSize:"0.78rem"}}>📍 {sucursalFiltro}</div>}
+              </div>
+
+              {/* Panel admin: asignar premio y publicar */}
+              {isAdmin && (
+                <div style={{background:"#fff",border:"2px solid #d3172e44",borderRadius:12,padding:"16px"}}>
+                  <div style={{fontWeight:700,fontSize:"0.85rem",color:BRAND.gray900,marginBottom:4}}>
+                    🎁 Asignar premio y publicar
+                  </div>
+                  <div style={{fontSize:"0.75rem",color:"#9ca3af",marginBottom:10}}>
+                    Si es una prueba, usa "🗑️ Eliminar prueba" sin publicar.
+                  </div>
+                  <input
+                    placeholder="Ej: Canasta de productos, Gift card $50..."
+                    value={premioInput}
+                    onChange={e=>setPremioInput(e.target.value)}
+                    style={{...S.input,marginBottom:10,fontSize:"0.85rem"}}
+                  />
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <button style={{...S.btn("#16a34a"),flex:2,fontSize:"0.82rem",minWidth:140}} onClick={async ()=>{
+                      if (!premioInput.trim()) { alert("Ingresa el premio antes de publicar"); return; }
+                      const nuevo = {
+                        id: Date.now(),
+                        name: winner.name,
+                        number: winner.number,
+                        sucursal: sucursalFiltro || "Todas",
+                        premio: premioInput.trim(),
+                        fecha: new Date().toISOString(),
+                      };
+                      const updated = [...ganadoresPublicados, nuevo];
+                      await setDoc(RULETA_DOC, {
+                        winners: savedWinners,
+                        ganadoresPublicados: updated,
+                      });
+                      setPremioInput("");
+                      setWinner(null);
+                      alert("✅ Ganador publicado correctamente");
+                    }}>
+                      ✅ Publicar ganador
+                    </button>
+                    <button style={{...S.btn("#dc2626"),flex:1,fontSize:"0.82rem",minWidth:120}} onClick={async ()=>{
+                      // Borrar ganador de prueba: limpiar winners en Firebase y estado local
+                      const newWinners = {...savedWinners};
+                      delete newWinners.ruleta;
+                      await setDoc(RULETA_DOC, { winners: newWinners, ganadoresPublicados });
+                      setWinner(null);
+                      setPremioInput("");
+                    }}>
+                      🗑️ Eliminar prueba
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Ganadores publicados (admin los ve aquí con opción de borrar) */}
+          {isAdmin && ganadoresPublicados.length > 0 && !winner && (
+            <div style={{background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:12,padding:"14px",marginBottom:16}}>
+              <div style={{fontWeight:700,fontSize:"0.85rem",color:BRAND.gray900,marginBottom:10}}>
+                📋 Ganadores publicados ({ganadoresPublicados.length})
+              </div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {ganadoresPublicados.map(g=>(
+                  <div key={g.id} style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:8,padding:"10px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap"}}>
+                    <div>
+                      {g.number && <span style={{background:accentColor,color:"#fff",borderRadius:5,padding:"1px 7px",fontSize:"0.65rem",fontWeight:800,marginRight:6}}>#{String(g.number).padStart(3,"0")}</span>}
+                      <span style={{fontWeight:700,fontSize:"0.85rem",color:BRAND.gray900}}>{g.name}</span>
+                      <div style={{fontSize:"0.75rem",color:"#6b7280",marginTop:3}}>🎁 {g.premio} · 📍 {g.sucursal}</div>
+                    </div>
+                    <button style={{...S.btn("#dc2626"),fontSize:"0.72rem",padding:"5px 10px",flexShrink:0}} onClick={async ()=>{
+                      if(!confirm("¿Borrar este ganador publicado?")) return;
+                      const updated = ganadoresPublicados.filter(x=>x.id!==g.id);
+                      await setDoc(RULETA_DOC, { winners: savedWinners, ganadoresPublicados: updated });
+                    }}>
+                      🗑️ Borrar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+
+        </>
+      )}
+    </div>
+  );
+}
+
 function FixtureView({ matches }) {
+  const lang = useLang();
   const [activeGroup, setActiveGroup] = useState("A");
   const [activePhase, setActivePhase] = useState("groups");
   const phaseColors = {round32:"#0369a1",round16:"#7c3aed",quarters:"#c0392b",semis:"#e67e22",third:"#2980b9",final:"#d3172e"};
@@ -1553,7 +2534,7 @@ function FixtureView({ matches }) {
       <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
         {["groups","elim"].map(ph=>(
           <button key={ph} style={S.navBtn(activePhase===ph)} onClick={()=>setActivePhase(ph)}>
-            {ph==="groups"?"Grupos":"Playoffs"}
+            {ph==="groups"?(lang==="fr"?"Groupes":"Grupos"):(lang==="fr"?"Éliminatoires":"Playoffs")}
           </button>
         ))}
       </div>
@@ -1561,10 +2542,10 @@ function FixtureView({ matches }) {
         <>
           <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:12}}>
             {Object.keys(GROUPS).map(g=>(
-              <button key={g} style={{...S.navBtn(activeGroup===g),background:activeGroup===g?GROUP_COLORS[g]:"transparent",borderColor:GROUP_COLORS[g],color:activeGroup===g?"#fff":GROUP_COLORS[g],padding:"4px 10px",fontSize:"0.75rem"}} onClick={()=>setActiveGroup(g)}>Grp {g}</button>
+              <button key={g} style={{...S.navBtn(activeGroup===g),background:activeGroup===g?GROUP_COLORS[g]:"transparent",borderColor:GROUP_COLORS[g],color:activeGroup===g?"#fff":GROUP_COLORS[g],padding:"4px 10px",fontSize:"0.75rem"}} onClick={()=>setActiveGroup(g)}>{lang==="fr"?"Grpe":"Grp"} {g}</button>
             ))}
           </div>
-          <div style={S.groupHeader(GROUP_COLORS[activeGroup])}>GRUPO {activeGroup}</div>
+          <div style={S.groupHeader(GROUP_COLORS[activeGroup])}>{lang==="fr"?"GROUPE":"GRUPO"} {activeGroup}</div>
           {groupMatches.filter(m=>m.group===activeGroup).map(m=>(
             <div key={m.id} style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
               <span style={{color:"#9ca3af",fontSize:"0.72rem",minWidth:38}}>{m.date}</span>
@@ -1590,7 +2571,7 @@ function FixtureView({ matches }) {
             });
             const table=Object.values(stats).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf);
             const hasData=table.some(s=>s.pj>0);
-            return <GroupTable grp={activeGroup} table={table} hasData={hasData} emptyMsg="Aun no hay resultados para este grupo" />;
+            return <GroupTable grp={activeGroup} table={table} hasData={hasData} emptyMsg={lang==="fr"?"Pas encore de résultats pour ce groupe":"Aun no hay resultados para este grupo"} />;
           })()}
         </>
       )}
@@ -1615,97 +2596,6 @@ function FixtureView({ matches }) {
 
 
 // Auto-resolve Round32 team names from group standings
-// Obtiene el equipo ganador de un partido (considera penaltis)
-function getElimWinner(match) {
-  if (!match || match.realHome === null || match.realAway === null) return null;
-  const h = Number(match.realHome), a = Number(match.realAway);
-  if (match.pkWinner === "home") return match.home;
-  if (match.pkWinner === "away") return match.away;
-  if (h > a) return match.home;
-  if (a > h) return match.away;
-  return null; // empate sin penaltis definidos
-}
-
-// Propaga ganadores de cada ronda eliminatoria a la siguiente
-function resolveElimWinners(matches) {
-  const byId = {};
-  matches.forEach(m => { byId[m.id] = m; });
-
-  // Mapa bracket oficial FIFA 2026
-  // Round32 IDs: 1001(M73) 1002(M74) 1003(M75) 1004(M76) 1005(M77) 1006(M78)
-  //              1007(M79) 1008(M80) 1009(M81) 1010(M82) 1011(M83) 1012(M84)
-  //              1013(M85) 1014(M86) 1015(M87) 1016(M88)
-  // Round16 IDs: 1017(M89) 1018(M90) 1019(M91) 1020(M92) 1021(M93) 1022(M94)
-  //              1023(M95) 1024(M96)
-  // M89 = Gan(M73) vs Gan(M74) → 1001 vs 1002 → id 1017
-  // M90 = Gan(M75) vs Gan(M76) → 1003 vs 1004 → id 1018
-  // M91 = Gan(M77) vs Gan(M78) → 1005 vs 1006 → id 1019
-  // M92 = Gan(M79) vs Gan(M80) → 1007 vs 1008 → id 1020
-  // M93 = Gan(M81) vs Gan(M82) → 1009 vs 1010 → id 1021
-  // M94 = Gan(M83) vs Gan(M84) → 1011 vs 1012 → id 1022
-  // M95 = Gan(M85) vs Gan(M86) → 1013 vs 1014 → id 1023
-  // M96 = Gan(M87) vs Gan(M88) → 1015 vs 1016 → id 1024
-  const bracket = {
-    // Round32 → Round16 (según bracket real FIFA)
-    1001: [1017,"home"], 1004: [1017,"away"],  // Canadá vs Marruecos
-    1003: [1018,"home"], 1006: [1018,"away"],  // Paraguay vs Francia
-    1002: [1019,"home"], 1005: [1019,"away"],  // Brasil vs Noruega
-    1007: [1020,"home"], 1008: [1020,"away"],  // México vs Inglaterra
-    1012: [1021,"home"], 1011: [1021,"away"],  // Portugal vs España
-    1010: [1022,"home"], 1009: [1022,"away"],  // Estados Unidos vs Bélgica
-    1014: [1023,"home"], 1016: [1023,"away"],  // Argentina vs Egipto
-    1013: [1024,"home"], 1015: [1024,"away"],  // Suiza vs Colombia
-    // Round16 → Quarters
-    1017: [1025,"home"], 1018: [1025,"away"],  // Gan(Canadá/Mar) vs Gan(Par/Fra)
-    1019: [1026,"home"], 1020: [1026,"away"],  // Gan(Bra/Nor) vs Gan(Mex/Ing)
-    1021: [1027,"home"], 1022: [1027,"away"],  // Gan(Por/Esp) vs Gan(USA/Bel)
-    1023: [1028,"home"], 1024: [1028,"away"],  // Gan(Arg/Egi) vs Gan(Sui/Col)
-    // Quarters → Semis
-    1025: [1029,"home"], 1026: [1029,"away"],
-    1027: [1030,"home"], 1028: [1030,"away"],
-    // Semis → Final
-    1029: [1032,"home"], 1030: [1032,"away"],
-  };
-
-  // Perdedores de semis → Tercer lugar
-  const semiLosers = {
-    1029: [1031,"home"],
-    1030: [1031,"away"],
-  };
-
-  const updated = matches.map(m => ({...m}));
-  const updById = {};
-  updated.forEach(m => { updById[m.id] = m; });
-
-  Object.entries(bracket).forEach(([sourceId, [targetId, side]]) => {
-    const source = updById[Number(sourceId)];
-    const target = updById[targetId];
-    if (!source || !target) return;
-    const winner = getElimWinner(source);
-    if (winner) {
-      if (side === "home") target.home = winner;
-      else target.away = winner;
-    }
-  });
-
-  // Perdedores de semis → Tercer lugar
-  Object.entries(semiLosers).forEach(([sourceId, [targetId, side]]) => {
-    const source = updById[Number(sourceId)];
-    const target = updById[targetId];
-    if (!source || !target) return;
-    const winner = getElimWinner(source);
-    if (!winner) return;
-    // El perdedor es el otro equipo
-    const loser = winner === source.home ? source.away : source.home;
-    if (loser) {
-      if (side === "home") target.home = loser;
-      else target.away = loser;
-    }
-  });
-
-  return updated;
-}
-
 function resolveRound32Teams(matches) {
   // 1. Calculate standings for each group
   const standings = {};
@@ -1813,6 +2703,7 @@ function resolveRound32Teams(matches) {
 
 function AdminParticipantRow({ p, i, participants, setParticipants, invoices, matches, removeParticipant }) {
   const [editing, setEditing] = useState(false);
+  const [showPreds, setShowPreds] = useState(false);
   const [eNombre, setENombre] = useState(p.nombre||p.name||"");
   const [eApellido, setEApellido] = useState(p.apellido||"");
   const [eTel, setETel] = useState(p.telefono||"");
@@ -1842,6 +2733,7 @@ function AdminParticipantRow({ p, i, participants, setParticipants, invoices, ma
           <span style={{color:"#9ca3af", fontWeight:700, minWidth:24}}>#{i+1}</span>
           <div>
             <div style={{display:"flex", alignItems:"center", gap:6}}>
+              {p.participantNumber && <span style={{background:BRAND.red,color:"#fff",borderRadius:6,padding:"1px 7px",fontSize:"0.68rem",fontWeight:800}}>#{String(p.participantNumber).padStart(3,"0")}</span>}
               <span style={{fontWeight:700, color:BRAND.gray900}}>{p.name}</span>
               <span style={{background:sc.bg, color:sc.color, borderRadius:6, padding:"1px 7px", fontSize:"0.68rem", fontWeight:700}}>{sc.icon} {sc.label}</span>
             </div>
@@ -1859,6 +2751,11 @@ function AdminParticipantRow({ p, i, participants, setParticipants, invoices, ma
             <div style={{fontSize:"1.3rem", fontWeight:800, color:BRAND.red}}>{p._total}</div>
             <div style={{fontSize:"0.68rem", color:"#9ca3af"}}>pts</div>
           </div>
+          <button onClick={()=>setShowPreds(e=>!e)}
+            style={{background:showPreds?"#eff6ff":"transparent", border:"1px solid #2563eb44", color:"#2563eb", borderRadius:6, padding:"3px 8px", cursor:"pointer", fontSize:"0.78rem"}}
+            title="Ver pronósticos">
+            👁️
+          </button>
           <button onClick={()=>setEditing(e=>!e)}
             style={{background:editing?"#f3f4f6":"transparent", border:"1px solid #2563eb44", color:"#2563eb", borderRadius:6, padding:"3px 8px", cursor:"pointer", fontSize:"0.78rem"}}>
             ✏️
@@ -1885,6 +2782,71 @@ function AdminParticipantRow({ p, i, participants, setParticipants, invoices, ma
           <button style={{...S.btn("#6b7280",true), padding:"6px 10px", fontSize:"0.82rem"}} onClick={()=>setEditing(false)}>✕</button>
         </div>
       )}
+
+      {/* Panel de pronósticos */}
+      {showPreds && (()=>{
+        const phases = ["groups","round32","round16","quarters","semis","third","final"];
+        const phaseLabels = {groups:"Fase de Grupos",round32:"Ronda de 32",round16:"Ronda de 16",quarters:"Cuartos",semis:"Semifinales",third:"Tercer Lugar",final:"Final"};
+        const preds = p.predictions || {};
+        let totalPts = 0;
+        const rows = matches
+          .filter(m => preds[m.id] && (preds[m.id].home!==null && preds[m.id].home!==undefined))
+          .sort((a,b)=>{
+            const pi = phases.indexOf(a.phase) - phases.indexOf(b.phase);
+            return pi !== 0 ? pi : a.id - b.id;
+          });
+
+        let lastPhase = null;
+        return (
+          <div style={{background:"#f0f7ff",border:"1px solid #bfdbfe",borderRadius:8,padding:"12px",marginTop:4}}>
+            <div style={{fontWeight:700,fontSize:"0.82rem",color:"#1e40af",marginBottom:10}}>
+              👁️ Pronósticos de {p.nombre||p.name} ({rows.length} pronósticos)
+            </div>
+            {rows.length === 0
+              ? <div style={{fontSize:"0.8rem",color:"#9ca3af"}}>Sin pronósticos registrados</div>
+              : rows.map(m => {
+                  const pred = preds[m.id];
+                  const pts = calcPoints(pred.home, pred.away, m.realHome, m.realAway);
+                  if (pts !== null) totalPts += pts;
+                  const showHeader = m.phase !== lastPhase;
+                  lastPhase = m.phase;
+                  const hasResult = m.realHome !== null && m.realAway !== null;
+                  const ptColor = pts === null ? "#9ca3af" : pts === 5 ? "#16a34a" : pts === 3 ? "#2563eb" : pts === 0 ? "#dc2626" : "#9ca3af";
+                  return (
+                    <div key={m.id}>
+                      {showHeader && (
+                        <div style={{fontSize:"0.68rem",fontWeight:800,color:"#6b7280",letterSpacing:2,marginTop:8,marginBottom:4}}>
+                          {phaseLabels[m.phase]||m.phase}
+                        </div>
+                      )}
+                      <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",background:"#fff",borderRadius:6,marginBottom:3,flexWrap:"wrap"}}>
+                        <span style={{fontSize:"0.72rem",color:"#9ca3af",minWidth:36}}>{m.date}</span>
+                        {m.group && <span style={{fontSize:"0.68rem",background:"#e0e7ff",color:"#3730a3",borderRadius:4,padding:"1px 5px",fontWeight:700}}>G{m.group}</span>}
+                        <span style={{fontSize:"0.8rem",color:"#374151",flex:1,minWidth:100}}>{m.home} vs {m.away}</span>
+                        <span style={{fontSize:"0.8rem",fontWeight:700,color:"#2563eb",background:"#eff6ff",borderRadius:6,padding:"1px 8px"}}>
+                          {pred.home} – {pred.away}
+                        </span>
+                        {hasResult && (
+                          <span style={{fontSize:"0.75rem",color:"#6b7280"}}>
+                            ({m.realHome}–{m.realAway})
+                          </span>
+                        )}
+                        <span style={{fontSize:"0.75rem",fontWeight:800,color:ptColor,minWidth:32,textAlign:"right"}}>
+                          {pts !== null ? `${pts}pts` : "—"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+            }
+            {rows.length > 0 && (
+              <div style={{textAlign:"right",marginTop:8,fontWeight:800,color:BRAND.red,fontSize:"0.85rem"}}>
+                Total pronósticos: {totalPts} pts
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1926,7 +2888,7 @@ function AdminInvoicesTab({ invoices, handleInvoice, pendingInvoices }) {
               </div>
               <div style={{fontSize:"0.72rem",marginTop:3,display:"flex",gap:8,flexWrap:"wrap"}}>
                 <span style={{color:"#9ca3af"}}>{new Date(inv.createdAt).toLocaleDateString()}</span>
-                {inv.amount>=50 && (
+                {parseFloat(inv.amount)>10 && (
                   <span style={{fontWeight:600,color:inv.hasProduct?"#16a34a":"#f59e0b"}}>
                     {inv.hasProduct ? ti.withProduct : ti.noProduct}
                   </span>
@@ -1949,7 +2911,7 @@ function AdminInvoicesTab({ invoices, handleInvoice, pendingInvoices }) {
                 <button
                   style={{...S.btn(editingId===inv.id?"#6b7280":"#d97706",true),fontSize:"0.78rem",padding:"5px 12px"}}
                   onClick={()=>setEditingId(editingId===inv.id?null:inv.id)}>
-                  {editingId===inv.id?"Cancelar":"✏️ Corregir"}
+                  {editingId===inv.id?lang==="fr"?"Annuler":"Cancelar":"✏️ Corregir"}
                 </button>
               )}
             </div>
@@ -2008,23 +2970,14 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
     setMatches(prev=>prev.map(m=>m.id===matchId?{...m,[side==="home"?"realHome":"realAway"]:v}:m));
   }
 
-  async function setPkWinner(matchId, val) {
-    const updated = matches.map(m=>m.id===matchId?{...m, pkWinner: val||null}:m);
-    const resolved = resolveElimWinners(updated);
-    setMatches(resolved);
-    await setDoc(MATCHES_DOC, {list: resolved});
-  }
-
   function setTeamName(matchId, side, val) {
     setMatches(prev=>prev.map(m=>m.id===matchId?{...m,[side==="home"?"home":"away"]:val}:m));
   }
 
   async function handleSave() {
     try {
-      // 1. Auto-fill Round32 teams from group standings
-      let resolved = resolveRound32Teams(matches);
-      // 2. Propagate elim winners to next rounds
-      resolved = resolveElimWinners(resolved);
+      // Auto-fill Round32 teams from group standings before saving
+      const resolved = resolveRound32Teams(matches);
       setMatches(resolved);
       await setDoc(MATCHES_DOC, {list: resolved});
       setSaved(true);
@@ -2126,38 +3079,21 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
                 ))}
               </div>
               <div style={S.phaseHeader(phaseColors[activePh])}>{phaseLabels[activePh]}</div>
-              {elimMatches.filter(m=>m.phase===activePh).map(m=>{
-                const isDraw = m.realHome!==null && m.realAway!==null && Number(m.realHome)===Number(m.realAway);
-                return (
-                <div key={m.id} style={{background:"#f9fafb",border:"1px solid #1e2d4a",borderRadius:8,padding:"6px 10px",marginBottom:5}}>
-                  <div style={{display:"grid",gridTemplateColumns:"38px 1fr 46px 12px 46px 1fr 24px",gap:5,alignItems:"center"}}>
-                    <span style={{color:"#9ca3af",fontSize:"0.7rem"}}>{m.date}</span>
-                    <div style={{textAlign:"right",fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.home}</div>
-                    <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
-                      value={m.realHome??""} onChange={e=>setResult(m.id,"home",e.target.value)} />
-                    <span style={{color:"#9ca3af",fontSize:"0.68rem",textAlign:"center"}}>VS</span>
-                    <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
-                      value={m.realAway??""} onChange={e=>setResult(m.id,"away",e.target.value)} />
-                    <div style={{fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.away}</div>
-                    <span style={{fontSize:"0.8rem",color:m.realHome!==null?"#27ae60":"#9ca3af"}}>
-                      {m.realHome!==null?"OK":"..."}
-                    </span>
-                  </div>
-                  {isDraw && (
-                    <div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,background:"#fffbeb",borderRadius:6,padding:"6px 10px"}}>
-                      <span style={{fontSize:"0.75rem",fontWeight:700,color:"#92400e"}}>🥅 Penaltis — Ganador:</span>
-                      <select
-                        style={{fontSize:"0.78rem",padding:"3px 8px",borderRadius:6,border:"1px solid #f59e0b",background:"#fff",fontWeight:600}}
-                        value={m.pkWinner||""}
-                        onChange={e=>setPkWinner(m.id, e.target.value)}>
-                        <option value="">Sin definir</option>
-                        <option value="home">{m.home}</option>
-                        <option value="away">{m.away}</option>
-                      </select>
-                    </div>
-                  )}
+              {elimMatches.filter(m=>m.phase===activePh).map(m=>(
+                <div key={m.id} style={{display:"grid",gridTemplateColumns:"38px 1fr 46px 12px 46px 1fr 24px",gap:5,alignItems:"center",background:"#f9fafb",border:"1px solid #1e2d4a",borderRadius:8,padding:"6px 10px",marginBottom:5}}>
+                  <span style={{color:"#9ca3af",fontSize:"0.7rem"}}>{m.date}</span>
+                  <div style={{textAlign:"right",fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.home}</div>
+                  <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
+                    value={m.realHome??""} onChange={e=>setResult(m.id,"home",e.target.value)} />
+                  <span style={{color:"#9ca3af",fontSize:"0.68rem",textAlign:"center"}}>VS</span>
+                  <input type="number" min="0" max="99" placeholder="-" style={S.scoreInput}
+                    value={m.realAway??""} onChange={e=>setResult(m.id,"away",e.target.value)} />
+                  <div style={{fontWeight:600,fontSize:"0.82rem",color:"#6b7280"}}>{m.away}</div>
+                  <span style={{fontSize:"0.8rem",color:m.realHome!==null?"#27ae60":"#9ca3af"}}>
+                    {m.realHome!==null?"OK":"..."}
+                  </span>
                 </div>
-              )})}
+              ))}
             </>
           )}
         </>
@@ -2189,61 +3125,58 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
           <p style={{color:"#6b7280",marginBottom:14,fontSize:"0.85rem"}}>Bloquea o desbloquea manualmente cada fase para pruebas o correcciones.</p>
 
 
-          {/* GRUPOS - bloqueo general */}
+          {/* GRUPOS - bloqueo partido a partido */}
           {(()=>{
-            const phase="groups";
-            const color="#1F618D";
-            const manLocked=!!adminUnlocked[phase+"_forced"];
-            const autoLocked=isPhaseLocked(phase,adminUnlocked);
-            const manUnlocked=!!adminUnlocked[phase];
-            const isLocked = manLocked || (autoLocked && !manUnlocked);
+            const color = "#1F618D";
+            const groupMatches = matches.filter(m=>m.phase==="groups");
+            const groups = [...new Set(groupMatches.map(m=>m.group))].sort();
             return (
               <div style={{marginBottom:20}}>
-                <div style={{fontWeight:800,fontSize:"0.8rem",color:"#6b7280",letterSpacing:2,marginBottom:8}}>FASE DE GRUPOS</div>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#f9fafb",border:"1px solid "+color+"44",borderRadius:10,padding:"12px 16px",flexWrap:"wrap",gap:8}}>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:"0.95rem",color:"#111827"}}>Todos los grupos</div>
-                    <div style={{fontSize:"0.75rem",color:"#9ca3af",marginTop:2}}>Bloqueo automático: 10 Jun 2026 00:00</div>
-                    <div style={{fontSize:"0.8rem",marginTop:3,fontWeight:600,color:isLocked?"#e74c3c":"#16a34a"}}>
-                      {isLocked ? "🔒 BLOQUEADO" : "🔓 ABIERTO"}
-                    </div>
-                  </div>
-                  <button
-                    style={{...S.btn(isLocked?"#16a34a":"#e74c3c",true),fontSize:"0.78rem",padding:"6px 14px"}}
-                    onClick={async ()=>{
-                      const updated = isLocked
-                        ? {...adminUnlocked, [phase]:true, [phase+"_forced"]:false}
-                        : {...adminUnlocked, [phase]:false, [phase+"_forced"]:true};
-                      setAdminUnlocked(updated);
-                      await setDoc(SETTINGS_DOC, {adminUnlocked: updated});
-                    }}>
-                    {isLocked ? "Desbloquear" : "Bloquear"}
-                  </button>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:6}}>
+                  <div style={{fontWeight:800,fontSize:"0.8rem",color:"#6b7280",letterSpacing:2}}>FASE DE GRUPOS</div>
+                  <div style={{fontSize:"0.72rem",color:"#9ca3af"}}>Auto: 1h antes de cada partido</div>
                 </div>
+                {groups.map(grp => (
+                  <div key={grp} style={{marginBottom:10}}>
+                    <div style={{fontWeight:700,fontSize:"0.78rem",color:color,marginBottom:4,letterSpacing:1}}>GRUPO {grp}</div>
+                    {groupMatches.filter(m=>m.group===grp).map(m => {
+                      const matchLocked = isMatchLocked(m, adminUnlocked);
+                      const manLocked = !!adminUnlocked["match_"+m.id+"_forced"];
+                      const manUnlocked = !!adminUnlocked["match_"+m.id];
+                      const lockMoment = m.lockTime ? new Date(new Date(m.lockTime).getTime()-60*60*1000) : null;
+                      return (
+                        <div key={m.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#f9fafb",border:"1px solid "+color+"33",borderRadius:8,padding:"8px 12px",marginBottom:4,flexWrap:"wrap",gap:6}}>
+                          <div>
+                            <div style={{fontWeight:600,fontSize:"0.82rem",color:"#111827"}}>{m.home} vs {m.away}</div>
+                            <div style={{fontSize:"0.7rem",color:"#9ca3af",marginTop:1}}>
+                              {m.date} · Auto: {lockMoment ? lockMoment.toLocaleString("es-CA",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "-"}
+                              {manLocked && <span style={{color:"#e74c3c",marginLeft:6}}>· Bloqueado manualmente</span>}
+                              {manUnlocked && <span style={{color:"#16a34a",marginLeft:6}}>· Desbloqueado manualmente</span>}
+                            </div>
+                            <div style={{fontSize:"0.75rem",fontWeight:600,color:matchLocked?"#e74c3c":"#16a34a",marginTop:2}}>
+                              {matchLocked ? "🔒 BLOQUEADO" : "🔓 ABIERTO"}
+                            </div>
+                          </div>
+                          <button
+                            style={{...S.btn(matchLocked?"#16a34a":"#e74c3c",true),fontSize:"0.72rem",padding:"5px 10px"}}
+                            onClick={async ()=>{
+                              const key = "match_"+m.id;
+                              const updated = matchLocked
+                                ? {...adminUnlocked, [key]:true, [key+"_forced"]:false}
+                                : {...adminUnlocked, [key]:false, [key+"_forced"]:true};
+                              setAdminUnlocked(updated);
+                              await setDoc(SETTINGS_DOC, {adminUnlocked: updated});
+                            }}>
+                            {matchLocked ? "Desbloquear" : "Bloquear"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             );
           })()}
-
-          {/* SINCRONIZAR EQUIPOS ROUND32 A FIREBASE */}
-          <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:10,padding:"12px 16px",marginBottom:20}}>
-            <div style={{fontWeight:700,fontSize:"0.85rem",color:"#1e40af",marginBottom:6}}>🔄 Sincronizar equipos Ronda de 32</div>
-            <div style={{fontSize:"0.78rem",color:"#3b82f6",marginBottom:10}}>Actualiza los nombres de los equipos en Firebase con los datos del código. Úsalo si los equipos no se ven correctamente.</div>
-            <button
-              style={{...S.btn("#1e40af"),fontSize:"0.78rem",padding:"6px 14px"}}
-              onClick={async ()=>{
-                const saved = matches.filter(m=>m.phase!=="round32");
-                const round32 = INITIAL_MATCHES.filter(m=>m.phase==="round32").map(nm=>{
-                  const old = matches.find(m=>m.id===nm.id);
-                  return {...nm, realHome: old?.realHome??null, realAway: old?.realAway??null};
-                });
-                const updated = [...saved, ...round32];
-                setMatches(updated);
-                await setDoc(MATCHES_DOC, {list: updated});
-                alert("✅ Equipos de la Ronda de 32 sincronizados en Firebase");
-              }}>
-              Sincronizar ahora
-            </button>
-          </div>
 
           {/* ELIMINATORIAS - bloqueo por partido */}
           {[
@@ -2375,30 +3308,58 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
         <div>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
             <div style={{...S.sectionTitle,marginBottom:0,borderBottom:"none"}}>{participants.length} Participantes</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <button style={{...S.btn("#16a34a"),fontSize:"0.8rem",padding:"7px 14px"}} onClick={()=>{
+              // Descarga CSV de facturas
+              const headers = ["#Participante","Nombre","Sucursal","#Factura","Monto CAD","Estado","Tiene Producto","Fecha"];
+              const rows = (invoices||[]).map(inv=>{
+                const p = participants.find(x=>x.id===inv.participantId);
+                const nombre = p ? (p.nombre||p.name||"")+" "+(p.apellido||"") : "Desconocido";
+                const num = p?.participantNumber ? "#"+String(p.participantNumber).padStart(3,"0") : "-";
+                return [num, nombre.trim(), p?.sucursal||"", inv.invoiceNumber||"", inv.amount||"", inv.status||"", inv.hasProduct?"Sí":"No", inv.createdAt?new Date(inv.createdAt).toLocaleDateString():""];
+              });
+              const csv=[headers,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+              const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"});
+              const url=URL.createObjectURL(blob);
+              const a=document.createElement("a");
+              a.href=url; a.download="facturas-mundial2026.csv"; a.click();
+              URL.revokeObjectURL(url);
+            }}>
+              📄 Descargar Facturas
+            </button>
             <button style={{...S.btn("#16a34a"),fontSize:"0.8rem",padding:"7px 14px"}} onClick={()=>{
               const ranked = [...participants].map(p=>{
                 const userInv=(invoices||[]).filter(inv=>inv.participantId===p.id&&inv.status==="approved");
                 const invPts=userInv.reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount),0);
                 let gamePts=0;
-                matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);if(pts!==null)gamePts+=pts;});
+                matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);if(pts!==null)gamePts+=pts;});
                 const {bonus:classPts}=calcClassificationBonus(p.predictions,matches);
                 return {...p,_total:gamePts+invPts+classPts,_invPts:invPts,_classPts:classPts};
               }).sort((a,b)=>b._total-a._total);
-              const headers = ["Posicion","Nombre","Apellido","Correo","Telefono","Sucursal","Puntos Pronosticos","Puntos Clasificados","Puntos Facturas","Total Puntos","Facturas Registradas","Fecha Registro"];
-              const rows = ranked.map((p,i)=>[
-                i+1,
-                p.nombre||p.name||"",
-                p.apellido||"",
-                p.email||"",
-                p.telefono||"",
-                p.sucursal||"",
-                p._total-p._invPts-p._classPts,
-                p._classPts||0,
-                p._invPts,
-                p._total,
-                (invoices||[]).filter(inv=>inv.participantId===p.id).length,
-                p.createdAt?new Date(p.createdAt).toLocaleDateString():"",
-              ]);
+              const headers = ["#","Posicion","Nombre","Apellido","Correo","Telefono","Sucursal","Pts Pronosticos","Pts Clasificados","Pts Facturas","Total Puntos","Entradas Ruleta","Facturas Registradas","Facturas Aprobadas","Fecha Registro"];
+              const rows = ranked.map((p,i)=>{
+                const totalPts = p._total;
+                const entradasRuleta = (invoices||[]).filter(inv=>inv.participantId===p.id&&inv.status==="approved").reduce((s,inv)=>s+calcInvoiceEntradas(inv.amount),0);
+                const facturasAprobadas = (invoices||[]).filter(inv=>inv.participantId===p.id&&inv.status==="approved").length;
+                const facturasTotal = (invoices||[]).filter(inv=>inv.participantId===p.id).length;
+                return [
+                  p.participantNumber ? "#"+String(p.participantNumber).padStart(3,"0") : "-",
+                  i+1,
+                  p.nombre||p.name||"",
+                  p.apellido||"",
+                  p.email||"",
+                  p.telefono||"",
+                  p.sucursal||"",
+                  p._total-p._invPts-p._classPts,
+                  p._classPts||0,
+                  p._invPts,
+                  totalPts,
+                  entradasRuleta,
+                  facturasTotal,
+                  facturasAprobadas,
+                  p.createdAt?new Date(p.createdAt).toLocaleDateString():"",
+                ];
+              });
               const csv = [headers,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
               const blob = new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
               const url = URL.createObjectURL(blob);
@@ -2406,16 +3367,34 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
               a.href=url; a.download="participantes-mundial2026.csv"; a.click();
               URL.revokeObjectURL(url);
             }}>
-              Exportar a Excel (CSV)
+              📊 Descargar Participantes
             </button>
+            </div>
           </div>
+          {/* Asignar números a participantes que no tienen */}
+          {participants.some(p => !p.participantNumber) && (
+            <div style={{background:"#fef3c7",border:"1px solid #f59e0b",borderRadius:8,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+              <div style={{fontSize:"0.82rem",color:"#92400e"}}>
+                ⚠️ Hay <strong>{participants.filter(p=>!p.participantNumber).length}</strong> participante(s) sin número asignado.
+              </div>
+              <button style={{...S.btn("#f59e0b"),fontSize:"0.78rem",padding:"6px 12px"}} onClick={async ()=>{
+                const sorted = [...participants].sort((a,b)=>(a.createdAt||"").localeCompare(b.createdAt||""));
+                let next = Math.max(0, ...participants.map(p=>p.participantNumber||0)) + 1;
+                const updated = sorted.map(p => p.participantNumber ? p : {...p, participantNumber: next++});
+                await setDoc(PARTICIPANTS_DOC, {list: updated});
+                setParticipants(updated);
+              }}>
+                🔢 Asignar números ahora
+              </button>
+            </div>
+          )}
           {participants.length===0 && <div style={{color:"#9ca3af",padding:16}}>Sin participantes</div>}
           {[...participants].map(p=>{
             const userInv=(invoices||[]).filter(inv=>inv.participantId===p.id&&inv.status==="approved");
             const invPts=userInv.reduce((sum,inv)=>sum+calcInvoicePoints(inv.amount),0);
             const totalInv=(invoices||[]).filter(inv=>inv.participantId===p.id).length;
             let gamePts=0,exact=0,correct=0;
-            matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway,m.pkWinner);if(pts===null)return;gamePts+=pts;if(pts===5)exact++;if(pts>=3)correct++;});
+            matches.forEach(m=>{const pred=p.predictions?.[m.id];if(!pred)return;const pts=calcPoints(pred.home,pred.away,m.realHome,m.realAway);if(pts===null)return;gamePts+=pts;if(pts===5)exact++;if(pts>=3)correct++;});
             const {bonus:classPts}=calcClassificationBonus(p.predictions,matches);
             return {...p,_total:gamePts+invPts+classPts,_invPts:invPts,_classPts:classPts,_exact:exact,_correct:correct,_totalInv:totalInv};
           }).sort((a,b)=>b._total-a._total).map((p,i)=>(
@@ -2430,8 +3409,8 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 // MAIN APP
 export default function App() {
   const isAdmin = typeof window !== "undefined" && window.location.search.includes("admin");
-  const [view, setView] = useState("leaderboard");
-  const [lang, setLang] = useState("es");
+  const [view, setView] = useState("login");
+  const [lang, setLang] = useState("fr");
   const [matches, setMatches] = useState(INITIAL_MATCHES);
   const [participants, setParticipants] = useState([]);
   const [adminUnlocked, setAdminUnlocked] = useState({});
@@ -2450,23 +3429,24 @@ export default function App() {
     const unsubM = onSnapshot(MATCHES_DOC, snap => {
       if (snap.exists()) {
         const saved = snap.data().list || [];
+        // Merge: keep new match structure but restore saved results & team names for elim
         const merged = INITIAL_MATCHES.map(m => {
           const old = saved.find(s => s.id === m.id);
           if (!old) return m;
           if (m.phase === "groups") {
-            // Grupos: nombres del código, solo resultados de Firebase
+            // Groups: keep new team names, only restore real results
             return {...m, realHome: old.realHome, realAway: old.realAway};
           } else if (m.phase === "round32" || m.phase === "round16") {
-            // Round32 y Round16: nombres del código (ya tienen equipos reales), resultados y pkWinner de Firebase
-            return {...m, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
+            // Round32/Round16: ALWAYS use team names from code (INITIAL_MATCHES), only restore results
+            return {...m, realHome: old.realHome, realAway: old.realAway};
           } else {
-            // Cuartos en adelante: nombres de Firebase (el admin los llena), resultados y pkWinner de Firebase
-            return {...m, home: old.home||m.home, away: old.away||m.away, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
+            // Playoffs (round16+): restore team names + results (admin edits them)
+            return {...m, home: old.home||m.home, away: old.away||m.away, realHome: old.realHome, realAway: old.realAway};
           }
         });
-        setMatches(resolveElimWinners(merged));
+        setMatches(merged);
       } else {
-        setMatches(resolveElimWinners(INITIAL_MATCHES));
+        setMatches(INITIAL_MATCHES);
       }
     });
     const unsubS = onSnapshot(SETTINGS_DOC, snap => {
@@ -2486,9 +3466,12 @@ export default function App() {
   const t = T[lang];
   const tabs = [
     ...(currentUser ? [{id:"predictions", label:t.nav.inicio}] : []),
-    {id:"clasificacion", label:t.nav.clasificacion},
     {id:"leaderboard", label:t.nav.reglamento},
     {id:"fixture", label:t.nav.resultados},
+    ...(isAdmin
+      ? [{id:"ruleta", label:t.nav.ruleta}]
+      : [{id:"ganadores", label:lang==="fr"?"🏆 Gagnants":"🏆 Ganadores"}]
+    ),
     ...(isAdmin ? [{id:"admin", label:t.nav.admin}] : []),
   ];
 
@@ -2501,7 +3484,7 @@ export default function App() {
       <FontStyle />
       <div style={{textAlign:"center"}}>
         <img src="data:image/jpeg;base64"
-          alt="Sabor Latino" style={{display:"none"}} />
+          alt="Sabor Latino" style={{height:60,marginBottom:16,opacity:.8}} />
         <div style={{fontSize:"2rem",marginBottom:8,color:BRAND.red}} className="pulse">...</div>
         <div style={{color:BRAND.gray400,fontSize:"0.85rem",letterSpacing:3}}>{t.status.loading}</div>
       </div>
@@ -2516,9 +3499,15 @@ export default function App() {
       <header style={S.header}>
         <div style={S.headerInner}>
           <div style={S.logo}>
+            <img
+              src="data:image/jpeg;base64"
+              alt="Sabor Latino"
+              style={{height:44, width:"auto", objectFit:"contain", borderRadius:4}}
+              onError={e=>{e.target.style.display="none";}}
+            />
             <div>
-              <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Polla</div>
-              <div style={{fontSize:"1rem",fontWeight:800,color:BRAND.gray900,letterSpacing:1}}>Mundial 2026</div>
+              <div style={{fontSize:"0.65rem",color:BRAND.red,fontWeight:800,letterSpacing:2,textTransform:"uppercase"}}>Concurso</div>
+              <div style={{fontSize:"1rem",fontWeight:800,color:BRAND.gray900,letterSpacing:1}}>Copa con Sabor</div>
             </div>
           </div>
           <nav style={{...S.nav, alignItems:"center"}}>
@@ -2550,14 +3539,22 @@ export default function App() {
                 {(currentUser.nombre||currentUser.name||"?")[0].toUpperCase()}
               </button>
             )}
+            {/* Lang toggle */}
+            <button
+              onClick={()=>setLang(l=>l==="fr"?"es":"fr")}
+              title={lang==="fr"?"Ver en Español":"Voir en Français"}
+              style={{marginLeft:6,background:"none",border:"1px solid #e5e7eb",borderRadius:6,cursor:"pointer",padding:"4px 8px",fontSize:"0.72rem",fontWeight:700,color:BRAND.gray600,letterSpacing:0.5,lineHeight:1.2,transition:"all 0.15s"}}
+            >
+              {lang==="fr"?"ES":"FR"}
+            </button>
           </nav>
         </div>
         <div style={{background:BRAND.red,padding:"4px 16px",textAlign:"center",fontSize:"0.7rem",color:"rgba(255,255,255,0.85)",letterSpacing:1}}>
           {participants.length} {t.status.participants} &nbsp;|&nbsp; {totalMatches} {t.status.matches} &nbsp;|&nbsp; 11 JUN - 19 JUL 2026
           {(() => {
             const diff = Math.ceil((new Date("2026-06-11") - new Date()) / (1000*60*60*24));
-            if (diff > 0) return <> &nbsp;|&nbsp; 🏆 {diff} {`día${diff!==1?"s":""} para el Mundial`}</>;
-            if (diff === 0) return <> &nbsp;|&nbsp; 🏆 {"¡El Mundial empieza hoy!"}</>;
+            if (diff > 0) return <> &nbsp;|&nbsp; 🏆 {diff} {lang==="fr"?`jour${diff!==1?"s":""} avant la Coupe`:`día${diff!==1?"s":""} para la Copa`}</>;
+            if (diff === 0) return <> &nbsp;|&nbsp; 🏆 {lang==="fr"?"La Coupe commence aujourd'hui !":"¡La Copa empieza hoy!"}</>;
             return null;
           })()}
         </div>
@@ -2565,10 +3562,11 @@ export default function App() {
 
       <main style={S.main}>
         <ErrorBoundary>
-        {view==="clasificacion" && <ClasificacionView participants={participants} matches={matches} invoices={invoices} currentUser={currentUser} />}
         {view==="leaderboard" && <ReglamentoView />}
         {(view==="predictions"||view==="login") && <ParticipantForm participants={participants} setParticipants={setParticipants} matches={matches} adminUnlocked={adminUnlocked} invoices={invoices} setInvoices={setInvoices} currentUser={currentUser} setCurrentUser={setCurrentUser} setView={setView} initialStep={view==="login"?"login":undefined} />}
         {view==="fixture" && <FixtureView matches={matches} />}
+        {view==="ruleta" && <RuletaView participants={participants} matches={matches} invoices={invoices} isAdmin={isAdmin} />}
+        {view==="ganadores" && <GanadoresView />}
         {view==="admin" && <AdminPanel matches={matches} setMatches={setMatches} participants={participants} setParticipants={setParticipants} adminUnlocked={adminUnlocked} setAdminUnlocked={setAdminUnlocked} invoices={invoices} setInvoices={setInvoices} pinRequests={pinRequests} setPinRequests={setPinRequests} />}
         </ErrorBoundary>
       </main>
