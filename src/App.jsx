@@ -2375,23 +2375,18 @@ export default function App() {
     const unsubM = onSnapshot(MATCHES_DOC, snap => {
       if (snap.exists()) {
         const saved = snap.data().list || [];
+        // El código es la fuente de verdad para TODO.
+        // Solo tomamos pkWinner de Firebase para semis/final/tercer lugar
         const merged = INITIAL_MATCHES.map(m => {
           const old = saved.find(s => s.id === m.id);
-          // El código SIEMPRE gana para resultados ya conocidos
-          if (m.realHome !== null && m.realAway !== null) return m;
-          // Para partidos sin resultado en el código, tomar de Firebase
           if (!old) return m;
-          return {
-            ...m,
-            realHome: old.realHome ?? null,
-            realAway: old.realAway ?? null,
-            pkWinner: old.pkWinner ?? null,
-          };
+          if (m.phase === "semis" || m.phase === "final" || m.phase === "third") {
+            return {...m, realHome: old.realHome??null, realAway: old.realAway??null, pkWinner: old.pkWinner??null};
+          }
+          return m; // Todo lo demás: 100% del código
         });
         setMatches(merged);
       } else {
-        // No hay datos en Firebase - escribir el código directamente
-        setDoc(MATCHES_DOC, {list: INITIAL_MATCHES}).catch(()=>{});
         setMatches(INITIAL_MATCHES);
       }
     });
