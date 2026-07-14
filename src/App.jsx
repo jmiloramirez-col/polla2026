@@ -293,8 +293,8 @@ function generateElimMatches() {
     // ── DIECISEISAVOS (Ronda de 32) ─────────────────────────────────────
     {id:1001,phase:"round32",label:"Ronda de 32",matchNum:1, date:"28 Jun",desc:"2º Grupo A vs 2º Grupo B",        home:"Sudáfrica",    away:"Canadá",    realHome:0,realAway:1},
     {id:1002,phase:"round32",label:"Ronda de 32",matchNum:2, date:"29 Jun",desc:"1º Grupo E vs 3º A/B/C/D/F",     home:"Brasil",    away:"Japón",  realHome:2,realAway:1},
-    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º Grupo F vs 2º Grupo C",       home:"Alemania",    away:"Paraguay",    realHome:1,realAway:1},
-    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º Grupo C vs 2º Grupo F",       home:"Países Bajos",    away:"Marruecos",    realHome:1,realAway:1},
+    {id:1003,phase:"round32",label:"Ronda de 32",matchNum:3, date:"29 Jun",desc:"1º Grupo F vs 2º Grupo C",       home:"Alemania",    away:"Paraguay",    realHome:1,realAway:1,pkWinner:"away"},
+    {id:1004,phase:"round32",label:"Ronda de 32",matchNum:4, date:"29 Jun",desc:"1º Grupo C vs 2º Grupo F",       home:"Países Bajos",    away:"Marruecos",    realHome:1,realAway:1,pkWinner:"away"},
     {id:1005,phase:"round32",label:"Ronda de 32",matchNum:5, date:"30 Jun",desc:"1º Grupo I vs 3º C/D/F/G/H",     home:"Costa de Marfil",    away:"Noruega",  realHome:1,realAway:2},
     {id:1006,phase:"round32",label:"Ronda de 32",matchNum:6, date:"30 Jun",desc:"2º Grupo E vs 2º Grupo I",       home:"Francia",    away:"Suecia",    realHome:3,realAway:0},
     {id:1007,phase:"round32",label:"Ronda de 32",matchNum:7, date:"30 Jun",desc:"1º Grupo A vs 3º C/E/F/H/I",     home:"México",    away:"Ecuador",  realHome:2,realAway:0},
@@ -306,7 +306,7 @@ function generateElimMatches() {
     {id:1013,phase:"round32",label:"Ronda de 32",matchNum:13,date:"2 Jul", desc:"1º Grupo B vs 3º E/F/G/I/J",     home:"Suiza",    away:"Argelia",  realHome:2,realAway:0},
     {id:1014,phase:"round32",label:"Ronda de 32",matchNum:14,date:"2 Jul", desc:"1º Grupo J vs 2º Grupo H",       home:"Argentina",    away:"Cabo Verde",    realHome:2,realAway:1},
     {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º Grupo K vs 3º D/E/I/J/L",     home:"Colombia",    away:"Ghana",  realHome:2,realAway:0},
-    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo D vs 2º Grupo G",       home:"Australia",    away:"Egipto",    realHome:1,realAway:1},
+    {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo D vs 2º Grupo G",       home:"Australia",    away:"Egipto",    realHome:1,realAway:1,pkWinner:"away"},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
     {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Canadá vs Marruecos",      home:"Canadá",        away:"Marruecos",   realHome:0, realAway:3, lockTime:"2026-07-04T18:00:00"},
     {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Paraguay vs Francia",      home:"Paraguay",      away:"Francia",     realHome:0, realAway:1, lockTime:"2026-07-04T22:00:00"},
@@ -2377,18 +2377,21 @@ export default function App() {
         const saved = snap.data().list || [];
         const merged = INITIAL_MATCHES.map(m => {
           const old = saved.find(s => s.id === m.id);
-          if (!old) return m;
-          // Si el código ya tiene resultado, usarlo siempre (es la fuente de verdad)
+          // El código SIEMPRE gana para resultados ya conocidos
           if (m.realHome !== null && m.realAway !== null) return m;
-          // Si no tiene resultado en el código, usar Firebase
-          if (m.phase === "groups") {
-            return {...m, realHome: old.realHome, realAway: old.realAway};
-          } else {
-            return {...m, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
-          }
+          // Para partidos sin resultado en el código, tomar de Firebase
+          if (!old) return m;
+          return {
+            ...m,
+            realHome: old.realHome ?? null,
+            realAway: old.realAway ?? null,
+            pkWinner: old.pkWinner ?? null,
+          };
         });
         setMatches(merged);
       } else {
+        // No hay datos en Firebase - escribir el código directamente
+        setDoc(MATCHES_DOC, {list: INITIAL_MATCHES}).catch(()=>{});
         setMatches(INITIAL_MATCHES);
       }
     });
