@@ -308,14 +308,14 @@ function generateElimMatches() {
     {id:1015,phase:"round32",label:"Ronda de 32",matchNum:15,date:"3 Jul", desc:"1º Grupo K vs 3º D/E/I/J/L",     home:"1º Grupo K",    away:"3º D/E/I/J/L",  realHome:null,realAway:null},
     {id:1016,phase:"round32",label:"Ronda de 32",matchNum:16,date:"3 Jul", desc:"2º Grupo D vs 2º Grupo G",       home:"2º Grupo D",    away:"2º Grupo G",    realHome:null,realAway:null},
     // ── OCTAVOS (Ronda de 16) ────────────────────────────────────────────
-    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul",desc:"Gan. P74 vs Gan. P77",  home:"Gan. P74",away:"Gan. P77",realHome:null,realAway:null},
-    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul",desc:"Gan. P73 vs Gan. P75",  home:"Gan. P73",away:"Gan. P75",realHome:null,realAway:null},
-    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul",desc:"Gan. P76 vs Gan. P78",  home:"Gan. P76",away:"Gan. P78",realHome:null,realAway:null},
-    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul",desc:"Gan. P79 vs Gan. P80",  home:"Gan. P79",away:"Gan. P80",realHome:null,realAway:null},
-    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul",desc:"Gan. P83 vs Gan. P84",  home:"Gan. P83",away:"Gan. P84",realHome:null,realAway:null},
-    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul",desc:"Gan. P81 vs Gan. P82",  home:"Gan. P81",away:"Gan. P82",realHome:null,realAway:null},
-    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul",desc:"Gan. P86 vs Gan. P88",  home:"Gan. P86",away:"Gan. P88",realHome:null,realAway:null},
-    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul",desc:"Gan. P85 vs Gan. P87",  home:"Gan. P85",away:"Gan. P87",realHome:null,realAway:null},
+    {id:1017,phase:"round16",label:"Octavos de Final",matchNum:1,date:"4 Jul", desc:"Canadá vs Marruecos",      home:"Canadá",        away:"Marruecos",   realHome:0, realAway:3, lockTime:"2026-07-04T18:00:00"},
+    {id:1018,phase:"round16",label:"Octavos de Final",matchNum:2,date:"4 Jul", desc:"Paraguay vs Francia",      home:"Paraguay",      away:"Francia",     realHome:0, realAway:1, lockTime:"2026-07-04T22:00:00"},
+    {id:1019,phase:"round16",label:"Octavos de Final",matchNum:3,date:"5 Jul", desc:"Brasil vs Noruega",        home:"Brasil",        away:"Noruega",     realHome:1, realAway:2, lockTime:"2026-07-05T21:00:00"},
+    {id:1020,phase:"round16",label:"Octavos de Final",matchNum:4,date:"5 Jul", desc:"México vs Inglaterra",     home:"México",        away:"Inglaterra",  realHome:2, realAway:3, lockTime:"2026-07-06T01:00:00"},
+    {id:1021,phase:"round16",label:"Octavos de Final",matchNum:5,date:"6 Jul", desc:"Portugal vs España",       home:"Portugal",      away:"España",      realHome:0, realAway:1, lockTime:"2026-07-06T20:00:00"},
+    {id:1022,phase:"round16",label:"Octavos de Final",matchNum:6,date:"6 Jul", desc:"Estados Unidos vs Bélgica",home:"Estados Unidos",away:"Bélgica",    realHome:1, realAway:4, lockTime:"2026-07-07T01:00:00"},
+    {id:1023,phase:"round16",label:"Octavos de Final",matchNum:7,date:"7 Jul", desc:"Argentina vs Egipto",      home:"Argentina",     away:"Egipto",      realHome:3, realAway:2, lockTime:"2026-07-07T17:00:00"},
+    {id:1024,phase:"round16",label:"Octavos de Final",matchNum:8,date:"7 Jul", desc:"Suiza vs Colombia",        home:"Suiza",         away:"Colombia",    realHome:0, realAway:0, pkWinner:"home", lockTime:"2026-07-07T21:00:00"},
     // ── CUARTOS DE FINAL ────────────────────────────────────────────────
     {id:1025,phase:"quarters",label:"Cuartos de Final",matchNum:1,date:"9 Jul", desc:"Marruecos vs Francia",   home:"Marruecos",  away:"Francia",    realHome:0,   realAway:2,   lockTime:"2026-07-09T20:00:00"},
     {id:1026,phase:"quarters",label:"Cuartos de Final",matchNum:2,date:"10 Jul",desc:"Noruega vs Inglaterra",  home:"Noruega",    away:"Inglaterra", realHome:1,   realAway:2,   lockTime:"2026-07-10T20:00:00"},
@@ -1975,12 +1975,20 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
 
   async function handleSave() {
     try {
-      // Auto-fill Round32 teams from group standings before saving
       const resolved = resolveRound32Teams(matches);
       setMatches(resolved);
       await setDoc(MATCHES_DOC, {list: resolved});
       setSaved(true);
       setTimeout(()=>setSaved(false),2000);
+    } catch(e) { alert("Error: "+e.message); }
+  }
+
+  async function handleResetMatches() {
+    if (!window.confirm("¿Resetear todos los partidos desde el código? Se perderán los resultados guardados en Firebase.")) return;
+    try {
+      await setDoc(MATCHES_DOC, {list: INITIAL_MATCHES});
+      setMatches(INITIAL_MATCHES);
+      alert("✅ Partidos reseteados desde el código correctamente.");
     } catch(e) { alert("Error: "+e.message); }
   }
 
@@ -2029,6 +2037,9 @@ function AdminPanel({ matches, setMatches, participants, setParticipants, adminU
         </div>
         <button style={{...S.btn(saved?"#27ae60":"#d3172e"),fontSize:"0.8rem"}} onClick={handleSave}>
           {saved?"Guardado!":"Guardar Resultados"}
+        </button>
+        <button style={{...S.btn("#6b7280",true),fontSize:"0.75rem"}} onClick={handleResetMatches}>
+          🔄 Reset partidos
         </button>
       </div>
 
@@ -2364,16 +2375,16 @@ export default function App() {
     const unsubM = onSnapshot(MATCHES_DOC, snap => {
       if (snap.exists()) {
         const saved = snap.data().list || [];
-        // Merge: keep new match structure but restore saved results & team names for elim
         const merged = INITIAL_MATCHES.map(m => {
           const old = saved.find(s => s.id === m.id);
           if (!old) return m;
           if (m.phase === "groups") {
-            // Groups: keep new team names, only restore real results
             return {...m, realHome: old.realHome, realAway: old.realAway};
+          } else if (m.phase === "round32" || m.phase === "round16" || m.phase === "quarters" || m.phase === "semis" || m.phase === "third" || m.phase === "final") {
+            // Siempre usar nombres del código, solo restaurar resultados y pkWinner de Firebase
+            return {...m, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
           } else {
-            // Playoffs: restore team names + results (admin edits them)
-            return {...m, home: old.home||m.home, away: old.away||m.away, realHome: old.realHome, realAway: old.realAway};
+            return {...m, home: old.home||m.home, away: old.away||m.away, realHome: old.realHome, realAway: old.realAway, pkWinner: old.pkWinner||null};
           }
         });
         setMatches(merged);
